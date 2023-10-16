@@ -39,17 +39,10 @@ public class Character
         get => _currentHealth;
         set
         {
-            if (_currentHealth + value <= MaxHealth)
+            _currentHealth = Math.Min(value, MaxHealth);
+            if (_currentHealth == 0)
             {
-                _currentHealth += value;
-            }
-            else if (_currentHealth + value <= 0)
-            {
-                // TODO: Character death
-            }
-            else
-            {
-                _currentHealth = MaxHealth;
+                // TODO: trigger character death event
             }
         }
     }
