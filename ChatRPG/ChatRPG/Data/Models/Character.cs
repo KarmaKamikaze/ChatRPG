@@ -4,6 +4,7 @@ namespace ChatRPG.Data.Models;
 
 [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Local")]
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
+[SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 public class Character
 {
     private Character() {}
@@ -16,13 +17,13 @@ public class Character
         Description = description;
         IsPlayer = isPlayer;
         MaxHealth = maxHealth;
-        _currentHealth = maxHealth;
+        CurrentHealth = maxHealth;
     }
 
     public Character(Campaign campaign, CharacterType type, string name, string description, bool isPlayer, int maxHealth, int currentHealth)
         : this(campaign, type, name, description, isPlayer, maxHealth)
     {
-        _currentHealth = currentHealth;
+        CurrentHealth = currentHealth;
     }
 
     public int Id { get; private set; }
@@ -33,17 +34,18 @@ public class Character
     public string Description { get; private set; } = null!;
     public int MaxHealth { get; private set; }
 
-    private int _currentHealth;
-    public int CurrentHealth
+    public int CurrentHealth { get; private set; }
+
+    /// <summary>
+    /// Adjust the current health of this character.
+    /// </summary>
+    /// <param name="value">The value to adjust the current health with.</param>
+    public void AdjustHealth(int value)
     {
-        get => _currentHealth;
-        set
+        CurrentHealth = Math.Min(MaxHealth, CurrentHealth + value);
+        if (CurrentHealth <= 0)
         {
-            _currentHealth = Math.Min(value, MaxHealth);
-            if (_currentHealth == 0)
-            {
-                // TODO: trigger character death event
-            }
+            // TODO: Handle character death
         }
     }
 }
