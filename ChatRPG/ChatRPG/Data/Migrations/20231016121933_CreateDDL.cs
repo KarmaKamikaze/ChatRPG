@@ -17,11 +17,10 @@ namespace ChatRPG.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Type = table.Column<int>(type: "integer", nullable: false),
-                    Value = table.Column<int>(type: "integer", nullable: false),
-                    AbilityPointCost = table.Column<int>(type: "integer", nullable: false)
+                    Value = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -33,7 +32,7 @@ namespace ChatRPG.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Title = table.Column<string>(type: "text", nullable: false),
                     Body = table.Column<string>(type: "text", nullable: false)
                 },
@@ -47,7 +46,7 @@ namespace ChatRPG.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     StartScenarioId = table.Column<int>(type: "integer", nullable: true),
                     UserId = table.Column<string>(type: "text", nullable: true),
                     CustomStartScenario = table.Column<string>(type: "text", nullable: true),
@@ -74,23 +73,14 @@ namespace ChatRPG.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     CampaignId = table.Column<int>(type: "integer", nullable: false),
                     Type = table.Column<int>(type: "integer", nullable: false),
                     IsPlayer = table.Column<bool>(type: "boolean", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
                     MaxHealth = table.Column<int>(type: "integer", nullable: false),
-                    CurrentHealth = table.Column<int>(type: "integer", nullable: false),
-                    MaxAbilityPoints = table.Column<int>(type: "integer", nullable: false),
-                    CurrentAbilityPoints = table.Column<int>(type: "integer", nullable: false),
-                    Strength = table.Column<int>(type: "integer", nullable: false),
-                    Dexterity = table.Column<int>(type: "integer", nullable: false),
-                    Constitution = table.Column<int>(type: "integer", nullable: false),
-                    Intelligence = table.Column<int>(type: "integer", nullable: false),
-                    Currency = table.Column<int>(type: "integer", nullable: false),
-                    Level = table.Column<int>(type: "integer", nullable: false),
-                    Experience = table.Column<int>(type: "integer", nullable: false)
+                    CurrentHealth = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -108,7 +98,7 @@ namespace ChatRPG.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     CampaignId = table.Column<int>(type: "integer", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false)
@@ -149,30 +139,11 @@ namespace ChatRPG.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Modifiers",
-                columns: table => new
-                {
-                    CharacterId = table.Column<int>(type: "integer", nullable: false),
-                    Type = table.Column<int>(type: "integer", nullable: false),
-                    Value = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Modifiers", x => new { x.CharacterId, x.Type });
-                    table.ForeignKey(
-                        name: "FK_Modifiers_Characters_CharacterId",
-                        column: x => x.CharacterId,
-                        principalTable: "Characters",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "CharacterLocations",
                 columns: table => new
                 {
                     CharacterId = table.Column<int>(type: "integer", nullable: false),
-                    Version = table.Column<int>(type: "integer", nullable: false),
+                    Version = table.Column<int>(type: "integer", nullable: false, defaultValue: 1),
                     EnvironmentId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -197,13 +168,13 @@ namespace ChatRPG.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     CampaignId = table.Column<int>(type: "integer", nullable: false),
                     CharacterId = table.Column<int>(type: "integer", nullable: true),
                     EnvironmentId = table.Column<int>(type: "integer", nullable: false),
                     Type = table.Column<int>(type: "integer", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
-                    Ordering = table.Column<int>(type: "integer", nullable: false)
+                    Ordering = table.Column<int>(type: "integer", nullable: false, defaultValue: 1)
                 },
                 constraints: table =>
                 {
@@ -271,6 +242,52 @@ namespace ChatRPG.Data.Migrations
                 name: "IX_Events_EnvironmentId",
                 table: "Events",
                 column: "EnvironmentId");
+
+            migrationBuilder.Sql(@"
+                create or replace function ""UpdateCharacterLocationsVersion""()
+                    returns trigger
+                    language plpgsql
+                as $$
+                    declare maxVersion integer;
+                    begin
+                        select coalesce(max(""Version""), 0) from ""CharacterLocations""
+                        where ""CharacterId"" = NEW.""CharacterId""
+                        into maxVersion;
+
+                        NEW.""Version"" = maxVersion + 1;
+                        return NEW;
+                    end;
+                $$;
+            ");
+
+            migrationBuilder.Sql(@"
+                create or replace trigger ""OnCharacterLocationsInsert""
+                    before insert on ""CharacterLocations""
+                    for each row execute procedure ""UpdateCharacterLocationsVersion""();
+            ");
+
+            migrationBuilder.Sql(@"
+                create or replace function ""UpdateEventOrdering""()
+                    returns trigger
+                    language plpgsql
+                as $$
+                    declare maxOrdering integer;
+                    begin
+                        select coalesce(max(""Ordering""), 0) from ""Events""
+                        where ""CampaignId"" = NEW.""CampaignId""
+                        into maxOrdering;
+
+                        NEW.""Ordering"" = maxOrdering + 1;
+                        return NEW;
+                    end;
+                $$;
+            ");
+
+            migrationBuilder.Sql(@"
+                create or replace trigger ""OnEventsInsert""
+                    before insert on ""Events""
+                    for each row execute procedure ""UpdateEventOrdering""();
+            ");
         }
 
         /// <inheritdoc />
@@ -286,22 +303,27 @@ namespace ChatRPG.Data.Migrations
                 name: "Events");
 
             migrationBuilder.DropTable(
-                name: "Modifiers");
-
-            migrationBuilder.DropTable(
                 name: "Abilities");
 
             migrationBuilder.DropTable(
-                name: "Environments");
+                name: "Characters");
 
             migrationBuilder.DropTable(
-                name: "Characters");
+                name: "Environments");
 
             migrationBuilder.DropTable(
                 name: "Campaigns");
 
             migrationBuilder.DropTable(
                 name: "StartScenarios");
+
+            migrationBuilder.Sql(@"drop trigger if exists ""OnCharacterLocationsInsert"" on ""CharacterLocations"";");
+
+            migrationBuilder.Sql(@"drop function if exists ""UpdateCharacterLocationsVersion"";");
+
+            migrationBuilder.Sql(@"drop trigger if exists ""OnEventsInsert"" on ""Events"";");
+
+            migrationBuilder.Sql(@"drop function if exists ""UpdateEventsOrdering"";");
         }
     }
 }

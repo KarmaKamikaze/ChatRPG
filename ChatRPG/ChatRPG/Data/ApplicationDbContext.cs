@@ -14,7 +14,6 @@ public sealed class ApplicationDbContext : IdentityDbContext<User>
     public DbSet<CharacterLocation> CharacterLocations { get; set; } = null!;
     public DbSet<Ability> Abilities { get; set; } = null!;
     public DbSet<CharacterAbility> CharacterAbilities { get; set; } = null!;
-    public DbSet<Modifier> Modifiers { get; set; } = null!;
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
@@ -27,7 +26,12 @@ public sealed class ApplicationDbContext : IdentityDbContext<User>
 
         modelBuilder
             .Entity<CharacterAbility>(builder => builder.HasKey(c => new { c.CharacterId, c.AbilityId }))
-            .Entity<CharacterLocation>(builder => builder.HasKey(x => new { x.CharacterId, x.Version }))
-            .Entity<Modifier>(builder => builder.HasKey(x => new { x.CharacterId, x.Type }));
+            .Entity<CharacterLocation>(builder =>
+            {
+                builder.HasKey(x => new { x.CharacterId, x.Version });
+                builder.Property(p => p.Version).HasDefaultValue(1);
+            })
+            .Entity<Event>(builder => builder.Property(x => x.Ordering).HasDefaultValue(1))
+            ;
     }
 }

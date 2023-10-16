@@ -30,9 +30,6 @@ namespace ChatRPG.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AbilityPointCost")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -92,15 +89,6 @@ namespace ChatRPG.Data.Migrations
                     b.Property<int>("CampaignId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Constitution")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Currency")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("CurrentAbilityPoints")
-                        .HasColumnType("integer");
-
                     b.Property<int>("CurrentHealth")
                         .HasColumnType("integer");
 
@@ -108,23 +96,8 @@ namespace ChatRPG.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("Dexterity")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Experience")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Intelligence")
-                        .HasColumnType("integer");
-
                     b.Property<bool>("IsPlayer")
                         .HasColumnType("boolean");
-
-                    b.Property<int>("Level")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("MaxAbilityPoints")
-                        .HasColumnType("integer");
 
                     b.Property<int>("MaxHealth")
                         .HasColumnType("integer");
@@ -132,9 +105,6 @@ namespace ChatRPG.Data.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("Strength")
-                        .HasColumnType("integer");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");
@@ -167,7 +137,9 @@ namespace ChatRPG.Data.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int>("Version")
-                        .HasColumnType("integer");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
 
                     b.Property<int>("EnvironmentId")
                         .HasColumnType("integer");
@@ -241,22 +213,6 @@ namespace ChatRPG.Data.Migrations
                     b.HasIndex("EnvironmentId");
 
                     b.ToTable("Events");
-                });
-
-            modelBuilder.Entity("ChatRPG.Data.Models.Modifier", b =>
-                {
-                    b.Property<int>("CharacterId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Value")
-                        .HasColumnType("integer");
-
-                    b.HasKey("CharacterId", "Type");
-
-                    b.ToTable("Modifiers");
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.StartScenario", b =>
@@ -578,17 +534,6 @@ namespace ChatRPG.Data.Migrations
                     b.Navigation("Character");
 
                     b.Navigation("Environment");
-                });
-
-            modelBuilder.Entity("ChatRPG.Data.Models.Modifier", b =>
-                {
-                    b.HasOne("ChatRPG.Data.Models.Character", "Character")
-                        .WithMany()
-                        .HasForeignKey("CharacterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Character");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

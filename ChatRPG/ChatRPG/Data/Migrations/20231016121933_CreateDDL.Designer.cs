@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChatRPG.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231012164633_CreateDDL")]
+    [Migration("20231016121933_CreateDDL")]
     partial class CreateDDL
     {
         /// <inheritdoc />
@@ -25,16 +25,13 @@ namespace ChatRPG.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("ChatRPG.Data.Ability", b =>
+            modelBuilder.Entity("ChatRPG.Data.Models.Ability", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AbilityPointCost")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -51,7 +48,7 @@ namespace ChatRPG.Data.Migrations
                     b.ToTable("Abilities");
                 });
 
-            modelBuilder.Entity("ChatRPG.Data.Campaign", b =>
+            modelBuilder.Entity("ChatRPG.Data.Models.Campaign", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -84,7 +81,7 @@ namespace ChatRPG.Data.Migrations
                     b.ToTable("Campaigns");
                 });
 
-            modelBuilder.Entity("ChatRPG.Data.Character", b =>
+            modelBuilder.Entity("ChatRPG.Data.Models.Character", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -95,15 +92,6 @@ namespace ChatRPG.Data.Migrations
                     b.Property<int>("CampaignId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Constitution")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Currency")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("CurrentAbilityPoints")
-                        .HasColumnType("integer");
-
                     b.Property<int>("CurrentHealth")
                         .HasColumnType("integer");
 
@@ -111,23 +99,8 @@ namespace ChatRPG.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("Dexterity")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Experience")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Intelligence")
-                        .HasColumnType("integer");
-
                     b.Property<bool>("IsPlayer")
                         .HasColumnType("boolean");
-
-                    b.Property<int>("Level")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("MaxAbilityPoints")
-                        .HasColumnType("integer");
 
                     b.Property<int>("MaxHealth")
                         .HasColumnType("integer");
@@ -135,9 +108,6 @@ namespace ChatRPG.Data.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("Strength")
-                        .HasColumnType("integer");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");
@@ -149,7 +119,7 @@ namespace ChatRPG.Data.Migrations
                     b.ToTable("Characters");
                 });
 
-            modelBuilder.Entity("ChatRPG.Data.CharacterAbility", b =>
+            modelBuilder.Entity("ChatRPG.Data.Models.CharacterAbility", b =>
                 {
                     b.Property<int>("CharacterId")
                         .HasColumnType("integer");
@@ -164,13 +134,15 @@ namespace ChatRPG.Data.Migrations
                     b.ToTable("CharacterAbilities");
                 });
 
-            modelBuilder.Entity("ChatRPG.Data.CharacterLocation", b =>
+            modelBuilder.Entity("ChatRPG.Data.Models.CharacterLocation", b =>
                 {
                     b.Property<int>("CharacterId")
                         .HasColumnType("integer");
 
                     b.Property<int>("Version")
-                        .HasColumnType("integer");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
 
                     b.Property<int>("EnvironmentId")
                         .HasColumnType("integer");
@@ -182,7 +154,7 @@ namespace ChatRPG.Data.Migrations
                     b.ToTable("CharacterLocations");
                 });
 
-            modelBuilder.Entity("ChatRPG.Data.Environment", b =>
+            modelBuilder.Entity("ChatRPG.Data.Models.Environment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -208,7 +180,7 @@ namespace ChatRPG.Data.Migrations
                     b.ToTable("Environments");
                 });
 
-            modelBuilder.Entity("ChatRPG.Data.Event", b =>
+            modelBuilder.Entity("ChatRPG.Data.Models.Event", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -230,7 +202,9 @@ namespace ChatRPG.Data.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int>("Ordering")
-                        .HasColumnType("integer");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");
@@ -246,23 +220,7 @@ namespace ChatRPG.Data.Migrations
                     b.ToTable("Events");
                 });
 
-            modelBuilder.Entity("ChatRPG.Data.Modifier", b =>
-                {
-                    b.Property<int>("CharacterId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Value")
-                        .HasColumnType("integer");
-
-                    b.HasKey("CharacterId", "Type");
-
-                    b.ToTable("Modifiers");
-                });
-
-            modelBuilder.Entity("ChatRPG.Data.StartScenario", b =>
+            modelBuilder.Entity("ChatRPG.Data.Models.StartScenario", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -283,58 +241,7 @@ namespace ChatRPG.Data.Migrations
                     b.ToTable("StartScenarios");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<string>("NormalizedName")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedName")
-                        .IsUnique()
-                        .HasDatabaseName("RoleNameIndex");
-
-                    b.ToTable("AspNetRoles", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ClaimType")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ClaimValue")
-                        .HasColumnType("text");
-
-                    b.Property<string>("RoleId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("AspNetRoleClaims", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
+            modelBuilder.Entity("ChatRPG.Data.Models.User", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("text");
@@ -396,6 +303,57 @@ namespace ChatRPG.Data.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex");
+
+                    b.ToTable("AspNetRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -483,13 +441,13 @@ namespace ChatRPG.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ChatRPG.Data.Campaign", b =>
+            modelBuilder.Entity("ChatRPG.Data.Models.Campaign", b =>
                 {
-                    b.HasOne("ChatRPG.Data.StartScenario", "StartScenario")
+                    b.HasOne("ChatRPG.Data.Models.StartScenario", "StartScenario")
                         .WithMany()
                         .HasForeignKey("StartScenarioId");
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                    b.HasOne("ChatRPG.Data.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
 
@@ -498,9 +456,9 @@ namespace ChatRPG.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ChatRPG.Data.Character", b =>
+            modelBuilder.Entity("ChatRPG.Data.Models.Character", b =>
                 {
-                    b.HasOne("ChatRPG.Data.Campaign", "Campaign")
+                    b.HasOne("ChatRPG.Data.Models.Campaign", "Campaign")
                         .WithMany()
                         .HasForeignKey("CampaignId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -509,15 +467,15 @@ namespace ChatRPG.Data.Migrations
                     b.Navigation("Campaign");
                 });
 
-            modelBuilder.Entity("ChatRPG.Data.CharacterAbility", b =>
+            modelBuilder.Entity("ChatRPG.Data.Models.CharacterAbility", b =>
                 {
-                    b.HasOne("ChatRPG.Data.Ability", "Ability")
+                    b.HasOne("ChatRPG.Data.Models.Ability", "Ability")
                         .WithMany()
                         .HasForeignKey("AbilityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ChatRPG.Data.Character", "Character")
+                    b.HasOne("ChatRPG.Data.Models.Character", "Character")
                         .WithMany()
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -528,15 +486,15 @@ namespace ChatRPG.Data.Migrations
                     b.Navigation("Character");
                 });
 
-            modelBuilder.Entity("ChatRPG.Data.CharacterLocation", b =>
+            modelBuilder.Entity("ChatRPG.Data.Models.CharacterLocation", b =>
                 {
-                    b.HasOne("ChatRPG.Data.Character", "Character")
+                    b.HasOne("ChatRPG.Data.Models.Character", "Character")
                         .WithMany()
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ChatRPG.Data.Environment", "Environment")
+                    b.HasOne("ChatRPG.Data.Models.Environment", "Environment")
                         .WithMany()
                         .HasForeignKey("EnvironmentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -547,9 +505,9 @@ namespace ChatRPG.Data.Migrations
                     b.Navigation("Environment");
                 });
 
-            modelBuilder.Entity("ChatRPG.Data.Environment", b =>
+            modelBuilder.Entity("ChatRPG.Data.Models.Environment", b =>
                 {
-                    b.HasOne("ChatRPG.Data.Campaign", "Campaign")
+                    b.HasOne("ChatRPG.Data.Models.Campaign", "Campaign")
                         .WithMany()
                         .HasForeignKey("CampaignId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -558,19 +516,19 @@ namespace ChatRPG.Data.Migrations
                     b.Navigation("Campaign");
                 });
 
-            modelBuilder.Entity("ChatRPG.Data.Event", b =>
+            modelBuilder.Entity("ChatRPG.Data.Models.Event", b =>
                 {
-                    b.HasOne("ChatRPG.Data.Campaign", "Campaign")
+                    b.HasOne("ChatRPG.Data.Models.Campaign", "Campaign")
                         .WithMany()
                         .HasForeignKey("CampaignId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ChatRPG.Data.Character", "Character")
+                    b.HasOne("ChatRPG.Data.Models.Character", "Character")
                         .WithMany()
                         .HasForeignKey("CharacterId");
 
-                    b.HasOne("ChatRPG.Data.Environment", "Environment")
+                    b.HasOne("ChatRPG.Data.Models.Environment", "Environment")
                         .WithMany()
                         .HasForeignKey("EnvironmentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -581,17 +539,6 @@ namespace ChatRPG.Data.Migrations
                     b.Navigation("Character");
 
                     b.Navigation("Environment");
-                });
-
-            modelBuilder.Entity("ChatRPG.Data.Modifier", b =>
-                {
-                    b.HasOne("ChatRPG.Data.Character", "Character")
-                        .WithMany()
-                        .HasForeignKey("CharacterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Character");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -605,7 +552,7 @@ namespace ChatRPG.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("ChatRPG.Data.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -614,7 +561,7 @@ namespace ChatRPG.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("ChatRPG.Data.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -629,7 +576,7 @@ namespace ChatRPG.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("ChatRPG.Data.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -638,7 +585,7 @@ namespace ChatRPG.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("ChatRPG.Data.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

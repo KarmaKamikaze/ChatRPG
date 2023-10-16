@@ -45,9 +45,8 @@ if (app.Environment.IsDevelopment())
         var user = await userManager.FindByNameAsync(username);
         if (user == null)
         {
-            user = new User
+            user = new User(username)
             {
-                UserName = username,
                 Email = username,
                 EmailConfirmed = true,
                 LockoutEnabled = false
