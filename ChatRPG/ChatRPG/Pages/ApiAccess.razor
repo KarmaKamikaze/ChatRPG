@@ -1,0 +1,47 @@
+@page "/ApiAccess"
+@using ChatRPG.API
+@using Microsoft.IdentityModel.Tokens
+@inject ILogger<ApiAccess> Logger
+@inject ISallingClient SallingClient;
+@inject IJSRuntime JsRuntime
+
+<h1>ApiAccess</h1>
+
+<h2>Salling Food-waste</h2>
+<div class="input-group">
+    <input class="form-control" @onchange="@Input" />
+</div>
+<button class="btn btn-primary" @onclick=CallApiWithZip>Call API with zip</button>
+
+@if (_foodWasteResponses is not null)
+{
+    <h3>Stores in @_zip with food waste information:</h3>
+
+    @foreach (var item in _foodWasteResponses)
+    {
+        <div>
+            <h3>@item.Store.Name, @item.Store.Address.Street</h3>
+            @foreach (var clearance in item.Clearances)
+            {
+                <h4>Produkt: @clearance.Product.Description</h4>
+                <h5>Tilbudspris: @clearance.Offer.NewPrice, Originalpris: @clearance.Offer.OriginalPrice</h5>
+                <img src="@clearance.Product.Image"/>
+                <br/>
+            }
+        </div>
+        <br/>
+    }
+}
+@code {
+    private string _zip;
+    private List<FoodWasteResponse> _foodWasteResponses;
+    private async Task Input(Microsoft.AspNetCore.Components.ChangeEventArgs patharg)
+    {
+        _zip = (string)patharg.Value;
+    }
+
+    private async Task CallApiWithZip()
+    {
+        _foodWasteResponses = await SallingClient.GetFoodwasteResponse(_zip);
+    }
+}
