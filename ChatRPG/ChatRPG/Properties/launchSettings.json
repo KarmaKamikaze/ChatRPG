@@ -14,7 +14,18 @@
       "launchBrowser": true,
       "applicationUrl": "http://localhost:5111",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "UseMocks": "false"
+      }
+    },
+    "http mocked": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "http://localhost:5111",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "UseMocks": "true"
       }
     },
     "https": {
@@ -23,7 +34,8 @@
       "launchBrowser": true,
       "applicationUrl": "https://localhost:7014;http://localhost:5111",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "UseMocks": "true"
       }
     },
     "IIS Express": {

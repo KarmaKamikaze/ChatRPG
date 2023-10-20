@@ -7,10 +7,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddUserSecrets<Program>();
+var configuration = builder.Configuration;
+configuration.AddUserSecrets<Program>();
 
 // Add services to the container.
-string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var connectionString = configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<User>()
@@ -18,7 +19,8 @@ builder.Services.AddDefaultIdentity<User>()
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<User>>();
-builder.Services.AddSingleton<IHttpMessageHandlerFactory>();
+var httpMessageHandlerFactory = new HttpMessageHandlerFactory(configuration);
+builder.Services.AddSingleton<HttpMessageHandler>(_ => httpMessageHandlerFactory.CreateHandler());
 builder.Services.AddSingleton<IOpenAiGptClient, OpenAiGptClient>();
 builder.Services.AddSingleton<IFoodWasteClient, SallingClient>();
 builder.Services.Configure<IdentityOptions>(options =>

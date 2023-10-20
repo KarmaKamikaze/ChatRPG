@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Microsoft.IdentityModel.Tokens;
 using RestSharp;
 using RestSharp.Authenticators;
@@ -16,14 +15,16 @@ public class OpenAiGptClient : IOpenAiGptClient, IDisposable
     private readonly ILogger<OpenAiGptClient> _logger;
     private readonly RestClient _client;
 
-    public OpenAiGptClient(ILogger<OpenAiGptClient> logger, IConfiguration configuration)
+    public OpenAiGptClient(ILogger<OpenAiGptClient> logger, IConfiguration configuration,
+        HttpMessageHandler httpMessageHandler)
     {
         _logger = logger;
 
         var options = new RestClientOptions(OpenAiBaseUrl)
         {
-            Authenticator = new JwtAuthenticator(configuration.GetSection("ApiKeys").GetValue<String>("OpenAI")),
-            FailOnDeserializationError = false
+            Authenticator = new JwtAuthenticator(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI") ?? string.Empty),
+            FailOnDeserializationError = false,
+            ConfigureMessageHandler = _ => httpMessageHandler
         };
         _client = new RestClient(options);
     }
@@ -38,11 +39,11 @@ public class OpenAiGptClient : IOpenAiGptClient, IDisposable
         request.AddJsonBody(openAiGptInput, ContentType.Json);
 
         _logger.LogInformation("""
-                                Request URL: {Url}
-                                Method: {Method}
-                                Parameters: {Parameters}
-                                Messages: {Messages}
-                                """,
+                               Request URL: {Url}
+                               Method: {Method}
+                               Parameters: {Parameters}
+                               Messages: {Messages}
+                               """,
             OpenAiBaseUrl + request.Resource,
             request.Method,
             string.Join(", ", request.Parameters.Select(p => $"{p.Name}={p.Value}")),
@@ -53,32 +54,48 @@ public class OpenAiGptClient : IOpenAiGptClient, IDisposable
 
         if (response.ErrorException != null)
         {
-            _logger.LogError($"Error retrieving data from API: {response.ErrorException.Message}");
+            _logger.LogError("Error retrieving data from API: {ErrorExceptionMessage}", response.ErrorException.Message);
         }
 
-        var promptTokens = response.Data.Usage.PromptTokens;
-        var completionTokens = response.Data.Usage.CompletionTokens;
+        var data = response!.Data;
+
+        if (data is null)
+        {
+            throw new EmptyResponseException(response, "The API response has no data.");
+        }
+
+        var promptTokens = data.Usage.PromptTokens;
+        var completionTokens = data.Usage.CompletionTokens;
 
         var promptCost = (promptTokens / 1000.0) * PromptToken1KCost;
         var completionCost = (completionTokens / 1000.0) * CompletionToken1KCost;
         var estimatedCost = promptCost + completionCost;
 
         _logger.LogInformation("""
-                                Prompt tokens: {PTokens}
-                                Completion tokens: {CTokens}
-                                Estimated cost: {EstCost}
-                                """,
+                               Prompt tokens: {PTokens}
+                               Completion tokens: {CTokens}
+                               Estimated cost: {EstCost}
+                               """,
             promptTokens,
             completionTokens,
             "$" + estimatedCost
-            );
+        );
 
-        return response!.Data;
+        return data;
     }
 
     public void Dispose()
     {
         _client.Dispose();
         GC.SuppressFinalize(this);
+    }
+}
+
+public class EmptyResponseException : Exception
+{
+    public RestResponse Response;
+    public EmptyResponseException(RestResponse response, string message) : base(message)
+    {
+        Response = response;
     }
 }
