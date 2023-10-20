@@ -5,7 +5,7 @@ namespace ChatRPG.API;
 
 public class SallingClient : IFoodWasteClient, IDisposable
 {
-    private const string _sallingBaseUrl = "https://api.sallinggroup.com/v1/";
+    private const string SallingBaseUrl = "https://api.sallinggroup.com/v1/";
     private readonly ILogger<SallingClient> _logger;
     private readonly RestClient _client;
 
@@ -13,7 +13,7 @@ public class SallingClient : IFoodWasteClient, IDisposable
     {
         _logger = logger;
 
-        var options = new RestClientOptions(_sallingBaseUrl)
+        var options = new RestClientOptions(SallingBaseUrl)
         {
             Authenticator = new JwtAuthenticator(configuration.GetSection("ApiKeys").GetValue<String>("Salling")),
             FailOnDeserializationError = false
@@ -31,7 +31,7 @@ public class SallingClient : IFoodWasteClient, IDisposable
                                Method: {Method}
                                Parameters: {Parameters}
                                """,
-            _sallingBaseUrl + request.Resource,
+            SallingBaseUrl + request.Resource,
             request.Method,
             string.Join(", ", request.Parameters.Select(p => $"{p.Name}={p.Value}"))
         );

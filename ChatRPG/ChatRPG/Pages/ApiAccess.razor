@@ -2,16 +2,31 @@
 @using ChatRPG.API
 @using Microsoft.IdentityModel.Tokens
 @inject ILogger<ApiAccess> Logger
+@inject IOpenAiGptClient OpenAiGptClient;
 @inject IFoodWasteClient FoodWasteClient;
-@inject IJSRuntime JsRuntime
 
 <h1>ApiAccess</h1>
 
+<h2>OpenAI GPT 3.5 Turbo</h2>
+<div class="input-group">
+    <input class="form-control" @onchange="@OpenAiInput" />
+</div>
+<br/>
+<button class="btn btn-primary" @onclick=CallOpenAiApiWithInput>Call OpenAI GPT 3.5 Turbo with input</button>
+
+@if (_openAiResponse is not null)
+{
+    <h3>Response: @_openAiResponse.Choices.First().Message.Content</h3>
+}
+
+<br/><br/><br/>
+
 <h2>Salling Food-waste</h2>
 <div class="input-group">
-    <input class="form-control" @onchange="@Input" />
+    <input class="form-control" @onchange="@SallingInput" />
 </div>
-<button class="btn btn-primary" @onclick=CallApiWithZip>Call API with zip</button>
+<br/>
+<button class="btn btn-primary" @onclick=CallFoodWasteApiWithZip>Call API with zip</button>
 
 @if (_foodWasteResponses is not null)
 {
@@ -33,14 +48,29 @@
     }
 }
 @code {
+    private string _input;
+    private ChatCompletionObject _openAiResponse;
     private string _zip;
     private List<FoodWasteResponse> _foodWasteResponses;
-    private async Task Input(Microsoft.AspNetCore.Components.ChangeEventArgs patharg)
+
+    private async Task OpenAiInput(Microsoft.AspNetCore.Components.ChangeEventArgs patharg)
+    {
+        _input = (string)patharg.Value;
+    }
+
+    private async Task CallOpenAiApiWithInput()
+    {
+        var input = new List<OpenAiGptInputMessage> { new ("user", _input) };
+
+        _openAiResponse = await OpenAiGptClient.GetChatCompletion(input);
+    }
+
+    private async Task SallingInput(Microsoft.AspNetCore.Components.ChangeEventArgs patharg)
     {
         _zip = (string)patharg.Value;
     }
 
-    private async Task CallApiWithZip()
+    private async Task CallFoodWasteApiWithZip()
     {
         _foodWasteResponses = await FoodWasteClient.GetFoodwasteResponse(_zip);
     }

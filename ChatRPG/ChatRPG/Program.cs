@@ -18,6 +18,8 @@ builder.Services.AddDefaultIdentity<User>()
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<User>>();
+builder.Services.AddSingleton<IHttpMessageHandlerFactory>();
+builder.Services.AddSingleton<IOpenAiGptClient, OpenAiGptClient>();
 builder.Services.AddSingleton<IFoodWasteClient, SallingClient>();
 builder.Services.Configure<IdentityOptions>(options =>
 {
