@@ -1,6 +1,6 @@
 namespace ChatRPG.API;
 
-public interface ISallingClient
+public interface IFoodWasteClient
 {
     Task<List<FoodWasteResponse>> GetFoodwasteResponse(string zip);
 }

@@ -3,7 +3,7 @@ using RestSharp.Authenticators;
 
 namespace ChatRPG.API;
 
-public class SallingClient : ISallingClient, IDisposable
+public class SallingClient : IFoodWasteClient, IDisposable
 {
     private const string _sallingBaseUrl = "https://api.sallinggroup.com/v1/";
     private readonly ILogger<SallingClient> _logger;

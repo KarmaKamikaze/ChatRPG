@@ -2,7 +2,7 @@
 @using ChatRPG.API
 @using Microsoft.IdentityModel.Tokens
 @inject ILogger<ApiAccess> Logger
-@inject ISallingClient SallingClient;
+@inject IFoodWasteClient FoodWasteClient;
 @inject IJSRuntime JsRuntime
 
 <h1>ApiAccess</h1>
@@ -42,6 +42,6 @@
 
     private async Task CallApiWithZip()
     {
-        _foodWasteResponses = await SallingClient.GetFoodwasteResponse(_zip);
+        _foodWasteResponses = await FoodWasteClient.GetFoodwasteResponse(_zip);
     }
 }

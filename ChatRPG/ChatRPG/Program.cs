@@ -18,7 +18,7 @@ builder.Services.AddDefaultIdentity<User>()
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<User>>();
-builder.Services.AddSingleton<ISallingClient, SallingClient>();
+builder.Services.AddSingleton<IFoodWasteClient, SallingClient>();
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequireDigit = false;
