@@ -4,7 +4,7 @@ using RestSharp.Authenticators;
 
 namespace ChatRPG.API;
 
-public class OpenAiGptClient : IOpenAiGptClient, IDisposable
+public class OpenAiLlmClient : IOpenAiLlmClient, IDisposable
 {
     private const string OpenAiBaseUrl = "https://api.openai.com/v1/";
     private const string Model = "gpt-3.5-turbo";
@@ -12,10 +12,10 @@ public class OpenAiGptClient : IOpenAiGptClient, IDisposable
     private const double PromptToken1KCost = 0.0015;
     private const double CompletionToken1KCost = 0.002;
 
-    private readonly ILogger<OpenAiGptClient> _logger;
+    private readonly ILogger<OpenAiLlmClient> _logger;
     private readonly RestClient _client;
 
-    public OpenAiGptClient(ILogger<OpenAiGptClient> logger, IConfiguration configuration,
+    public OpenAiLlmClient(ILogger<OpenAiLlmClient> logger, IConfiguration configuration,
         HttpMessageHandler httpMessageHandler)
     {
         _logger = logger;

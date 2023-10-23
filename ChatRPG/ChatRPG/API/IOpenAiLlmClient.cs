@@ -1,6 +1,6 @@
 namespace ChatRPG.API;
 
-public interface IOpenAiGptClient
+public interface IOpenAiLlmClient
 {
     Task<ChatCompletionObject> GetChatCompletion(List<OpenAiGptInputMessage> inputs);
 }

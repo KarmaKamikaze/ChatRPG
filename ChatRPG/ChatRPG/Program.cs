@@ -21,7 +21,7 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<User>>();
 var httpMessageHandlerFactory = new HttpMessageHandlerFactory(configuration);
 builder.Services.AddSingleton<HttpMessageHandler>(_ => httpMessageHandlerFactory.CreateHandler());
-builder.Services.AddSingleton<IOpenAiGptClient, OpenAiGptClient>();
+builder.Services.AddSingleton<IOpenAiLlmClient, OpenAiLlmClient>();
 builder.Services.AddSingleton<IFoodWasteClient, SallingClient>();
 builder.Services.Configure<IdentityOptions>(options =>
 {

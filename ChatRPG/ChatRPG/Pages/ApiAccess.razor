@@ -2,7 +2,7 @@
 @using ChatRPG.API
 @using Microsoft.IdentityModel.Tokens
 @inject ILogger<ApiAccess> Logger
-@inject IOpenAiGptClient OpenAiGptClient;
+@inject IOpenAiLlmClient OpenAiLlmClient;
 @inject IFoodWasteClient FoodWasteClient;
 
 <h1>ApiAccess</h1>
@@ -62,7 +62,7 @@
     {
         var input = new List<OpenAiGptInputMessage> { new ("user", _input) };
 
-        _openAiResponse = await OpenAiGptClient.GetChatCompletion(input);
+        _openAiResponse = await OpenAiLlmClient.GetChatCompletion(input);
     }
 
     private async Task SallingInput(Microsoft.AspNetCore.Components.ChangeEventArgs patharg)
