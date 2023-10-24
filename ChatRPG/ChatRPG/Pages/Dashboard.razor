@@ -38,11 +38,11 @@
             // Use the user input to generate a response
             string userMessage = $"You: {_userInput}";
             _conversation.Add(userMessage);
-            await _fileUtil.UpdateSaveFileAsync(userMessage);
+            await _fileUtil.UpdateSaveFileAsync(_userInput, true);
             string response = ProcessUserInput(_userInput);
             string gameMessage = $"Game: {response}";
             _conversation.Add(gameMessage);
-            await _fileUtil.UpdateSaveFileAsync(gameMessage);
+            await _fileUtil.UpdateSaveFileAsync(response);
 
             // Clear the user input
             _userInput = "";

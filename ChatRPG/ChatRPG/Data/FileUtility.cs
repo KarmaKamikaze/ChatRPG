@@ -7,6 +7,9 @@ public class FileUtility
     private readonly string _path;
     private readonly string _saveDir;
     private readonly string _filenamePrefix = "conversation";
+    // Define "special" keywords for determining the author of a message.
+    private readonly string _playerKeyword = "#<Player>: ";
+    private readonly string _gameKeyword = "#<Game>: ";
 
     public FileUtility(string saveDir = "Saves/")
     {
@@ -14,7 +17,7 @@ public class FileUtility
         _path = SetPath(DateTime.Now);
     }
 
-    public async Task UpdateSaveFileAsync(string message)
+    public async Task UpdateSaveFileAsync(string message, bool isPLayerMessage = false)
     {
         // According to .NET docs, you do not need to check if directory exists first
         Directory.CreateDirectory(_saveDir);
@@ -26,11 +29,19 @@ public class FileUtility
         if (!message.EndsWith("\n"))
             message += "\n";
 
+        message = isPLayerMessage ? $"{_playerKeyword}{message}" : $"{_gameKeyword}{message}";
+
         byte[] encodedMessage = Encoding.Unicode.GetBytes(message);
         await fs.WriteAsync(encodedMessage, 0, encodedMessage.Length);
     }
 
-    public async Task<string> GetConversationFromSaveFileAsync(string path)
+    public async Task<List<string>> GetMostRecentConversationAsync()
+    {
+        string filePath = GetMostRecentFile(Directory.GetFiles(_saveDir, $"{_filenamePrefix}*"));
+        return await GetConversationsStringFromSaveFileAsync(filePath);
+    }
+
+    private async Task<List<string>> GetConversationsStringFromSaveFileAsync(string path)
     {
         await using FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
             bufferSize: 4096, useAsync: true);
@@ -44,13 +55,7 @@ public class FileUtility
             sb.Append(stream);
         }
 
-        return sb.ToString();
-    }
-
-    public async Task<string> GetMostRecentConversationAsync()
-    {
-        string filePath = GetMostRecentFile(Directory.GetFiles(_saveDir, $"{_filenamePrefix}*"));
-        return await GetConversationFromSaveFileAsync(filePath);
+        return ConvertConversationStringToList(sb.ToString());
     }
 
     private string GetMostRecentFile(string[] files)
@@ -70,6 +75,29 @@ public class FileUtility
         }
 
         return mostRecentPath;
+    }
+
+    /// <summary>
+    /// This method converts a conversation in string form to a list of messages making up the conversation.
+    /// Importantly, this method assumes that a conversation is initiated by the player and that the conversation
+    /// alternates between the player and the game.
+    /// </summary>
+    /// <param name="conversation">A full conversation in string form.</param>
+    /// <returns>The list of messages making up the conversation.</returns>
+    private List<string> ConvertConversationStringToList(string conversation)
+    {
+        string[] conversationSplit =
+            conversation.Split(
+                new[] { _playerKeyword, _gameKeyword, $"\n{_playerKeyword}", $"\n{_gameKeyword}" },
+                StringSplitOptions.RemoveEmptyEntries);
+        List<string> conversationList = new List<string>();
+
+        for (int i = 0; i < conversationSplit.Length; i++)
+        {
+            conversationList.Add(i % 2 == 0 ? $"You: {conversationSplit[i]}" : $"Game: {conversationSplit[i]}");
+        }
+
+        return conversationList;
     }
 
     private string SetPath(DateTime timestamp)
