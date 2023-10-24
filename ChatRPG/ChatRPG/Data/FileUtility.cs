@@ -4,31 +4,34 @@ namespace ChatRPG.Data;
 
 public class FileUtility
 {
+    private readonly string _path;
+    private readonly string _saveDir;
     public FileUtility(string saveDir = "Saves/")
     {
-        SaveDir = saveDir;
+        _saveDir = Path.Join(AppDomain.CurrentDomain.BaseDirectory, saveDir);
+        _path = SetPath(DateTime.Now);
     }
 
-    public string SaveDir { get; set; }
-
-    public async Task UpdateSaveFileAsync(List<string> conversation)
+    public async Task UpdateSaveFileAsync(string message)
     {
-        string path = SetPath(DateTime.Now);
+        // According to .NET docs, you do not need to deck if it exists first
+        Directory.CreateDirectory(_saveDir);
+
         await using FileStream fs =
-            new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.None, bufferSize: 4096,
+            new FileStream(_path, FileMode.Append, FileAccess.Write, FileShare.None, bufferSize: 4096,
                 useAsync: true);
-        foreach (string message in conversation)
-        {
-            byte[] encodedMessage = Encoding.Unicode.GetBytes(message);
-            await fs.WriteAsync(encodedMessage, 0, encodedMessage.Length);
-        }
+
+        if (!message.EndsWith("\n"))
+            message += "\n";
+
+        byte[] encodedMessage = Encoding.Unicode.GetBytes(message);
+        await fs.WriteAsync(encodedMessage, 0, encodedMessage.Length);
     }
 
     private string SetPath(DateTime timestamp)
     {
         // Add save directory and file name to path
-        string savePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, SaveDir);
         string fileName = $"conversation {timestamp:dd-mm-yyyy HH-mm-ss}.txt";
-        return Path.Join(savePath, fileName);
+        return Path.Join(_saveDir, fileName);
     }
 }

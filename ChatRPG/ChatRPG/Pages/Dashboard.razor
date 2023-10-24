@@ -1,4 +1,5 @@
 ﻿@page "/Dashboard"
+@using ChatRPG.Data
 
 <h1>Dashboard</h1>
 
@@ -18,28 +19,36 @@
 
 
 @code {
+    private readonly FileUtility _fileUtil = new FileUtility();
     readonly List<string> _conversation = new List<string>();
     string _userInput = "";
 
-    void EnterKeyHandler(KeyboardEventArgs e)
+    async Task EnterKeyHandler(KeyboardEventArgs e)
     {
         if (e.Code is "Enter" or "NumpadEnter")
         {
-            SendPrompt();
+            await SendPrompt();
         }
     }
 
-    void SendPrompt()
+    async Task SendPrompt()
     {
         if (!string.IsNullOrWhiteSpace(_userInput))
         {
             // Use the user input to generate a response
-            _conversation.Add($"You: {_userInput}");
+            string userMessage = $"You: {_userInput}";
+            _conversation.Add(userMessage);
+            await _fileUtil.UpdateSaveFileAsync(userMessage);
             string response = ProcessUserInput(_userInput);
-            _conversation.Add($"Game: {response}");
+            string gameMessage = $"Game: {response}";
+            _conversation.Add(gameMessage);
+            await _fileUtil.UpdateSaveFileAsync(gameMessage);
 
             // Clear the user input
             _userInput = "";
+
+            // Notify the component to re-render because of async methods
+            StateHasChanged();
         }
     }
 
