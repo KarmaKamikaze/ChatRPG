@@ -2,17 +2,15 @@
 
 namespace ChatRPG.Data;
 
-public class MessagePair
-{
-    public string PlayerMessage { get; set; }
-    public string AssistantMessage { get; set; }
-}
+public record MessagePair(string PlayerMessage, string AssistantMessage);
 
 public class FileUtility
 {
     private readonly string _path;
     private readonly string _saveDir;
+
     private readonly string _filenamePrefix = "conversation";
+
     // Define "special" keywords for determining the author of a message.
     private readonly string _playerKeyword = "#<Player>: ";
     private readonly string _gameKeyword = "#<Game>: ";
