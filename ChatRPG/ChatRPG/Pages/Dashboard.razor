@@ -36,13 +36,13 @@
         if (!string.IsNullOrWhiteSpace(_userInput))
         {
             // Use the user input to generate a response
-            string userMessage = $"Player: {_userInput}";
-            _conversation.Add(userMessage);
-            await _fileUtil.UpdateSaveFileAsync(_userInput, true);
+            MessagePair messages = new MessagePair();
+            _conversation.Add($"Player: {_userInput}");
+            messages.PlayerMessage = _userInput;
             string response = ProcessUserInput(_userInput);
-            string gameMessage = $"Assistant: {response}";
-            _conversation.Add(gameMessage);
-            await _fileUtil.UpdateSaveFileAsync(response);
+            _conversation.Add($"Assistant: {response}");
+            messages.AssistantMessage = response;
+            await _fileUtil.UpdateSaveFileAsync(messages);
 
             // Clear the user input
             _userInput = "";

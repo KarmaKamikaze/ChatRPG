@@ -2,6 +2,12 @@
 
 namespace ChatRPG.Data;
 
+public class MessagePair
+{
+    public string PlayerMessage { get; set; }
+    public string AssistantMessage { get; set; }
+}
+
 public class FileUtility
 {
     private readonly string _path;
@@ -17,7 +23,7 @@ public class FileUtility
         _path = SetPath(DateTime.Now);
     }
 
-    public async Task UpdateSaveFileAsync(string message, bool isPlayerMessage = false)
+    public async Task UpdateSaveFileAsync(MessagePair messages)
     {
         // According to .NET docs, you do not need to check if directory exists first
         Directory.CreateDirectory(_saveDir);
@@ -26,19 +32,26 @@ public class FileUtility
             new FileStream(_path, FileMode.Append, FileAccess.Write, FileShare.None, bufferSize: 4096,
                 useAsync: true);
 
-        if (!message.EndsWith("\n"))
-            message += "\n";
+        byte[] encodedPlayerMessage = Encoding.Unicode.GetBytes(PrepareMessageForSave(messages.PlayerMessage, true));
+        await fs.WriteAsync(encodedPlayerMessage, 0, encodedPlayerMessage.Length);
 
-        message = isPlayerMessage ? $"{_playerKeyword}{message}" : $"{_gameKeyword}{message}";
-
-        byte[] encodedMessage = Encoding.Unicode.GetBytes(message);
-        await fs.WriteAsync(encodedMessage, 0, encodedMessage.Length);
+        byte[] encodedAssistantMessage = Encoding.Unicode.GetBytes(PrepareMessageForSave(messages.AssistantMessage));
+        await fs.WriteAsync(encodedAssistantMessage, 0, encodedAssistantMessage.Length);
     }
 
     public async Task<List<string>> GetMostRecentConversationAsync()
     {
         string filePath = GetMostRecentFile(Directory.GetFiles(_saveDir, $"{_filenamePrefix}*"));
         return await GetConversationsStringFromSaveFileAsync(filePath);
+    }
+
+    private string PrepareMessageForSave(string message, bool isPlayerMessage = false)
+    {
+        if (!message.EndsWith("\n"))
+            message += "\n";
+
+        message = isPlayerMessage ? $"{_playerKeyword}{message}" : $"{_gameKeyword}{message}";
+        return message;
     }
 
     private async Task<List<string>> GetConversationsStringFromSaveFileAsync(string path)
