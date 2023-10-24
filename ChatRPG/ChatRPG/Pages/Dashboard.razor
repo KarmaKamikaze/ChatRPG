@@ -12,7 +12,7 @@
 </div>
 
 <div class="user-prompt">
-    <input type="text" @bind="_userInput" placeholder="What do you do?"/>
+    <input type="text" @bind="_userInput" placeholder="What do you do?" @onkeyup="@EnterKeyHandler"/>
     <button @onclick="SendPrompt">Send</button>
 </div>
 
@@ -20,6 +20,14 @@
 @code {
     readonly List<string> _conversation = new List<string>();
     string _userInput = "";
+
+    void EnterKeyHandler(KeyboardEventArgs e)
+    {
+        if (e.Code is "Enter" or "NumpadEnter")
+        {
+            SendPrompt();
+        }
+    }
 
     void SendPrompt()
     {
