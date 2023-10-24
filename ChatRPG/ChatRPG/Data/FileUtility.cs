@@ -29,7 +29,7 @@ public class FileUtility
         if (!message.EndsWith("\n"))
             message += "\n";
 
-        message = isPLayerMessage ? $"{_playerKeyword}{message}" : $"{_gameKeyword}{message}";
+        message = isPlayerMessage ? $"{_playerKeyword}{message}" : $"{_gameKeyword}{message}";
 
         byte[] encodedMessage = Encoding.Unicode.GetBytes(message);
         await fs.WriteAsync(encodedMessage, 0, encodedMessage.Length);
