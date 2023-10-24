@@ -1,9 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿namespace ChatRPG.Data.Models;
 
-namespace ChatRPG.Data.Models;
-
-[SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Local")]
-[SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
 public class StartScenario
 {
     private StartScenario() {}
@@ -17,4 +13,5 @@ public class StartScenario
     public int Id { get; private set; }
     public string Title { get; private set; } = null!;
     public string Body { get; private set; } = null!;
+    public ICollection<Campaign> Campaigns { get; } = new List<Campaign>();
 }

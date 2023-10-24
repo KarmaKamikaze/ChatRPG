@@ -1,10 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿namespace ChatRPG.Data.Models;
 
-namespace ChatRPG.Data.Models;
-
-[SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Local")]
-[SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
-[SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 public class Character
 {
     private Character() {}
@@ -33,8 +28,10 @@ public class Character
     public string Name { get; private set; } = null!;
     public string Description { get; private set; } = null!;
     public int MaxHealth { get; private set; }
-
     public int CurrentHealth { get; private set; }
+    public ICollection<CharacterAbility> CharacterAbilities { get; } = new List<CharacterAbility>();
+    public ICollection<CharacterEnvironment> CharacterEnvironments { get; } = new List<CharacterEnvironment>();
+    public Environment? CurrentEnvironment => CharacterEnvironments.MaxBy(x => x.Version)?.Environment;
 
     /// <summary>
     /// Adjust the current health of this character.
@@ -47,5 +44,40 @@ public class Character
         {
             // TODO: Handle character death
         }
+    }
+
+    /// <summary>
+    /// Creates a <see cref="CharacterEnvironment"/> for this character and the given <paramref name="environment"/>, and adds it to its list of <see cref="CharacterEnvironments"/>.
+    /// </summary>
+    /// <param name="environment">The environment to add.</param>
+    /// <returns>The <see cref="CharacterEnvironment"/> that was created.</returns>
+    public CharacterEnvironment AddEnvironment(Environment environment)
+    {
+        int version = 1;
+        if (CharacterEnvironments.Any())
+        {
+            version = CharacterEnvironments.Max(c => c.Version) + 1;
+        }
+        var charEnv = new CharacterEnvironment(Campaign, this, environment, version);
+        CharacterEnvironments.Add(charEnv);
+        return charEnv;
+    }
+
+    /// <summary>
+    /// Creates a <see cref="CharacterAbility"/> for this character and the given <paramref name="ability"/>, and adds it to its list of <see cref="CharacterAbilities"/> if it does not already exist.
+    /// </summary>
+    /// <param name="ability">The ability to add.</param>
+    /// <returns>The created <see cref="CharacterAbility"/> entity.</returns>
+    public CharacterAbility AddAbility(Ability ability)
+    {
+        var charAbility = CharacterAbilities.FirstOrDefault(a => a!.Ability == ability, null);
+        if (charAbility is not null)
+        {
+            return charAbility;
+        }
+        charAbility = new CharacterAbility(Campaign, this, ability);
+        CharacterAbilities.Add(charAbility);
+
+        return charAbility;
     }
 }

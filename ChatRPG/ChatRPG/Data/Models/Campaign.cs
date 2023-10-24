@@ -1,9 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿namespace ChatRPG.Data.Models;
 
-namespace ChatRPG.Data.Models;
-
-[SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Local")]
-[SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
 public class Campaign
 {
     private Campaign() {}
@@ -31,4 +27,8 @@ public class Campaign
     public string? CustomStartScenario { get; private set; }
     public string Title { get; private set; } = null!;
     public DateTime StartedOn { get; private set; }
+    public ICollection<Character> Characters { get; } = new List<Character>();
+    public ICollection<Event> Events { get; } = new List<Event>();
+    public ICollection<Environment> Environments { get; } = new List<Environment>();
+    public ICollection<Ability> Abilities { get; } = new List<Ability>();
 }
