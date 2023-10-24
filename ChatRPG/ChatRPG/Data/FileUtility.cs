@@ -17,7 +17,7 @@ public class FileUtility
         _path = SetPath(DateTime.Now);
     }
 
-    public async Task UpdateSaveFileAsync(string message, bool isPLayerMessage = false)
+    public async Task UpdateSaveFileAsync(string message, bool isPlayerMessage = false)
     {
         // According to .NET docs, you do not need to check if directory exists first
         Directory.CreateDirectory(_saveDir);
