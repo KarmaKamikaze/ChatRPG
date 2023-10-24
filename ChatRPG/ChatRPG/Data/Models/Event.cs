@@ -6,7 +6,9 @@ namespace ChatRPG.Data.Models;
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
 public class Event
 {
-    private Event() {}
+    private Event()
+    {
+    }
 
     public Event(Campaign campaign, Environment environment, EventType type, string description)
     {

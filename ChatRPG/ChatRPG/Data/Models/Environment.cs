@@ -6,7 +6,9 @@ namespace ChatRPG.Data.Models;
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
 public class Environment
 {
-    private Environment() {}
+    private Environment()
+    {
+    }
 
     public Environment(Campaign campaign, string name, string description)
     {

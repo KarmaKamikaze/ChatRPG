@@ -2,5 +2,6 @@
 
 public enum AbilityType
 {
-    Heal, Damage
+    Heal,
+    Damage
 }

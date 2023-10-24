@@ -11,7 +11,8 @@ var configuration = builder.Configuration;
 configuration.AddUserSecrets<Program>();
 
 // Add services to the container.
-var connectionString = configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var connectionString = configuration.GetConnectionString("DefaultConnection") ??
+                       throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<User>()
@@ -59,6 +60,7 @@ if (app.Environment.IsDevelopment())
             };
             await userManager.CreateAsync(user, password: username);
         }
+
         logger.LogInformation("Database was successfully initialized");
     }
     catch (Exception e)

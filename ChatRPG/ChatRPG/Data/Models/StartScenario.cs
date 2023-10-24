@@ -6,7 +6,9 @@ namespace ChatRPG.Data.Models;
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
 public class StartScenario
 {
-    private StartScenario() {}
+    private StartScenario()
+    {
+    }
 
     public StartScenario(string title, string body)
     {

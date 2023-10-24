@@ -2,5 +2,8 @@
 
 public enum EventType
 {
-    Observation, Action, Death, Other
+    Observation,
+    Action,
+    Death,
+    Other
 }

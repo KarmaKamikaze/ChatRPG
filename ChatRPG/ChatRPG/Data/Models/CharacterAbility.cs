@@ -6,7 +6,9 @@ namespace ChatRPG.Data.Models;
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
 public class CharacterAbility
 {
-    private CharacterAbility() {}
+    private CharacterAbility()
+    {
+    }
 
     public CharacterAbility(Character character, Ability ability)
     {

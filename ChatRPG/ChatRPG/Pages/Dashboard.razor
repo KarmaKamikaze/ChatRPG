@@ -1,0 +1,44 @@
+﻿@page "/Dashboard"
+
+<h1>Dashboard</h1>
+
+<div class="conversation">
+    <div class="conversation-text">
+        @foreach (string message in _conversation)
+        {
+            <p>@message</p>
+        }
+    </div>
+</div>
+
+<div class="user-prompt">
+    <input type="text" @bind="_userInput" placeholder="What do you do?"/>
+    <button @onclick="SendPrompt">Send</button>
+</div>
+
+
+@code {
+    readonly List<string> _conversation = new List<string>();
+    string _userInput = "";
+
+    void SendPrompt()
+    {
+        if (!string.IsNullOrWhiteSpace(_userInput))
+        {
+            // Use the user input to generate a response
+            _conversation.Add($"You: {_userInput}");
+            string response = ProcessUserInput(_userInput);
+            _conversation.Add($"Game: {response}");
+
+            // Clear the user input
+            _userInput = "";
+        }
+    }
+
+    string ProcessUserInput(string input)
+    {
+        // Temporary response
+        return "This is the game's response to your input.";
+    }
+
+}

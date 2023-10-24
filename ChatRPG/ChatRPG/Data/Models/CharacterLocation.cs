@@ -6,7 +6,9 @@ namespace ChatRPG.Data.Models;
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
 public class CharacterLocation
 {
-    private CharacterLocation() {}
+    private CharacterLocation()
+    {
+    }
 
     public CharacterLocation(Character character, Environment environment)
     {

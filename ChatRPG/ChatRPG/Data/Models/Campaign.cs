@@ -6,7 +6,9 @@ namespace ChatRPG.Data.Models;
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
 public class Campaign
 {
-    private Campaign() {}
+    private Campaign()
+    {
+    }
 
     public Campaign(User user, string title)
     {
