@@ -1,5 +1,7 @@
 ﻿@page "/Dashboard"
 @using ChatRPG.Data
+@using ChatRPG.API
+@inject IOpenAiLlmClient OpenAiLlmClient;
 
 <h1>Dashboard</h1>
 
@@ -35,25 +37,28 @@
     {
         if (!string.IsNullOrWhiteSpace(_userInput))
         {
-            // Use the user input to generate a response
+    // Use the user input to generate a response
 
             _conversation.Add($"Player: {_userInput}");
-            string response = ProcessUserInput(_userInput);
+            string response = await ProcessUserInput(_userInput);
             _conversation.Add($"Assistant: {response}");
             await _fileUtil.UpdateSaveFileAsync(new MessagePair(_userInput, response));
 
-            // Clear the user input
+    // Clear the user input
             _userInput = "";
 
-            // Notify the component to re-render because of async methods
+    // Notify the component to re-render because of async methods
             StateHasChanged();
         }
     }
 
-    string ProcessUserInput(string input)
+    async Task<string> ProcessUserInput(string input)
     {
-        // Temporary response
-        return "This is the game's response to your input.";
+        List<OpenAiGptInputMessage> inputMessage = new List<OpenAiGptInputMessage> { new OpenAiGptInputMessage("user", input) };
+
+        ChatCompletionObject response = await OpenAiLlmClient.GetChatCompletion(inputMessage);
+
+        return response.Choices[0].Message.Content;
     }
 
 }
