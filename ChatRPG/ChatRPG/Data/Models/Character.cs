@@ -23,6 +23,7 @@ public class Character
 
     public int Id { get; private set; }
     public Campaign Campaign { get; private set; } = null!;
+    public Environment Environment { get; set; } = null!;
     public CharacterType Type { get; private set; }
     public bool IsPlayer { get; private set; }
     public string Name { get; private set; } = null!;
@@ -30,8 +31,6 @@ public class Character
     public int MaxHealth { get; private set; }
     public int CurrentHealth { get; private set; }
     public ICollection<CharacterAbility> CharacterAbilities { get; } = new List<CharacterAbility>();
-    public ICollection<CharacterEnvironment> CharacterEnvironments { get; } = new List<CharacterEnvironment>();
-    public Environment? CurrentEnvironment => CharacterEnvironments.MaxBy(x => x.Version)?.Environment;
 
     /// <summary>
     /// Adjust the current health of this character.
@@ -44,23 +43,6 @@ public class Character
         {
             // TODO: Handle character death
         }
-    }
-
-    /// <summary>
-    /// Creates a <see cref="CharacterEnvironment"/> for this character and the given <paramref name="environment"/>, and adds it to its list of <see cref="CharacterEnvironments"/>.
-    /// </summary>
-    /// <param name="environment">The environment to add.</param>
-    /// <returns>The <see cref="CharacterEnvironment"/> that was created.</returns>
-    public CharacterEnvironment AddEnvironment(Environment environment)
-    {
-        int version = 1;
-        if (CharacterEnvironments.Any())
-        {
-            version = CharacterEnvironments.Max(c => c.Version) + 1;
-        }
-        var charEnv = new CharacterEnvironment(this, environment, version);
-        CharacterEnvironments.Add(charEnv);
-        return charEnv;
     }
 
     /// <summary>

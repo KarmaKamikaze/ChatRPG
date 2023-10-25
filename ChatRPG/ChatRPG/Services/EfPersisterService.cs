@@ -45,13 +45,12 @@ public class EfPersisterService : IPersisterService
     {
         return await _dbContext.Campaigns
             .Where(campaign => campaign.Id == campaignId)
+            .Include(campaign => campaign.StartScenario)
             .Include(campaign => campaign.Environments)
             .Include(campaign => campaign.Events)
             .Include(campaign => campaign.Characters)
                 .ThenInclude(character => character.CharacterAbilities)
                 .ThenInclude(characterAbility => characterAbility.Ability)
-            .Include(campaign => campaign.Characters)
-                .ThenInclude(character => character.CharacterEnvironments)
             .AsSplitQuery()
             .FirstAsync();
     }

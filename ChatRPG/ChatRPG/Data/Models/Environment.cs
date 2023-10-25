@@ -15,5 +15,5 @@ public class Environment
     public Campaign Campaign { get; private set; } = null!;
     public string Name { get; private set; } = null!;
     public string Description { get; private set; } = null!;
-    public ICollection<CharacterEnvironment> CharactersEnvironments { get; } = new List<CharacterEnvironment>();
+    public ICollection<Character> Characters { get; } = new List<Character>();
 }
