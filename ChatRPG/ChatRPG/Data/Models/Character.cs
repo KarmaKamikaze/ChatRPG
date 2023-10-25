@@ -58,7 +58,7 @@ public class Character
         {
             version = CharacterEnvironments.Max(c => c.Version) + 1;
         }
-        var charEnv = new CharacterEnvironment(Campaign, this, environment, version);
+        var charEnv = new CharacterEnvironment(this, environment, version);
         CharacterEnvironments.Add(charEnv);
         return charEnv;
     }
@@ -75,7 +75,7 @@ public class Character
         {
             return charAbility;
         }
-        charAbility = new CharacterAbility(Campaign, this, ability);
+        charAbility = new CharacterAbility(this, ability);
         CharacterAbilities.Add(charAbility);
 
         return charAbility;

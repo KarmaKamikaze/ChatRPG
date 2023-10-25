@@ -3,6 +3,7 @@ using System;
 using ChatRPG.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChatRPG.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231025174859_RemoveUnnecessaryCampaignReferences")]
+    partial class RemoveUnnecessaryCampaignReferences
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,6 +33,9 @@ namespace ChatRPG.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CampaignId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -41,6 +47,8 @@ namespace ChatRPG.Data.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CampaignId");
 
                     b.ToTable("Abilities");
                 });
@@ -438,6 +446,17 @@ namespace ChatRPG.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ChatRPG.Data.Models.Ability", b =>
+                {
+                    b.HasOne("ChatRPG.Data.Models.Campaign", "Campaign")
+                        .WithMany("Abilities")
+                        .HasForeignKey("CampaignId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Campaign");
+                });
+
             modelBuilder.Entity("ChatRPG.Data.Models.Campaign", b =>
                 {
                     b.HasOne("ChatRPG.Data.Models.StartScenario", "StartScenario")
@@ -596,6 +615,8 @@ namespace ChatRPG.Data.Migrations
 
             modelBuilder.Entity("ChatRPG.Data.Models.Campaign", b =>
                 {
+                    b.Navigation("Abilities");
+
                     b.Navigation("Characters");
 
                     b.Navigation("Environments");

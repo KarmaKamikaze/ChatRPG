@@ -39,19 +39,19 @@ public class EfPersisterService : IPersisterService
             throw;
         }
     }
-    
+
     /// <inheritdoc />
     public async Task<Campaign> LoadFromCampaignIdAsync(int campaignId)
     {
         return await _dbContext.Campaigns
-            .Where(cam => cam.Id == campaignId)
-            .Include(cam => cam.Abilities)
-            .Include(cam => cam.Environments)
-            .Include(cam => cam.Events)
-            .Include(cam => cam.Characters)
-            .ThenInclude(c => c.CharacterAbilities)
-            .Include(cam => cam.Characters)
-            .ThenInclude(c => c.CharacterEnvironments)
+            .Where(campaign => campaign.Id == campaignId)
+            .Include(campaign => campaign.Environments)
+            .Include(campaign => campaign.Events)
+            .Include(campaign => campaign.Characters)
+                .ThenInclude(character => character.CharacterAbilities)
+                .ThenInclude(characterAbility => characterAbility.Ability)
+            .Include(campaign => campaign.Characters)
+                .ThenInclude(character => character.CharacterEnvironments)
             .AsSplitQuery()
             .FirstAsync();
     }

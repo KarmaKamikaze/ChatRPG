@@ -30,12 +30,12 @@ public sealed class ApplicationDbContext : IdentityDbContext<User>
         modelBuilder
             .Entity<CharacterAbility>(builder =>
             {
-                builder.HasKey(c => new { c.CharacterId, c.AbilityId });
+                builder.HasKey("CharacterId", "AbilityId");
                 builder.HasOne(c => c.Character).WithMany(c => c.CharacterAbilities);
             })
             .Entity<CharacterEnvironment>(builder =>
             {
-                builder.HasKey(x => new { x.CharacterId, x.Version });
+                builder.HasKey("CharacterId", "Version");
                 builder.Property(p => p.Version).HasDefaultValue(1);
                 builder.HasOne(c => c.Character).WithMany(c => c.CharacterEnvironments);
             })
