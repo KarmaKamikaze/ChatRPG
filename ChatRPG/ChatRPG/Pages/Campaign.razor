@@ -1,6 +1,7 @@
 ﻿@page "/Campaign"
 @using ChatRPG.Data
 @using ChatRPG.API
+@inject IConfiguration Configuration
 @inject IOpenAiLlmClient OpenAiLlmClient;
 @inject IJSRuntime JsRuntime
 
@@ -69,7 +70,10 @@
             _conversation.Add($"Player: {_userInput}");
             string response = await ProcessUserInput(_userInput);
             _conversation.Add($"Assistant: {response}");
-            await _fileUtil.UpdateSaveFileAsync(new MessagePair(_userInput, response));
+            if (Configuration.GetValue<bool>("SaveConversationsToFile"))
+            {
+                await _fileUtil.UpdateSaveFileAsync(new MessagePair(_userInput, response));
+            }
 
             // Clear the user input
             _userInput = "";
