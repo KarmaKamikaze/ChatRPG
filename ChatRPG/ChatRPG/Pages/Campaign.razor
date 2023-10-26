@@ -13,18 +13,10 @@
     <div class="conversation-text">
         @foreach (string message in _conversation)
         {
-            @if (message.StartsWith("Player: "))
-            {
-                <div class="user-message-container">
-                    <p class="user-message">@message</p>
-                </div>
-            }
-            else
-            {
-                <div class="assistant-message-container">
-                    <p class="assistant-message">@message</p>
-                </div>
-            }
+            string prefix = message.StartsWith("Player: ") ? "user" : "assistant";
+            <div class="@($"{prefix}-message-container")">
+                <p class="@($"{prefix}-message")">@message</p>
+            </div>
         }
     </div>
 </div>
