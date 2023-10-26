@@ -45,6 +45,7 @@ public class EfPersisterService : IPersisterService
     {
         return await _dbContext.Campaigns
             .Where(campaign => campaign.Id == campaignId)
+            .Include(campaign => campaign.Messages)
             .Include(campaign => campaign.StartScenario)
             .Include(campaign => campaign.Environments)
             .Include(campaign => campaign.Events)

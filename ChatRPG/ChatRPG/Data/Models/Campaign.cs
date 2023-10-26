@@ -8,7 +8,7 @@ public class Campaign
     {
         User = user;
         Title = title;
-        StartedOn = DateTime.Now.ToUniversalTime();
+        StartedOn = DateTime.UtcNow;
     }
 
     public Campaign(User user, string title, StartScenario startScenario) : this(user, title)
@@ -27,6 +27,7 @@ public class Campaign
     public string? CustomStartScenario { get; private set; }
     public string Title { get; private set; } = null!;
     public DateTime StartedOn { get; private set; }
+    public ICollection<Message> Messages { get; } = new List<Message>();
     public ICollection<Character> Characters { get; } = new List<Character>();
     public ICollection<Event> Events { get; } = new List<Event>();
     public ICollection<Environment> Environments { get; } = new List<Environment>();
