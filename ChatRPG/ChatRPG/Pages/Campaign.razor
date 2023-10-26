@@ -2,6 +2,7 @@
 @using ChatRPG.Data
 @using ChatRPG.API
 @inject IOpenAiLlmClient OpenAiLlmClient;
+@inject IJSRuntime JsRuntime
 
 <div class="text-center mx-auto">
     <h1>Campaign</h1>
@@ -29,7 +30,7 @@
 
 <div class="container">
     <div class="input-group mx-auto col-8 mt-2 mb-5 input-group-border">
-        <input type="text" style="resize:vertical;"  class="form-control user-prompt custom-text-field"
+        <input type="text" style="resize:vertical;" class="form-control user-prompt custom-text-field"
                @bind="_userInput" placeholder="What do you do?" @onkeyup="@EnterKeyHandler"/>
         <div class="input-group-append">
             <button class="btn btn-primary ml-2" type="button" @onclick="SendPrompt">
@@ -39,6 +40,7 @@
     </div>
 </div>
 
+<span id="bottom-id"></span>
 
 @code {
     private readonly FileUtility _fileUtil = new FileUtility();
@@ -68,6 +70,9 @@
 
             // Notify the component to re-render because of async methods
             StateHasChanged();
+
+            // Scroll to bottom of page
+            await ScrollToElement("bottom-id");
         }
     }
 
@@ -78,6 +83,12 @@
         ChatCompletionObject response = await OpenAiLlmClient.GetChatCompletion(inputMessage);
 
         return response.Choices[0].Message.Content;
+    }
+
+    async Task ScrollToElement(string elementId)
+    {
+        IJSObjectReference module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/scroll.js");
+        await module.InvokeVoidAsync("ScrollToId", elementId);
     }
 
 }
