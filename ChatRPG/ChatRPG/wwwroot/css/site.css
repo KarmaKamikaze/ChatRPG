@@ -94,3 +94,20 @@ a, .btn-link {
     color: rgb(0, 0, 0);
     margin: 10px 0;
 }
+
+.custom-text-field {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    outline: none; /* Remove the focus outline */
+}
+
+.input-group-border {
+    border: 2px solid grey;
+    border-radius: 10px;
+    padding: 8px;
+}
+
+.custom-text-field:focus {
+    box-shadow: none; /* Remove any focus box-shadow */
+}
