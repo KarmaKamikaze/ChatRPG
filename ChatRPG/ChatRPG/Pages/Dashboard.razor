@@ -1,10 +1,10 @@
-﻿@page "/Dashboard"
+﻿@page "/Campaign"
 @using ChatRPG.Data
 @using ChatRPG.API
 @inject IOpenAiLlmClient OpenAiLlmClient;
 
 <div class="text-center mx-auto">
-    <h1>Dashboard</h1>
+    <h1>Campaign</h1>
 </div>
 
 <div class="conversation mx-auto col-8 mt-4 rounded p-5 text-black">
@@ -28,7 +28,7 @@
 </div>
 
 <div class="user-prompt mx-auto col-8 mt-2 grow-wrap">
-    <input type="text" style="resize:both;"  class="form-control" @bind="_userInput" placeholder="What do you do?" @onkeyup="@EnterKeyHandler"/>
+    <input type="text" style="resize:vertical;"  class="form-control" @bind="_userInput" placeholder="What do you do?" @onkeyup="@EnterKeyHandler"/>
     <button @onclick="SendPrompt">Send</button>
 </div>
 
