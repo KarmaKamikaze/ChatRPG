@@ -43,9 +43,15 @@
 <span id="bottom-id"></span>
 
 @code {
+    private IJSObjectReference? _scrollJsScript;
     private readonly FileUtility _fileUtil = new FileUtility();
     readonly List<string> _conversation = new List<string>();
     private string _userInput = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _scrollJsScript = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/scroll.js");
+    }
 
     async Task EnterKeyHandler(KeyboardEventArgs e)
     {
@@ -85,10 +91,9 @@
         return response.Choices[0].Message.Content;
     }
 
-    async Task ScrollToElement(string elementId)
+    private async Task ScrollToElement(string elementId)
     {
-        IJSObjectReference module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/scroll.js");
-        await module.InvokeVoidAsync("ScrollToId", elementId);
+        await _scrollJsScript!.InvokeVoidAsync("ScrollToId", elementId);
     }
 
 }
