@@ -33,7 +33,7 @@ public class HttpMessageHandlerFactory : IHttpMessageHandlerFactory
                                                   {
                                                       "id": "chatcmpl-000",
                                                       "object": "chat.completion",
-                                                      "created": {{(int) (DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds)}},
+                                                      "created": {{(int)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds)}},
                                                       "model": "gpt-3.5-turbo",
                                                       "choices": [{
                                                           "index": 0,
