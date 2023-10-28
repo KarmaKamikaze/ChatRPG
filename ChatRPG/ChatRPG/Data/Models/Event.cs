@@ -1,9 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿namespace ChatRPG.Data.Models;
 
-namespace ChatRPG.Data.Models;
-
-[SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Local")]
-[SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
 public class Event
 {
     private Event()

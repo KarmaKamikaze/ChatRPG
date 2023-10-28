@@ -11,4 +11,6 @@ public class User : IdentityUser
     public User(string username) : base(username)
     {
     }
+
+    public ICollection<Campaign> Campaigns { get; } = new List<Campaign>();
 }

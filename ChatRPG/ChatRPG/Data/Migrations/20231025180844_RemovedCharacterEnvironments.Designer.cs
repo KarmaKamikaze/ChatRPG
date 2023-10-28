@@ -3,6 +3,7 @@ using System;
 using ChatRPG.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChatRPG.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231025180844_RemovedCharacterEnvironments")]
+    partial class RemovedCharacterEnvironments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -200,34 +203,6 @@ namespace ChatRPG.Data.Migrations
                     b.HasIndex("EnvironmentId");
 
                     b.ToTable("Events");
-                });
-
-            modelBuilder.Entity("ChatRPG.Data.Models.Message", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CampaignId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CampaignId");
-
-                    b.ToTable("Message");
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.StartScenario", b =>
@@ -540,17 +515,6 @@ namespace ChatRPG.Data.Migrations
                     b.Navigation("Environment");
                 });
 
-            modelBuilder.Entity("ChatRPG.Data.Models.Message", b =>
-                {
-                    b.HasOne("ChatRPG.Data.Models.Campaign", "Campaign")
-                        .WithMany("Messages")
-                        .HasForeignKey("CampaignId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Campaign");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -614,8 +578,6 @@ namespace ChatRPG.Data.Migrations
                     b.Navigation("Environments");
 
                     b.Navigation("Events");
-
-                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.Character", b =>
