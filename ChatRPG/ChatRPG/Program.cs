@@ -2,6 +2,7 @@ using ChatRPG.API;
 using ChatRPG.Areas.Identity;
 using ChatRPG.Data;
 using ChatRPG.Data.Models;
+using ChatRPG.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -18,11 +19,14 @@ builder.Services.AddDefaultIdentity<User>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<User>>();
+
 var httpMessageHandlerFactory = new HttpMessageHandlerFactory(configuration);
-builder.Services.AddSingleton<HttpMessageHandler>(_ => httpMessageHandlerFactory.CreateHandler());
-builder.Services.AddSingleton<IOpenAiLlmClient, OpenAiLlmClient>();
-builder.Services.AddSingleton<IFoodWasteClient, SallingClient>();
+builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<User>>()
+    .AddSingleton<HttpMessageHandler>(_ => httpMessageHandlerFactory.CreateHandler())
+    .AddSingleton<IOpenAiLlmClient, OpenAiLlmClient>()
+    .AddSingleton<IFoodWasteClient, SallingClient>()
+    .AddTransient<IPersisterService, EfPersisterService>();
+
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequireDigit = false;

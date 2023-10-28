@@ -1,9 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿namespace ChatRPG.Data.Models;
 
-namespace ChatRPG.Data.Models;
-
-[SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Local")]
-[SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
 public class Ability
 {
     private Ability() {}
@@ -19,4 +15,5 @@ public class Ability
     public string Name { get; private set; } = null!;
     public AbilityType Type { get; private set; } = AbilityType.Damage;
     public int Value { get; private set; }
+    public ICollection<CharacterAbility> CharactersAbilities { get; } = new List<CharacterAbility>();
 }
