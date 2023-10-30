@@ -38,6 +38,7 @@
 <span id="bottom-id"></span>
 
 @code {
+    private bool _shouldSave;
     private IJSObjectReference? _scrollJsScript;
     private readonly FileUtility _fileUtil = new FileUtility();
     readonly List<string> _conversation = new List<string>();
@@ -45,6 +46,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        _shouldSave = Configuration.GetValue<bool>("SaveConversationsToFile");
         _scrollJsScript = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/scroll.js");
     }
 
@@ -56,7 +58,7 @@
         }
     }
 
-    async Task SendPrompt()
+    private async Task SendPrompt()
     {
         if (!string.IsNullOrWhiteSpace(_userInput))
         {
@@ -64,7 +66,7 @@
             _conversation.Add($"Player: {_userInput}");
             string response = await ProcessUserInput(_userInput);
             _conversation.Add($"Assistant: {response}");
-            if (Configuration.GetValue<bool>("SaveConversationsToFile"))
+            if (_shouldSave)
             {
                 await _fileUtil.UpdateSaveFileAsync(new MessagePair(_userInput, response));
             }
