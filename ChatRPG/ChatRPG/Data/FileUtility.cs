@@ -36,10 +36,10 @@ public class FileUtility
         await fs.WriteAsync(encodedAssistantMessage, 0, encodedAssistantMessage.Length);
     }
 
-    public async Task<List<string>> GetMostRecentConversationAsync()
+    public async Task<List<string>> GetMostRecentConversationAsync(string playerTag, string assistantTag)
     {
         string filePath = GetMostRecentFile(Directory.GetFiles(_saveDir, $"{_filenamePrefix}*"));
-        return await GetConversationsStringFromSaveFileAsync(filePath);
+        return await GetConversationsStringFromSaveFileAsync(filePath, playerTag, assistantTag);
     }
 
     private string PrepareMessageForSave(string message, bool isPlayerMessage = false)
@@ -51,7 +51,8 @@ public class FileUtility
         return message;
     }
 
-    private async Task<List<string>> GetConversationsStringFromSaveFileAsync(string path)
+    private async Task<List<string>> GetConversationsStringFromSaveFileAsync(string path, string playerTag,
+        string assistantTag)
     {
         await using FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
             bufferSize: 4096, useAsync: true);
@@ -65,7 +66,7 @@ public class FileUtility
             sb.Append(stream);
         }
 
-        return ConvertConversationStringToList(sb.ToString());
+        return ConvertConversationStringToList(sb.ToString(), playerTag, assistantTag);
     }
 
     private string GetMostRecentFile(string[] files)
@@ -91,21 +92,23 @@ public class FileUtility
     /// This method converts a conversation in string form to a list of messages making up the conversation.
     /// </summary>
     /// <param name="conversation">A full conversation in string form.</param>
+    /// <param name="playerTag">The tag to mark a player message.</param>
+    /// <param name="assistantTag">The tag to mark an assistant message.</param>
     /// <returns>The list of messages making up the conversation.</returns>
-    private List<string> ConvertConversationStringToList(string conversation)
+    private List<string> ConvertConversationStringToList(string conversation, string playerTag, string assistantTag)
     {
         // First split up conversation on all player keywords,
-        // which gives us the player query and all subsequent game responses
+        // which gives us the player query and all subsequent assistant responses
         string[] playerSplit = conversation.Split(new[] { _playerKeyword, $"\n{_playerKeyword}" },
             StringSplitOptions.RemoveEmptyEntries);
 
-        // Prepend "You: " to all player queries
+        // Prepend "[playerTag]: " to all player queries
         for (int i = 0; i < playerSplit.Length; i++)
         {
-            playerSplit[i] = $"You: {playerSplit[i]}";
+            playerSplit[i] = $"{playerTag}: {playerSplit[i]}";
         }
 
-        // Secondly, split all individual player strings since they still contain game responses
+        // Secondly, split all individual player strings since they still contain assistant responses
         List<string> fullConversation = new List<string>();
         foreach (string combinedMessage in playerSplit)
         {
@@ -113,10 +116,10 @@ public class FileUtility
                 StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < messages.Length; i++)
             {
-                // Prepend "Game: " to all game responses
-                if (!messages[i].StartsWith("You: "))
+                // Prepend "[assistantTag]: " to all assistant responses
+                if (!messages[i].StartsWith($"{playerTag}: "))
                 {
-                    messages[i] = $"Game: {messages[i]}";
+                    messages[i] = $"{assistantTag}: {messages[i]}";
                 }
 
                 fullConversation.Add(messages[i]);
