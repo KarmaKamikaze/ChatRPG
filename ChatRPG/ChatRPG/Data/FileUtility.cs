@@ -8,7 +8,6 @@ public class FileUtility
 {
     private readonly string _path;
     private readonly string _saveDir;
-
     private readonly string _filenamePrefix = "conversation";
 
     // Define "special" keywords for determining the author of a message.
@@ -90,25 +89,41 @@ public class FileUtility
 
     /// <summary>
     /// This method converts a conversation in string form to a list of messages making up the conversation.
-    /// Importantly, this method assumes that a conversation is initiated by the player and that the conversation
-    /// alternates between the player and the game.
     /// </summary>
     /// <param name="conversation">A full conversation in string form.</param>
     /// <returns>The list of messages making up the conversation.</returns>
     private List<string> ConvertConversationStringToList(string conversation)
     {
-        string[] conversationSplit =
-            conversation.Split(
-                new[] { _playerKeyword, _gameKeyword, $"\n{_playerKeyword}", $"\n{_gameKeyword}" },
-                StringSplitOptions.RemoveEmptyEntries);
-        List<string> conversationList = new List<string>();
+        // First split up conversation on all player keywords,
+        // which gives us the player query and all subsequent game responses
+        string[] playerSplit = conversation.Split(new[] { _playerKeyword, $"\n{_playerKeyword}" },
+            StringSplitOptions.RemoveEmptyEntries);
 
-        for (int i = 0; i < conversationSplit.Length; i++)
+        // Prepend "You: " to all player queries
+        for (int i = 0; i < playerSplit.Length; i++)
         {
-            conversationList.Add(i % 2 == 0 ? $"You: {conversationSplit[i]}" : $"Game: {conversationSplit[i]}");
+            playerSplit[i] = $"You: {playerSplit[i]}";
         }
 
-        return conversationList;
+        // Secondly, split all individual player strings since they still contain game responses
+        List<string> fullConversation = new List<string>();
+        foreach (string combinedMessage in playerSplit)
+        {
+            string[] messages = combinedMessage.Split(new[] { _gameKeyword, $"\n{_gameKeyword}" },
+                StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < messages.Length; i++)
+            {
+                // Prepend "Game: " to all game responses
+                if (!messages[i].StartsWith("You: "))
+                {
+                    messages[i] = $"Game: {messages[i]}";
+                }
+
+                fullConversation.Add(messages[i]);
+            }
+        }
+
+        return fullConversation;
     }
 
     private string SetPath(DateTime timestamp)
