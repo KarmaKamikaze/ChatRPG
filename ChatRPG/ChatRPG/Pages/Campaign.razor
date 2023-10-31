@@ -1,0 +1,99 @@
+﻿@page "/Campaign"
+@using ChatRPG.Data
+@using ChatRPG.API
+@inject IConfiguration Configuration
+@inject IOpenAiLlmClient OpenAiLlmClient;
+@inject IJSRuntime JsRuntime
+
+<PageTitle>Campaign</PageTitle>
+
+<div class="text-center mx-auto">
+    <h1>Campaign</h1>
+</div>
+
+<div class="conversation mx-auto col-8 mt-4 rounded p-5 text-black">
+    <div class="conversation-text">
+        @foreach (string message in _conversation)
+        {
+            string prefix = message.StartsWith("Player: ") ? "user" : "assistant";
+            <div class="@($"{prefix}-message-container")">
+                <p class="@($"{prefix}-message")">@message</p>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="container">
+    <div class="input-group mx-auto col-8 mt-2 mb-5 input-group-border">
+        <input type="text" style="resize:vertical;" class="form-control user-prompt custom-text-field"
+               @bind="_userInput" placeholder="What do you do?" @onkeyup="@EnterKeyHandler"/>
+        <div class="input-group-append">
+            <button class="btn btn-primary ml-2" type="button" @onclick="SendPrompt">
+                Send
+            </button>
+        </div>
+    </div>
+</div>
+
+<span id="bottom-id"></span>
+
+@code {
+    private bool _shouldSave;
+    private IJSObjectReference? _scrollJsScript;
+    private readonly FileUtility _fileUtil = new FileUtility();
+    readonly List<string> _conversation = new List<string>();
+    private string _userInput = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _shouldSave = Configuration.GetValue<bool>("SaveConversationsToFile");
+        _scrollJsScript = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/scroll.js");
+    }
+
+    async Task EnterKeyHandler(KeyboardEventArgs e)
+    {
+        if (e.Code is "Enter" or "NumpadEnter")
+        {
+            await SendPrompt();
+        }
+    }
+
+    private async Task SendPrompt()
+    {
+        if (!string.IsNullOrWhiteSpace(_userInput))
+        {
+            // Use the user input to generate a response
+            _conversation.Add($"Player: {_userInput}");
+            string response = await ProcessUserInput(_userInput);
+            _conversation.Add($"Assistant: {response}");
+            if (_shouldSave)
+            {
+                await _fileUtil.UpdateSaveFileAsync(new MessagePair(_userInput, response));
+            }
+
+            // Clear the user input
+            _userInput = "";
+
+            // Notify the component to re-render because of async methods
+            StateHasChanged();
+
+            // Scroll to bottom of page
+            await ScrollToElement("bottom-id");
+        }
+    }
+
+    async Task<string> ProcessUserInput(string input)
+    {
+        List<OpenAiGptInputMessage> inputMessage = new List<OpenAiGptInputMessage> { new OpenAiGptInputMessage("user", input) };
+
+        ChatCompletionObject response = await OpenAiLlmClient.GetChatCompletion(inputMessage);
+
+        return response.Choices[0].Message.Content;
+    }
+
+    private async Task ScrollToElement(string elementId)
+    {
+        await _scrollJsScript!.InvokeVoidAsync("ScrollToId", elementId);
+    }
+
+}

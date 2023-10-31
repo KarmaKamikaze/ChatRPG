@@ -5,24 +5,25 @@ namespace ChatRPG.API;
 public class HttpMessageHandlerFactory : IHttpMessageHandlerFactory
 {
     private bool _useMocks;
+
     public HttpMessageHandlerFactory(IConfiguration configuration)
     {
         _useMocks = configuration.GetValue<bool>("UseMocks");
     }
 
-   public HttpMessageHandler CreateHandler(string name)
-   {
-       if (!_useMocks)
-       {
-           return new HttpClientHandler();
-       }
+    public HttpMessageHandler CreateHandler(string name)
+    {
+        if (!_useMocks)
+        {
+            return new HttpClientHandler();
+        }
 
-       var mockHttpMessageHandler = new MockHttpMessageHandler();
-       mockHttpMessageHandler.When("*")
-           .Respond(GenerateMockResponse);
+        var mockHttpMessageHandler = new MockHttpMessageHandler();
+        mockHttpMessageHandler.When("*")
+            .Respond(GenerateMockResponse);
 
-       return mockHttpMessageHandler;
-   }
+        return mockHttpMessageHandler;
+    }
 
     private static HttpResponseMessage GenerateMockResponse(HttpRequestMessage request)
     {

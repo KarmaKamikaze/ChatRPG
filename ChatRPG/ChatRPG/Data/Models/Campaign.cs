@@ -2,7 +2,9 @@
 
 public class Campaign
 {
-    private Campaign() {}
+    private Campaign()
+    {
+    }
 
     public Campaign(User user, string title)
     {

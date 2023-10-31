@@ -2,7 +2,9 @@
 
 public class Ability
 {
-    private Ability() {}
+    private Ability()
+    {
+    }
 
     public Ability(string name, AbilityType type, int value)
     {

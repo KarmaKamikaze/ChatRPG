@@ -66,3 +66,48 @@ a, .btn-link {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+
+.custom-gray-bg {
+    background-color: rgb(80, 80, 80);
+}
+
+.user-message-container {
+    background-color: rgb(222, 222, 222);
+    border-radius: 10px; /* Adds rounded corners to the container */
+    padding: 10px; /* Adds padding to the container */
+    margin: 10px 0;
+}
+
+.assistant-message-container {
+    background-color: rgb(200, 200, 200);
+    border-radius: 10px; /* Adds rounded corners to the container */
+    padding: 10px; /* Adds padding to the container */
+    margin: 10px 0;
+}
+
+.user-message {
+    color: rgb(0, 0, 0);
+    margin: 10px 0;
+}
+
+.assistant-message {
+    color: rgb(0, 0, 0);
+    margin: 10px 0;
+}
+
+.custom-text-field {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    outline: none; /* Remove the focus outline */
+}
+
+.input-group-border {
+    border: 2px solid grey;
+    border-radius: 10px;
+    padding: 8px;
+}
+
+.custom-text-field:focus {
+    box-shadow: none; /* Remove any focus box-shadow */
+}

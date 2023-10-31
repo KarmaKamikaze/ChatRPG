@@ -2,7 +2,9 @@
 
 public class StartScenario
 {
-    private StartScenario() {}
+    private StartScenario()
+    {
+    }
 
     public StartScenario(string title, string body)
     {

@@ -2,7 +2,9 @@
 
 public class CharacterAbility
 {
-    private CharacterAbility() {}
+    private CharacterAbility()
+    {
+    }
 
     public CharacterAbility(Character character, Ability ability)
     {

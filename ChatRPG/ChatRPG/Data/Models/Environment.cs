@@ -2,7 +2,9 @@
 
 public class Environment
 {
-    private Environment() {}
+    private Environment()
+    {
+    }
 
     public Environment(Campaign campaign, string name, string description)
     {
