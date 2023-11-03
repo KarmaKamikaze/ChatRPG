@@ -6,16 +6,17 @@ public record MessagePair(string PlayerMessage, string AssistantMessage);
 
 public class FileUtility
 {
+    private readonly string _currentUser;
     private readonly string _path;
     private readonly string _saveDir;
-    private readonly string _filenamePrefix = "conversation";
 
     // Define "special" keywords for determining the author of a message.
     private readonly string _playerKeyword = "#<Player>: ";
     private readonly string _gameKeyword = "#<Game>: ";
 
-    public FileUtility(string saveDir = "Saves/")
+    public FileUtility(string currentUser, string saveDir = "Saves/")
     {
+        _currentUser = currentUser;
         _saveDir = Path.Join(AppDomain.CurrentDomain.BaseDirectory, saveDir);
         _path = SetPath(DateTime.Now);
     }
@@ -38,7 +39,7 @@ public class FileUtility
 
     public async Task<List<string>> GetMostRecentConversationAsync(string playerTag, string assistantTag)
     {
-        string filePath = GetMostRecentFile(Directory.GetFiles(_saveDir, $"{_filenamePrefix}*"));
+        string filePath = GetMostRecentFile(Directory.GetFiles(_saveDir, $"{_currentUser}*"));
         return await GetConversationsStringFromSaveFileAsync(filePath, playerTag, assistantTag);
     }
 
@@ -132,7 +133,7 @@ public class FileUtility
     private string SetPath(DateTime timestamp)
     {
         // Add save directory and file name to path
-        string fileName = $"{_filenamePrefix} {timestamp:dd-MM-yyyy_HH-mm-ss}.txt";
+        string fileName = $"{_currentUser} {timestamp:dd-MM-yyyy_HH-mm-ss}.txt";
         return Path.Join(_saveDir, fileName);
     }
 }

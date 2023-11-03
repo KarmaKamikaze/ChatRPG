@@ -4,6 +4,7 @@
 @inject IConfiguration Configuration
 @inject IOpenAiLlmClient OpenAiLlmClient;
 @inject IJSRuntime JsRuntime
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Campaign</PageTitle>
 
@@ -38,14 +39,18 @@
 <span id="bottom-id"></span>
 
 @code {
+    private string? _loggedInUsername;
     private bool _shouldSave;
     private IJSObjectReference? _scrollJsScript;
-    private readonly FileUtility _fileUtil = new FileUtility();
+    private FileUtility? _fileUtil;
     readonly List<string> _conversation = new List<string>();
     private string _userInput = "";
 
     protected override async Task OnInitializedAsync()
     {
+        AuthenticationState authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        _loggedInUsername = authenticationState.User.Identity?.Name;
+        if (_loggedInUsername != null) _fileUtil = new FileUtility(_loggedInUsername);
         _shouldSave = Configuration.GetValue<bool>("SaveConversationsToFile");
         _scrollJsScript = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/scroll.js");
     }
@@ -66,7 +71,7 @@
             _conversation.Add($"Player: {_userInput}");
             string response = await ProcessUserInput(_userInput);
             _conversation.Add($"Assistant: {response}");
-            if (_shouldSave)
+            if (_shouldSave && _fileUtil != null)
             {
                 await _fileUtil.UpdateSaveFileAsync(new MessagePair(_userInput, response));
             }
