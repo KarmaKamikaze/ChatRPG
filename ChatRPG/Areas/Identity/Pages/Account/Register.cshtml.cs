@@ -75,11 +75,23 @@ namespace ChatRPG.Areas.Identity.Pages.Account
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
+            
+            [Required]
+            [StringLength(100)]
+            [DataType(DataType.Text)]
+            [Display(Name = "Username")]
+            public string Username { get; set; }
+            
             [Required]
             [EmailAddress]
             [Display(Name = "Email")]
             public string Email { get; set; }
 
+            [EmailAddress]
+            [Display(Name = "Confirm Email")]
+            [Compare("Email", ErrorMessage = "The email and confirmation email do not match.")]
+            public string ConfirmEmail { get; set; }
+            
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
@@ -115,7 +127,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account
             {
                 var user = CreateUser();
 
-                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+                await _userStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
