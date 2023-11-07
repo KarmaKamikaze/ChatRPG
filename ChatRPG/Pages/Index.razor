@@ -1,9 +1,56 @@
 ﻿@page "/"
 
-<PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
+<AuthorizeView>
+    <NotAuthorized>
+        <PageTitle>ChatRPG</PageTitle>
 
-Welcome to your new app.
+        <div class="container-front">
+            <h1 class="title display-1">
+                @_titleDisplayText<span class="cursor" style="visibility: @(_cursorVisible ? "visible" : "hidden")">|</span>
+            </h1>
+            <p class="slogan-front">Immerse yourself in the ultimate AI-powered adventure!</p>
+        </div>
+    </NotAuthorized>
+    <Authorized>
+        <PageTitle>Dashboard - ChatRPG</PageTitle>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+
+    </Authorized>
+</AuthorizeView>
+
+
+@code {
+    private readonly string _fullTitleText = "ChatRPG";
+    private string _titleDisplayText = "";
+    private bool _cursorVisible = true;
+    private bool _isPageLoaded = true; // set to false when leaving page
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Start cursor blinking on a separate thread
+        await Task.Factory.StartNew(BlinkCursorAsync, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        await TypingAsync();
+    }
+
+    private async Task TypingAsync()
+    {
+        for (int i = 0; i <= _fullTitleText.Length; i++)
+        {
+            _titleDisplayText = _fullTitleText.Substring(0, i);
+            await Task.Delay(100); // Adjust the delay as needed
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task BlinkCursorAsync()
+    {
+        while (_isPageLoaded)
+        {
+            _cursorVisible = !_cursorVisible; // Toggle cursor visibility
+            await Task.Delay(500); // Adjust the delay between blinks
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+}

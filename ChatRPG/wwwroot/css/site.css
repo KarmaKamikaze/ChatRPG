@@ -111,3 +111,54 @@ a, .btn-link {
 .custom-text-field:focus {
     box-shadow: none; /* Remove any focus box-shadow */
 }
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-30px);
+    }
+    60% {
+        transform: translateY(-15px);
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.container-front {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.title-front {
+    font-size: 5rem;
+    animation: bounce 2s infinite;
+}
+
+.slogan-front {
+    font-size: 1.5rem;
+    animation: fadeIn 3s;
+}
+
+.typing {
+    overflow: hidden; /* Hide overflowing text */
+    border-right: .15em solid orange; /* Typing cursor */
+    white-space: nowrap; /* Keeps text on a single line */
+    margin: 0 auto; /* Center the text horizontally */
+}
+
+.cursor {
+    position: relative;
+    top: -0.1em; /* Adjust the value to raise or lower the cursor */
+}
