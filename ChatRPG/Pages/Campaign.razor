@@ -91,9 +91,7 @@
     {
         List<OpenAiGptInputMessage> inputMessage = new List<OpenAiGptInputMessage> { new OpenAiGptInputMessage("user", input) };
 
-        ChatCompletionObject response = await OpenAiLlmClient.GetChatCompletion(inputMessage);
-
-        return response.Choices[0].Message.Content;
+        return await OpenAiLlmClient.GetChatCompletion(inputMessage);
     }
 
     private async Task ScrollToElement(string elementId)

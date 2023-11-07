@@ -2,7 +2,7 @@ namespace ChatRPG.API;
 
 public interface IOpenAiLlmClient
 {
-    Task<ChatCompletionObject> GetChatCompletion(List<OpenAiGptInputMessage> inputs);
+    Task<string> GetChatCompletion(List<OpenAiGptInputMessage> inputs);
 }
 
 public record ChatCompletionObject(string Id, string Object, int Created, string Model, Choice[] Choices, Usage Usage);

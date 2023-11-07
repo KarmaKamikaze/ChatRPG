@@ -16,7 +16,7 @@
 
 @if (_openAiResponse is not null)
 {
-    <h3>Response: @_openAiResponse.Choices.First().Message.Content</h3>
+    <h3>Response: @_openAiResponse</h3>
 }
 
 <br/><br/><br/>
@@ -49,7 +49,7 @@
 }
 @code {
     private string _input;
-    private ChatCompletionObject _openAiResponse;
+    private string _openAiResponse;
     private string _zip;
     private List<FoodWasteResponse> _foodWasteResponses;
 
