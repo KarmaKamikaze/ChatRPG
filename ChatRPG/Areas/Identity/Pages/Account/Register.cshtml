@@ -9,7 +9,6 @@
 <div class="row">
     <div class="col-md-4">
         <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <h2>Create a new account.</h2>
             <hr />
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
             <div class="form-floating mb-3">
@@ -37,7 +36,13 @@
                 <label asp-for="Input.ConfirmPassword">Confirm Password</label>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg" style="background-color: #4eb758; color: black; border-color: black">Register</button>
+            <div>
+                <p>
+                    Already a member? Login
+                    <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">here</a>
+                </p>
+            </div>
         </form>
     </div>
 </div>
