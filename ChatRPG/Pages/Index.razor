@@ -30,15 +30,15 @@
     {
         // Start cursor blinking on a separate thread
         await Task.Factory.StartNew(() => BlinkCursorAsync(_cts.Token), _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-        await TypingAnimateAsync();
+        await TypingAnimateAsync(_cts.Token);
     }
 
-    private async Task TypingAnimateAsync()
+    private async Task TypingAnimateAsync(CancellationToken cancellationToken)
     {
         for (int i = 0; i <= _fullTitleText.Length; i++)
         {
             _titleDisplayText = _fullTitleText.Substring(0, i);
-            await Task.Delay(100); // Adjust the delay as needed
+            await Task.Delay(100, cancellationToken); // Adjust the delay as needed
             await InvokeAsync(StateHasChanged);
         }
     }
