@@ -151,13 +151,6 @@ a, .btn-link {
     animation: fadeIn 3s;
 }
 
-.typing {
-    overflow: hidden; /* Hide overflowing text */
-    border-right: .15em solid orange; /* Typing cursor */
-    white-space: nowrap; /* Keeps text on a single line */
-    margin: 0 auto; /* Center the text horizontally */
-}
-
 .cursor {
     position: relative;
     top: -0.1em; /* Adjust the value to raise or lower the cursor */
