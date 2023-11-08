@@ -26,7 +26,6 @@ builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuth
     .AddSingleton(httpMessageHandlerFactory)
     .AddSingleton<IHttpClientFactory, HttpClientFactory>()
     .AddSingleton<IOpenAiLlmClient, OpenAiLlmClient>()
-    .AddSingleton<IFoodWasteClient, SallingClient>()
     .AddTransient<IPersisterService, EfPersisterService>();
 
 builder.Services.Configure<IdentityOptions>(options =>
