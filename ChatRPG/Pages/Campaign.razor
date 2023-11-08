@@ -54,17 +54,21 @@
     private bool _shouldStream;
     private bool _isWaitingForResponse;
 
+    protected override async Task OnInitializedAsync()
+    {
+        AuthenticationState authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        _loggedInUsername = authenticationState.User.Identity?.Name;
+        if (_loggedInUsername != null) _fileUtil = new FileUtility(_loggedInUsername);
+        _shouldSave = Configuration.GetValue<bool>("SaveConversationsToFile");
+        _shouldStream = !Configuration.GetValue<bool>("UseMocks") && Configuration.GetValue<bool>("StreamChatCompletions");
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            AuthenticationState authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            _loggedInUsername = authenticationState.User.Identity?.Name;
-            if (_loggedInUsername != null) _fileUtil = new FileUtility(_loggedInUsername);
-            _shouldSave = Configuration.GetValue<bool>("SaveConversationsToFile");
             _scrollJsScript ??= await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/scroll.js");
         }
-        _shouldStream = !Configuration.GetValue<bool>("UseMocks") && Configuration.GetValue<bool>("StreamChatCompletions");
     }
 
     async Task EnterKeyHandler(KeyboardEventArgs e)
