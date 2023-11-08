@@ -8,7 +8,7 @@ public class OpenAiLlmClient : IOpenAiLlmClient
 {
     private const string Model = "gpt-3.5-turbo";
     private const double Temperature = 0.7;
-    
+
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly OpenAIAPI _openAiApi;
 
@@ -19,7 +19,7 @@ public class OpenAiLlmClient : IOpenAiLlmClient
         _openAiApi.Chat.DefaultChatRequestArgs.Model = Model;
         _openAiApi.Chat.DefaultChatRequestArgs.Temperature = Temperature;
     }
-    
+
     public async Task<string> GetChatCompletion(OpenAiGptMessage input)
     {
         var inputList = new List<OpenAiGptMessage> {input};
@@ -29,14 +29,14 @@ public class OpenAiLlmClient : IOpenAiLlmClient
     public async Task<string> GetChatCompletion(List<OpenAiGptMessage> inputs)
     {
         if (inputs.IsNullOrEmpty()) throw new ArgumentNullException(nameof(inputs));
-        
+
         var chat = _openAiApi.Chat.CreateConversation();
         _openAiApi.HttpClientFactory = _httpClientFactory;
         foreach (var openAiGptInputMessage in inputs)
         {
             chat.AppendMessage(ChatMessageRole.FromString(openAiGptInputMessage.Role), openAiGptInputMessage.Content);
         }
-        
+
         return await chat.GetResponseFromChatbotAsync();
     }
 
@@ -49,7 +49,7 @@ public class OpenAiLlmClient : IOpenAiLlmClient
     public IAsyncEnumerable<string> GetStreamedChatCompletion(List<OpenAiGptMessage> inputs)
     {
         if (inputs.IsNullOrEmpty()) throw new ArgumentNullException(nameof(inputs));
-        
+
         var chat = _openAiApi.Chat.CreateConversation();
         _openAiApi.HttpClientFactory = _httpClientFactory;
         foreach (var openAiGptInputMessage in inputs)
