@@ -21,9 +21,9 @@
         <link rel="stylesheet" href="~/Identity/css/site.css" asp-append-version="true" />
     </environment>
 </head>
-<body style="background-color: #3E3A3A">
+<body class="vh-100 m-0" style="background-color: #3E3A3A">
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light box-shadow mb-3" style="background-color: #232323">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light box-shadow" style="background-color: #232323">
             <div class="container">
                 <a class="navbar-brand" href="~/" style="color: white;">ChatRPG</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -49,12 +49,10 @@
         </nav>
     </header>
 
-    <div class="pt-4">
-        <div class="container pt-5">
-            <main role="main" class="pb-1 pt-5">
-                @RenderBody()
-            </main>
-        </div>
+    <div class="container mt-5 h-75 d-flex align-items-center">
+        <main role="main" class="flex-grow-1">
+            @RenderBody()
+        </main>
     </div>
     <footer class="footer pl-3 text-muted" style="overflow: hidden">
         <div class="container">
