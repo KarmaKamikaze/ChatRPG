@@ -23,7 +23,7 @@ builder.Services.AddServerSideBlazor();
 
 var httpMessageHandlerFactory = new HttpMessageHandlerFactory(configuration);
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<User>>()
-    .AddSingleton<HttpMessageHandler>(_ => httpMessageHandlerFactory.CreateHandler())
+    .AddSingleton(httpMessageHandlerFactory)
     .AddSingleton<IHttpClientFactory, HttpClientFactory>()
     .AddSingleton<IOpenAiLlmClient, OpenAiLlmClient>()
     .AddSingleton<IFoodWasteClient, SallingClient>()

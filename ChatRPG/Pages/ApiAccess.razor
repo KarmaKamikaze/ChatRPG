@@ -1,6 +1,7 @@
 @page "/ApiAccess"
 @using ChatRPG.API
 @using Microsoft.IdentityModel.Tokens
+@using OpenAiGptMessage = ChatRPG.API.OpenAiGptMessage
 @inject ILogger<ApiAccess> Logger
 @inject IOpenAiLlmClient OpenAiLlmClient;
 @inject IFoodWasteClient FoodWasteClient;
@@ -60,7 +61,7 @@
 
     private async Task CallOpenAiApiWithInput()
     {
-        var input = new List<OpenAiGptInputMessage> { new ("user", _input) };
+        var input = new List<OpenAiGptMessage> { new ("user", _input) };
 
         _openAiResponse = await OpenAiLlmClient.GetChatCompletion(input);
     }

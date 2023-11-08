@@ -2,7 +2,10 @@ namespace ChatRPG.API;
 
 public interface IOpenAiLlmClient
 {
-    Task<string> GetChatCompletion(List<OpenAiGptInputMessage> inputs);
+    Task<string> GetChatCompletion(OpenAiGptMessage input);
+    Task<string> GetChatCompletion(List<OpenAiGptMessage> inputs);
+    IAsyncEnumerable<string> GetStreamedChatCompletion(OpenAiGptMessage input);
+    IAsyncEnumerable<string> GetStreamedChatCompletion(List<OpenAiGptMessage> inputs);
 }
 
 public record ChatCompletionObject(string Id, string Object, int Created, string Model, Choice[] Choices, Usage Usage);
@@ -13,6 +16,6 @@ public record Message(string Role, string Content);
 
 public record Usage(int PromptTokens, int CompletionTokens, int TotalTokens);
 
-public record OpenAiGptInputMessage(string Role, string Content);
+public record OpenAiGptMessage(string Role, string Content);
 
-public record OpenAiGptInput(string Model, List<OpenAiGptInputMessage> Messages, double Temperature);
+public record OpenAiGptInput(string Model, List<OpenAiGptMessage> Messages, double Temperature);

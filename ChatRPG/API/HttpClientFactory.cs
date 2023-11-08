@@ -2,15 +2,15 @@
 
 public class HttpClientFactory : IHttpClientFactory
 {
-    private HttpMessageHandler _httpMessageHandler;
+    private HttpMessageHandlerFactory _httpMessageHandlerFactory;
     
-    public HttpClientFactory(HttpMessageHandler httpMessageHandler)
+    public HttpClientFactory(HttpMessageHandlerFactory httpMessageHandlerFactory)
     {
-        _httpMessageHandler = httpMessageHandler;
+        _httpMessageHandlerFactory = httpMessageHandlerFactory;
     }
     
     public HttpClient CreateClient(string name)
     {
-        return new HttpClient(_httpMessageHandler);
+        return new HttpClient(_httpMessageHandlerFactory.CreateHandler());
     }
 }
