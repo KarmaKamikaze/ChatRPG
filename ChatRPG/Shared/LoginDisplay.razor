@@ -1,4 +1,6 @@
-﻿<AuthorizeView>
+﻿@inject NavigationManager NavMan
+
+<AuthorizeView>
     <Authorized>
         <a href="Identity/Account/Manage">Hello, @context.User.Identity?.Name!</a>
         <form method="post" action="Identity/Account/Logout">
@@ -6,7 +8,22 @@
         </form>
     </Authorized>
     <NotAuthorized>
-        <a href="Identity/Account/Register">Register</a>
-        <a href="Identity/Account/Login">Log in</a>
+        <div class="btn-group">
+            <button class="btn btn-secondary" @onclick="Register">Register</button>
+            <button class="btn btn-secondary" @onclick="Login">Log in</button>
+        </div>
     </NotAuthorized>
 </AuthorizeView>
+
+
+@code {
+    private void Register()
+    {
+        NavMan.NavigateTo("Identity/Account/Register");
+    }
+
+    private void Login()
+    {
+        NavMan.NavigateTo("Identity/Account/Login");
+    }
+}

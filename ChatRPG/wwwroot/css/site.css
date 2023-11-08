@@ -143,7 +143,6 @@ a, .btn-link {
 
 .title-front {
     font-size: 5rem;
-    animation: bounce 2s infinite;
 }
 
 .slogan-front {
@@ -154,4 +153,28 @@ a, .btn-link {
 .cursor {
     position: relative;
     top: -0.1em; /* Adjust the value to raise or lower the cursor */
+}
+
+.main-container {
+    background-image: url('../images/passage-7685848.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center center;
+}
+
+.main-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Alpha value for transparency */
+}
+
+.text-readable {
+    z-index: 1; /* Ensure the text is above the overlay */
+    color: #98d2d2;
+    text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5); /* Add a shadow with offset and color */
 }
