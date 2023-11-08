@@ -10,7 +10,7 @@
                 @_titleDisplayText<span class="cursor" style="visibility: @(_cursorVisible ? "visible" : "hidden")">|</span>
             </h1>
             <p class="slogan-front text-readable">Immerse yourself in the ultimate AI-powered adventure!</p>
-            <LoginDisplay />
+            <LoginDisplay/>
         </div>
     </NotAuthorized>
     <Authorized>
@@ -19,45 +19,3 @@
 
     </Authorized>
 </AuthorizeView>
-
-
-@code {
-    private readonly string _fullTitleText = "ChatRPG";
-    private string _titleDisplayText = "";
-    private bool _cursorVisible = true;
-    private readonly CancellationTokenSource _cts = new CancellationTokenSource();
-
-    protected override async Task OnInitializedAsync()
-    {
-        // Start cursor blinking on a separate thread
-        await Task.Factory.StartNew(() => BlinkCursorAsync(_cts.Token), _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-        await TypingAnimateAsync(_cts.Token);
-    }
-
-    private async Task TypingAnimateAsync(CancellationToken cancellationToken)
-    {
-        for (int i = 0; i <= _fullTitleText.Length; i++)
-        {
-            _titleDisplayText = _fullTitleText.Substring(0, i);
-            await Task.Delay(100, cancellationToken); // Adjust the delay as needed
-            await InvokeAsync(StateHasChanged);
-        }
-    }
-
-    private async Task BlinkCursorAsync(CancellationToken cancellationToken)
-    {
-        while (!cancellationToken.IsCancellationRequested)
-        {
-            _cursorVisible = !_cursorVisible; // Toggle cursor visibility
-            await Task.Delay(500, cancellationToken); // Adjust the delay between blinks
-            await InvokeAsync(StateHasChanged);
-        }
-    }
-
-    public void Dispose()
-    {
-        _cts.Cancel(); // Request cancellation when the component is about to be removed
-        _cts.Dispose(); // Dispose of the CancellationTokenSource
-    }
-
-}
