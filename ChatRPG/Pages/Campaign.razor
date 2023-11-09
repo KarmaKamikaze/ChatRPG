@@ -87,7 +87,7 @@
         }
         _isWaitingForResponse = true;
 
-        var userInput = new OpenAiGptMessage("user", _userInput);
+        OpenAiGptMessage userInput = new OpenAiGptMessage("user", _userInput);
         _conversation.Add(userInput);
 
         if (!_shouldStream)
@@ -114,7 +114,7 @@
 
     private void HandleResponse(string response)
     {
-        var assistantOutput = new OpenAiGptMessage("assistant", response);
+        OpenAiGptMessage assistantOutput = new OpenAiGptMessage("assistant", response);
         _conversation.Add(assistantOutput);
     }
 

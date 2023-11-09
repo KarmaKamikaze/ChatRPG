@@ -21,7 +21,7 @@ builder.Services.AddDefaultIdentity<User>()
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
-var httpMessageHandlerFactory = new HttpMessageHandlerFactory(configuration);
+HttpMessageHandlerFactory httpMessageHandlerFactory = new HttpMessageHandlerFactory(configuration);
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<User>>()
     .AddSingleton(httpMessageHandlerFactory)
     .AddSingleton<IHttpClientFactory, HttpClientFactory>()

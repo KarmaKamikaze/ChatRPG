@@ -18,18 +18,18 @@ public class HttpMessageHandlerFactory : IHttpMessageHandlerFactory
             return new HttpClientHandler();
         }
 
-        var mockHttpMessageHandler = new MockHttpMessageHandler();
-        mockHttpMessageHandler.When("*")
+        MockHttpMessageHandler messageHandler = new MockHttpMessageHandler();
+        messageHandler.When("*")
             .Respond(GenerateMockResponse);
 
-        return mockHttpMessageHandler;
+        return messageHandler;
     }
 
     private static HttpResponseMessage GenerateMockResponse(HttpRequestMessage request)
     {
         Console.Write("Please enter mocked API response: ");
         string input = Console.ReadLine();
-        var responseContent = new StringContent($$"""
+        StringContent responseContent = new StringContent($$"""
                                                   {
                                                       "id": "chatcmpl-000",
                                                       "object": "chat.completion",

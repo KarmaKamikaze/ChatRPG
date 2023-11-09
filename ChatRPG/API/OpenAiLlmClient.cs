@@ -22,7 +22,7 @@ public class OpenAiLlmClient : IOpenAiLlmClient
 
     public async Task<string> GetChatCompletion(OpenAiGptMessage input)
     {
-        var inputList = new List<OpenAiGptMessage> { input };
+        List<OpenAiGptMessage> inputList = new List<OpenAiGptMessage> { input };
         return await GetChatCompletion(inputList);
     }
 
@@ -35,7 +35,7 @@ public class OpenAiLlmClient : IOpenAiLlmClient
 
     public IAsyncEnumerable<string> GetStreamedChatCompletion(OpenAiGptMessage input)
     {
-        var inputList = new List<OpenAiGptMessage> { input };
+        List<OpenAiGptMessage> inputList = new List<OpenAiGptMessage> { input };
         return GetStreamedChatCompletion(inputList);
     }
 

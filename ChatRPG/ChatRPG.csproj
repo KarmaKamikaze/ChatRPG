@@ -28,18 +28,4 @@
     <PackageReference Include="RichardSzalay.MockHttp" Version="7.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="ChatRPG\bin\Debug\net7.0\appsettings.Development.json" />
-    <_ContentIncludedByDefault Remove="ChatRPG\bin\Debug\net7.0\appsettings.json" />
-    <_ContentIncludedByDefault Remove="ChatRPG\bin\Debug\net7.0\ChatRPG.deps.json" />
-    <_ContentIncludedByDefault Remove="ChatRPG\bin\Debug\net7.0\ChatRPG.runtimeconfig.json" />
-    <_ContentIncludedByDefault Remove="ChatRPG\bin\Debug\net7.0\ChatRPG.staticwebassets.runtime.json" />
-    <_ContentIncludedByDefault Remove="ChatRPG\obj\ChatRPG.csproj.nuget.dgspec.json" />
-    <_ContentIncludedByDefault Remove="ChatRPG\obj\Debug\net7.0\staticwebassets.build.json" />
-    <_ContentIncludedByDefault Remove="ChatRPG\obj\Debug\net7.0\staticwebassets.development.json" />
-    <_ContentIncludedByDefault Remove="ChatRPG\obj\Debug\net7.0\staticwebassets.pack.json" />
-    <_ContentIncludedByDefault Remove="ChatRPG\obj\project.assets.json" />
-    <_ContentIncludedByDefault Remove="ChatRPG\obj\project.packagespec.json" />
-  </ItemGroup>
-  
 </Project>
