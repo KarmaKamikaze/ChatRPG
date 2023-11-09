@@ -90,14 +90,14 @@
         OpenAiGptMessage userInput = new OpenAiGptMessage("user", _userInput);
         _conversation.Add(userInput);
 
-        if (!_shouldStream)
+        if (_shouldStream)
         {
-            string response = await OpenAiLlmClient.GetChatCompletion(userInput);
-            HandleResponse(response);
+            await HandleStreamedResponse(OpenAiLlmClient.GetStreamedChatCompletion(userInput));
         }
         else
         {
-            await HandleStreamedResponse(OpenAiLlmClient.GetStreamedChatCompletion(userInput));
+            string response = await OpenAiLlmClient.GetChatCompletion(userInput);
+            HandleResponse(response);
         }
 
         if (_shouldSave && _fileUtil != null)
