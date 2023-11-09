@@ -51,7 +51,7 @@ if (app.Environment.IsDevelopment())
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         dbContext.Database.Migrate();
 
-        UserManager<User?> userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+        UserManager<User> userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
         const string username = "test";
         User? user = await userManager.FindByNameAsync(username);
         if (user == null)

@@ -28,7 +28,7 @@ public class HttpMessageHandlerFactory : IHttpMessageHandlerFactory
     private static HttpResponseMessage GenerateMockResponse(HttpRequestMessage request)
     {
         Console.Write("Please enter mocked API response: ");
-        string input = Console.ReadLine();
+        string? input = Console.ReadLine();
         StringContent responseContent = new StringContent($$"""
                                                   {
                                                       "id": "chatcmpl-000",

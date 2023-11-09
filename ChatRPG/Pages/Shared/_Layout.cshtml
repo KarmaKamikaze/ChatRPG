@@ -58,7 +58,7 @@
         <div class="container">
         &copy; 2023 - ChatRPG
             @{
-                string foundPrivacy = Url.Page("/Privacy", new { area = "" });
+                string? foundPrivacy = Url.Page("/Privacy", new { area = "" });
             }
             @if (foundPrivacy != null)
             {

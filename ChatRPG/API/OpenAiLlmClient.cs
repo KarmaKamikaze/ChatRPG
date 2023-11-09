@@ -13,7 +13,7 @@ public class OpenAiLlmClient : IOpenAiLlmClient
 
     public OpenAiLlmClient(IConfiguration configuration, IHttpClientFactory httpClientFactory)
     {
-        _openAiApi = new OpenAIAPI(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI") ?? string.Empty);
+        _openAiApi = new OpenAIAPI(configuration.GetSection("ApiKeys")?.GetValue<string>("OpenAI"));
         _openAiApi.Chat.DefaultChatRequestArgs.Model = Model;
         _openAiApi.Chat.DefaultChatRequestArgs.Temperature = Temperature;
         _openAiApi.HttpClientFactory = httpClientFactory;

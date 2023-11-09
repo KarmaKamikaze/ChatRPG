@@ -31,7 +31,7 @@ public class RevalidatingIdentityAuthenticationStateProvider<TUser>
         IServiceScope scope = _scopeFactory.CreateScope();
         try
         {
-            UserManager<TUser?> userManager = scope.ServiceProvider.GetRequiredService<UserManager<TUser>>();
+            UserManager<TUser> userManager = scope.ServiceProvider.GetRequiredService<UserManager<TUser>>();
             return await ValidateSecurityStampAsync(userManager, authenticationState.User);
         }
         finally
@@ -47,7 +47,7 @@ public class RevalidatingIdentityAuthenticationStateProvider<TUser>
         }
     }
 
-    private async Task<bool> ValidateSecurityStampAsync(UserManager<TUser?> userManager, ClaimsPrincipal principal)
+    private async Task<bool> ValidateSecurityStampAsync(UserManager<TUser> userManager, ClaimsPrincipal principal)
     {
         TUser? user = await userManager.GetUserAsync(principal);
         if (user == null)
