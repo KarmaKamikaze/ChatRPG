@@ -9,8 +9,8 @@
     </Authorized>
     <NotAuthorized>
         <div class="btn-group">
-            <button class="btn btn-secondary" @onclick="Register">Register</button>
-            <button class="btn btn-secondary" @onclick="Login">Log in</button>
+            <button @onclick="Register" class="btn btn-secondary">Register</button>
+            <button @onclick="Login" class="btn btn-secondary">Log in</button>
         </div>
     </NotAuthorized>
 </AuthorizeView>
@@ -19,11 +19,11 @@
 @code {
     private void Register()
     {
-        NavMan.NavigateTo("Identity/Account/Register");
+        NavMan.NavigateTo("Register", forceLoad: true);
     }
 
     private void Login()
     {
-        NavMan.NavigateTo("Identity/Account/Login");
+        NavMan.NavigateTo("Login", forceLoad: true);
     }
 }
