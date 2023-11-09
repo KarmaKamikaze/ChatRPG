@@ -1,6 +1,6 @@
 ﻿@page "/Logout"
 @attribute [IgnoreAntiforgeryToken]
-@inject SignInManager<IdentityUser> SignInManager
+@inject SignInManager<User> SignInManager
 @functions {
     public async Task<IActionResult> OnPost()
     {
