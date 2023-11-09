@@ -120,7 +120,7 @@
 
     private async Task HandleStreamedResponse(IAsyncEnumerable<string> streamedResponse)
     {
-        await foreach (var res in streamedResponse)
+        await foreach (string res in streamedResponse)
         {
             _tempMessage += res;
             StateHasChanged();

@@ -56,7 +56,7 @@ public class Character
     /// <returns>The created <see cref="CharacterAbility"/> entity.</returns>
     public CharacterAbility AddAbility(Ability ability)
     {
-        var charAbility = CharacterAbilities.FirstOrDefault(a => a!.Ability == ability, null);
+        CharacterAbility charAbility = CharacterAbilities.FirstOrDefault(a => a!.Ability == ability, null);
         if (charAbility is not null)
         {
             return charAbility;

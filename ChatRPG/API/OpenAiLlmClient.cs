@@ -28,14 +28,7 @@ public class OpenAiLlmClient : IOpenAiLlmClient
 
     public async Task<string> GetChatCompletion(List<OpenAiGptMessage> inputs)
     {
-        if (inputs.IsNullOrEmpty()) throw new ArgumentNullException(nameof(inputs));
-
-        var chat = _openAiApi.Chat.CreateConversation();
-        _openAiApi.HttpClientFactory = _httpClientFactory;
-        foreach (var openAiGptInputMessage in inputs)
-        {
-            chat.AppendMessage(ChatMessageRole.FromString(openAiGptInputMessage.Role), openAiGptInputMessage.Content);
-        }
+        Conversation chat = CreateConversation(inputs);
 
         return await chat.GetResponseFromChatbotAsync();
     }
@@ -48,15 +41,22 @@ public class OpenAiLlmClient : IOpenAiLlmClient
 
     public IAsyncEnumerable<string> GetStreamedChatCompletion(List<OpenAiGptMessage> inputs)
     {
+        Conversation chat = CreateConversation(inputs);
+
+        return chat.StreamResponseEnumerableFromChatbotAsync();
+    }
+
+    private Conversation CreateConversation(List<OpenAiGptMessage> inputs)
+    {
         if (inputs.IsNullOrEmpty()) throw new ArgumentNullException(nameof(inputs));
 
-        var chat = _openAiApi.Chat.CreateConversation();
+        Conversation chat = _openAiApi.Chat.CreateConversation();
         _openAiApi.HttpClientFactory = _httpClientFactory;
-        foreach (var openAiGptInputMessage in inputs)
+        foreach (OpenAiGptMessage openAiGptInputMessage in inputs)
         {
             chat.AppendMessage(ChatMessageRole.FromString(openAiGptInputMessage.Role), openAiGptInputMessage.Content);
         }
 
-        return chat.StreamResponseEnumerableFromChatbotAsync();
+        return chat;
     }
 }
