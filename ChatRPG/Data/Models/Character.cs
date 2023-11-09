@@ -34,7 +34,7 @@ public class Character
     public string Description { get; private set; } = null!;
     public int MaxHealth { get; private set; }
     public int CurrentHealth { get; private set; }
-    public ICollection<CharacterAbility> CharacterAbilities { get; } = new List<CharacterAbility>();
+    public ICollection<CharacterAbility?> CharacterAbilities { get; } = new List<CharacterAbility?>();
 
     /// <summary>
     /// Adjust the current health of this character.
@@ -54,9 +54,9 @@ public class Character
     /// </summary>
     /// <param name="ability">The ability to add.</param>
     /// <returns>The created <see cref="CharacterAbility"/> entity.</returns>
-    public CharacterAbility AddAbility(Ability ability)
+    public CharacterAbility? AddAbility(Ability ability)
     {
-        var charAbility = CharacterAbilities.FirstOrDefault(a => a!.Ability == ability, null);
+        CharacterAbility? charAbility = CharacterAbilities.FirstOrDefault(a => a!.Ability == ability, null);
         if (charAbility is not null)
         {
             return charAbility;

@@ -1,6 +1,8 @@
 ﻿@page "/Campaign"
 @using ChatRPG.Data
 @using ChatRPG.API
+@using Microsoft.IdentityModel.Tokens
+@using OpenAiGptMessage = ChatRPG.API.OpenAiGptMessage
 @inject IConfiguration Configuration
 @inject IOpenAiLlmClient OpenAiLlmClient;
 @inject IJSRuntime JsRuntime
@@ -14,11 +16,14 @@
 
 <div class="conversation mx-auto col-8 mt-4 rounded p-5 text-black">
     <div class="conversation-text">
-        @foreach (string message in _conversation)
+        @foreach (OpenAiGptMessage message in _conversation)
         {
-            string prefix = message.StartsWith("Player: ") ? "user" : "assistant";
-            <div class="@($"{prefix}-message-container")">
-                <p class="@($"{prefix}-message")">@message</p>
+            <OpenAiGptMessageComponent OpenAiGptMessage="@message"/>
+        }
+        @if (!_tempMessage.IsNullOrEmpty())
+        {
+            <div class="@("assistant-message-container")">
+                <p class="@("assistant-message")">Assistant: @_tempMessage</p>
             </div>
         }
     </div>
@@ -27,9 +32,9 @@
 <div class="container">
     <div class="input-group mx-auto col-8 mt-2 mb-5 input-group-border">
         <input type="text" style="resize:vertical;" class="form-control user-prompt custom-text-field"
-               @bind="_userInput" placeholder="What do you do?" @onkeyup="@EnterKeyHandler"/>
+               @bind="_userInput" placeholder="What do you do?" @onkeyup="@EnterKeyHandler" disabled="@_isWaitingForResponse"/>
         <div class="input-group-append">
-            <button class="btn btn-primary ml-2" type="button" @onclick="SendPrompt">
+            <button class="btn btn-primary ml-2" type="button" @onclick="SendPrompt" disabled="@_isWaitingForResponse">
                 Send
             </button>
         </div>
@@ -43,8 +48,11 @@
     private bool _shouldSave;
     private IJSObjectReference? _scrollJsScript;
     private FileUtility? _fileUtil;
-    readonly List<string> _conversation = new List<string>();
+    readonly List<OpenAiGptMessage> _conversation = new();
     private string _userInput = "";
+    private string _tempMessage = "";
+    private bool _shouldStream;
+    private bool _isWaitingForResponse;
 
     protected override async Task OnInitializedAsync()
     {
@@ -52,7 +60,15 @@
         _loggedInUsername = authenticationState.User.Identity?.Name;
         if (_loggedInUsername != null) _fileUtil = new FileUtility(_loggedInUsername);
         _shouldSave = Configuration.GetValue<bool>("SaveConversationsToFile");
-        _scrollJsScript = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/scroll.js");
+        _shouldStream = !Configuration.GetValue<bool>("UseMocks") && Configuration.GetValue<bool>("StreamChatCompletions");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _scrollJsScript ??= await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/scroll.js");
+        }
     }
 
     async Task EnterKeyHandler(KeyboardEventArgs e)
@@ -65,35 +81,53 @@
 
     private async Task SendPrompt()
     {
-        if (!string.IsNullOrWhiteSpace(_userInput))
+        if (string.IsNullOrWhiteSpace(_userInput))
         {
-            // Use the user input to generate a response
-            _conversation.Add($"Player: {_userInput}");
-            string response = await ProcessUserInput(_userInput);
-            _conversation.Add($"Assistant: {response}");
-            if (_shouldSave && _fileUtil != null)
-            {
-                await _fileUtil.UpdateSaveFileAsync(new MessagePair(_userInput, response));
-            }
-
-            // Clear the user input
-            _userInput = "";
-
-            // Notify the component to re-render because of async methods
-            StateHasChanged();
-
-            // Scroll to bottom of page
-            await ScrollToElement("bottom-id");
+            return;
         }
+        _isWaitingForResponse = true;
+
+        OpenAiGptMessage userInput = new OpenAiGptMessage("user", _userInput);
+        _conversation.Add(userInput);
+
+        if (_shouldStream)
+        {
+            await HandleStreamedResponse(OpenAiLlmClient.GetStreamedChatCompletion(userInput));
+        }
+        else
+        {
+            string response = await OpenAiLlmClient.GetChatCompletion(userInput);
+            HandleResponse(response);
+        }
+
+        if (_shouldSave && _fileUtil != null)
+        {
+            string assistantOutput = _conversation.Last().Content;
+            await _fileUtil.UpdateSaveFileAsync(new MessagePair(_userInput, assistantOutput));
+        }
+
+        _userInput = "";
+        StateHasChanged();
+        await ScrollToElement("bottom-id");
+        _isWaitingForResponse = false;
     }
 
-    async Task<string> ProcessUserInput(string input)
+    private void HandleResponse(string response)
     {
-        List<OpenAiGptInputMessage> inputMessage = new List<OpenAiGptInputMessage> { new OpenAiGptInputMessage("user", input) };
+        OpenAiGptMessage assistantOutput = new OpenAiGptMessage("assistant", response);
+        _conversation.Add(assistantOutput);
+    }
 
-        ChatCompletionObject response = await OpenAiLlmClient.GetChatCompletion(inputMessage);
-
-        return response.Choices[0].Message.Content;
+    private async Task HandleStreamedResponse(IAsyncEnumerable<string> streamedResponse)
+    {
+        await foreach (string res in streamedResponse)
+        {
+            _tempMessage += res;
+            StateHasChanged();
+            await ScrollToElement("bottom-id");
+        }
+        HandleResponse(_tempMessage);
+        _tempMessage = "";
     }
 
     private async Task ScrollToElement(string elementId)
