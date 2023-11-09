@@ -66,7 +66,7 @@ public class EfPersisterService : IPersisterService
             .Include(campaign => campaign.StartScenario)
             .ToListAsync();
     }
-    
+
     /// <inheritdoc />
     public async Task<List<StartScenario>> GetStartScenarios()
     {
