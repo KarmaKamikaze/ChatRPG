@@ -12,5 +12,5 @@ public class User : IdentityUser
     {
     }
 
-    public ICollection<Campaign> Campaigns { get; } = new List<Campaign>();
+    public virtual ICollection<Campaign> Campaigns { get; } = new List<Campaign>();
 }
