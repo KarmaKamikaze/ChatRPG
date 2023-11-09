@@ -29,7 +29,7 @@
         <input type="text" style="resize:vertical;" class="form-control user-prompt custom-text-field"
                @bind="_userInput" placeholder="What do you do?" @onkeyup="@EnterKeyHandler"/>
         <div class="input-group-append">
-            <button class="btn btn-primary ml-2" type="button" @onclick="SendPrompt">
+            <button class="btn btn-send ml-2" type="button" @onclick="SendPrompt">
                 Send
             </button>
         </div>

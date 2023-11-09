@@ -71,6 +71,12 @@ a, .btn-link {
     background-color: rgb(80, 80, 80);
 }
 
+.btn-send {
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
+}
+
 .user-message-container {
     background-color: rgb(222, 222, 222);
     border-radius: 10px; /* Adds rounded corners to the container */
