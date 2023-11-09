@@ -184,3 +184,34 @@ a, .btn-link {
     color: #98d2d2;
     text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5); /* Add a shadow with offset and color */
 }
+
+.btn-front {
+    position: relative;
+    width: 200px;
+    padding: 15px 0;
+    text-align: center;
+    margin: 20px 10px;
+    font-weight: bold;
+    border: 2px solid #98d2d2;
+    background-color: rgb(152, 210, 210, 0.5);
+    color: #ffffff;
+    cursor: pointer;
+    overflow: hidden;
+    text-transform: uppercase;
+    animation: fadeIn 3s;
+}
+
+.btn-front-span {
+    background: #98d2d2;
+    height: 100%;
+    width: 0;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: -1;
+    transition: 0.5s;
+}
+
+.btn-front:hover .btn-front-span {
+    width: 100%;
+}

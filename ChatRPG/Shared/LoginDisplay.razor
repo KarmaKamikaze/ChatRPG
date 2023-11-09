@@ -3,12 +3,12 @@
 <AuthorizeView>
     <Authorized>
         <a href="Identity/Account/Manage">Hello, @context.User.Identity?.Name!</a>
-        <button @onclick='() => NavMan.NavigateTo("Logout", forceLoad: true)' class="btn btn-secondary">Log in</button>
+        <button @onclick='() => NavMan.NavigateTo("Logout", forceLoad: true)' class="btn btn-front"><span class="btn-front-span"></span>Log in</button>
     </Authorized>
     <NotAuthorized>
         <div class="btn-group">
-            <button @onclick='() => NavMan.NavigateTo("Register", forceLoad: true)' class="btn btn-secondary">Register</button>
-            <button @onclick='() => NavMan.NavigateTo("Login", forceLoad: true)' class="btn btn-secondary">Log in</button>
+            <button @onclick='() => NavMan.NavigateTo("Register", forceLoad: true)' class="btn btn-front"><span class="btn-front-span"></span>Register</button>
+            <button @onclick='() => NavMan.NavigateTo("Login", forceLoad: true)' class="btn btn-front"><span class="btn-front-span"></span>Log in</button>
         </div>
     </NotAuthorized>
 </AuthorizeView>
