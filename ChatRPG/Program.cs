@@ -7,12 +7,12 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args);
-var configuration = builder.Configuration;
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+ConfigurationManager configuration = builder.Configuration;
 configuration.AddUserSecrets<Program>();
 
 // Add services to the container.
-var connectionString = configuration.GetConnectionString("DefaultConnection") ??
+string connectionString = configuration.GetConnectionString("DefaultConnection") ??
                        throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -21,11 +21,11 @@ builder.Services.AddDefaultIdentity<User>()
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
-var httpMessageHandlerFactory = new HttpMessageHandlerFactory(configuration);
+HttpMessageHandlerFactory httpMessageHandlerFactory = new HttpMessageHandlerFactory(configuration);
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<User>>()
-    .AddSingleton<HttpMessageHandler>(_ => httpMessageHandlerFactory.CreateHandler())
+    .AddSingleton(httpMessageHandlerFactory)
+    .AddSingleton<IHttpClientFactory, HttpClientFactory>()
     .AddSingleton<IOpenAiLlmClient, OpenAiLlmClient>()
-    .AddSingleton<IFoodWasteClient, SallingClient>()
     .AddTransient<IPersisterService, EfPersisterService>();
 
 builder.Services.Configure<IdentityOptions>(options =>
@@ -36,24 +36,24 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireNonAlphanumeric = false;
 });
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
 
-    using var scope = app.Services.CreateScope();
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    using IServiceScope scope = app.Services.CreateScope();
+    ILogger<Program> logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     logger.LogInformation("Initializing database with test user");
     try
     {
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         dbContext.Database.Migrate();
 
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+        UserManager<User> userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
         const string username = "test";
-        var user = await userManager.FindByNameAsync(username);
+        User? user = await userManager.FindByNameAsync(username);
         if (user == null)
         {
             user = new User(username)

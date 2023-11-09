@@ -1,0 +1,45 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">
+            <div class="logo-name-group" style="display: flex; align-items: center; position: relative; bottom: 5px;">
+                <img class="site-icon" src="favicon.png" asp-append-version="true"
+                     alt="Adventure game logo" style="width: 40px; height: 40px; margin-right: 10px;">
+                <div class="logo-name-group-text" style="margin-top: 5px;">
+                    ChatRPG
+                </div>
+            </div>
+        </a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="campaign">
+                <span class="oi oi-copywriting" aria-hidden="true"></span> Campaign
+            </NavLink>
+        </div>
+        <a href="https://www.flaticon.com/free-icons/adventure" title="adventure icons"
+           style="position: absolute; bottom: 0; font-size: 10px;">Adventure icons created by Freepik - Flaticon</a>
+    </nav>
+</div>
+
+@code {
+    private bool _collapseNavMenu = true;
+
+    private string? NavMenuCssClass => _collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        _collapseNavMenu = !_collapseNavMenu;
+    }
+
+}
