@@ -41,5 +41,5 @@
     <_ContentIncludedByDefault Remove="ChatRPG\obj\project.assets.json" />
     <_ContentIncludedByDefault Remove="ChatRPG\obj\project.packagespec.json" />
   </ItemGroup>
-
+  
 </Project>
