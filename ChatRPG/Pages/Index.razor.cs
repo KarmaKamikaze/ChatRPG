@@ -13,7 +13,14 @@ public partial class Index
         // Start cursor blinking on a separate thread
         await Task.Factory.StartNew(() => BlinkCursorAsync(_cts.Token), _cts.Token,
             TaskCreationOptions.LongRunning, TaskScheduler.Default);
-        await TypingAnimateAsync(_cts.Token);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await TypingAnimateAsync(_cts!.Token);
+        }
     }
 
     private async Task TypingAnimateAsync(CancellationToken cancellationToken)
