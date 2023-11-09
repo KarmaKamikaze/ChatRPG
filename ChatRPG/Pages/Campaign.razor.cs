@@ -25,6 +25,10 @@ public partial class Campaign
     [Inject] private IJSRuntime? JsRuntime { get; set; }
     [Inject] private AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
 
+    /// <summary>
+    /// Initializes the Campaign page component by setting up configuration parameters.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous initialization process.</returns>
     protected override async Task OnInitializedAsync()
     {
         AuthenticationState authenticationState = await AuthenticationStateProvider!.GetAuthenticationStateAsync();
@@ -35,6 +39,11 @@ public partial class Campaign
                         Configuration!.GetValue<bool>("StreamChatCompletions");
     }
 
+    /// <summary>
+    /// Executes after the component has rendered and initializes JavaScript interop for scrolling.
+    /// </summary>
+    /// <param name="firstRender">A boolean indicating if it is the first rendering of the component.</param>
+    /// <returns>A task representing the asynchronous rendering process.</returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -43,6 +52,10 @@ public partial class Campaign
         }
     }
 
+    /// <summary>
+    /// Handles the Enter key press event and sends the user input as a prompt to the LLM API.
+    /// </summary>
+    /// <param name="e">A KeyboardEventArgs representing the keyboard event.</param>
     async Task EnterKeyHandler(KeyboardEventArgs e)
     {
         if (e.Code is "Enter" or "NumpadEnter")
@@ -51,6 +64,9 @@ public partial class Campaign
         }
     }
 
+    /// <summary>
+    /// Sends the user input as a prompt to the AI model, handles the response, and updates the conversation UI.
+    /// </summary>
     private async Task SendPrompt()
     {
         if (string.IsNullOrWhiteSpace(_userInput))
@@ -85,12 +101,20 @@ public partial class Campaign
         _isWaitingForResponse = false;
     }
 
+    /// <summary>
+    /// Handles the AI model's response and updates the conversation UI with the assistant's message.
+    /// </summary>
+    /// <param name="response">The response received from the AI model.</param>
     private void HandleResponse(string response)
     {
         OpenAiGptMessage assistantOutput = new OpenAiGptMessage("assistant", response);
         _conversation.Add(assistantOutput);
     }
 
+    /// <summary>
+    /// Handles a streamed response from the AI model and updates the conversation UI with the assistant's message.
+    /// </summary>
+    /// <param name="streamedResponse">An asynchronous stream of responses from the AI model.</param>
     private async Task HandleStreamedResponse(IAsyncEnumerable<string> streamedResponse)
     {
         await foreach (string res in streamedResponse)
@@ -104,6 +128,10 @@ public partial class Campaign
         _tempMessage = "";
     }
 
+    /// <summary>
+    /// Scrolls to the specified document element using JavaScript interop.
+    /// </summary>
+    /// <param name="elementId">The ID of the element to scroll to.</param>
     private async Task ScrollToElement(string elementId)
     {
         await _scrollJsScript!.InvokeVoidAsync("ScrollToId", elementId);

@@ -22,7 +22,7 @@ public partial class Index
     /// <summary>
     /// Executes after the component has rendered and starts the typing animation.
     /// </summary>
-    /// <param name="firstRender">A boolean indicating if it is the first rendering the component.</param>
+    /// <param name="firstRender">A boolean indicating if it is the first rendering of the component.</param>
     /// <returns>A task representing the asynchronous rendering process.</returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
