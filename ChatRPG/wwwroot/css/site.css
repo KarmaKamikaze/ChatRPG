@@ -28,8 +28,7 @@ a, .btn-link {
     background-color: #297931;
     color: black;
     border-color: black;
-    box-shadow: none;
-    outline: white;
+    box-shadow: black;
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
@@ -85,6 +84,11 @@ a, .btn-link {
     background-color: rgb(80, 80, 80);
 }
 
+.custom-gray-container {
+    background-color: #232323;
+    color: white
+}
+
 .user-message-container {
     background-color: rgb(222, 222, 222);
     border-radius: 10px; /* Adds rounded corners to the container */
@@ -124,4 +128,11 @@ a, .btn-link {
 
 .custom-text-field:focus {
     box-shadow: none; /* Remove any focus box-shadow */
+}
+
+.footer-formatting {
+    overflow: hidden; 
+    position: fixed; 
+    bottom: 0; 
+    padding: 10px;
 }
