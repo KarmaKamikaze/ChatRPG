@@ -10,15 +10,15 @@
     <title>@ViewData["Title"] - ChatRPG</title>
 
     <environment include="Development">
-        <link rel="stylesheet" href="~/Identity/lib/bootstrap/dist/css/bootstrap.css" />
-        <link rel="stylesheet" href="~/Identity/css/site.css" />
+        <link rel="stylesheet" href="~/css/bootstrap/bootstrap.min.css" />
+        <link rel="stylesheet" href="~/css/site.css" />
     </environment>
     <environment exclude="Development">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
               integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous"
               asp-fallback-href="~/Identity/lib/bootstrap/dist/css/bootstrap.min.css"
               asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
-        <link rel="stylesheet" href="~/Identity/css/site.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     </environment>
 </head>
 <body class="vh-100 m-0" style="background-color: #3E3A3A">
@@ -49,23 +49,24 @@
         </nav>
     </header>
 
-    <div class="container mt-5 h-75 d-flex align-items-center">
-        <main role="main" class="pt-4 pb-4 flex-grow-1" style="background-color: #232323; color: white">
-            @RenderBody()
-        </main>
-    </div>
-    <footer class="footer pl-3 text-muted" style="overflow: hidden">
-        <div class="container">
+<div class="container-fluid mt-5 h-75 d-flex align-items-center justify-content-center">
+    <main role="main" class="pt-4 pb-4 col-6" style="background-color: #232323; color: white">
+        @RenderBody()
+    </main>
+</div>
+
+<footer class="footer pl-3 text-muted" style="overflow: hidden; position: fixed; bottom: 0; padding: 10px">
+    <div class="container">
         &copy; 2023 - ChatRPG
-            @{
-                var foundPrivacy = Url.Page("/Privacy", new { area = "" });
-            }
-            @if (foundPrivacy != null)
-            {
-                <a asp-area="" asp-page="/Privacy">Privacy</a>
-            }
-        </div>
-    </footer>
+        @{
+            var foundPrivacy = Url.Page("/Privacy", new { area = "" });
+        }
+        @if (foundPrivacy != null)
+        {
+            <a asp-area="" asp-page="/Privacy">Privacy</a>
+        }
+    </div>
+</footer>
 
     <environment include="Development">
         <script src="~/Identity/lib/jquery/dist/jquery.js"></script>

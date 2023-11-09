@@ -13,9 +13,23 @@ a, .btn-link {
 }
 
 .btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    background-color: #4eb758;
+    color: black;
+    border-color: black;
+}
+
+.btn-primary:hover {
+    background-color: #297931;
+    color: black;
+    border-color: black;
+}
+
+.btn-primary:focus {
+    background-color: #297931;
+    color: black;
+    border-color: black;
+    box-shadow: none;
+    outline: white;
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
