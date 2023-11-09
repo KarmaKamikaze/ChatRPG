@@ -3,27 +3,12 @@
 <AuthorizeView>
     <Authorized>
         <a href="Identity/Account/Manage">Hello, @context.User.Identity?.Name!</a>
-        <form method="post" action="Identity/Account/Logout">
-            <button type="submit" class="nav-link btn btn-link">Log out</button>
-        </form>
+        <button @onclick='() => NavMan.NavigateTo("Logout", forceLoad: true)' class="btn btn-secondary">Log in</button>
     </Authorized>
     <NotAuthorized>
         <div class="btn-group">
-            <button @onclick="Register" class="btn btn-secondary">Register</button>
-            <button @onclick="Login" class="btn btn-secondary">Log in</button>
+            <button @onclick='() => NavMan.NavigateTo("Register", forceLoad: true)' class="btn btn-secondary">Register</button>
+            <button @onclick='() => NavMan.NavigateTo("Login", forceLoad: true)' class="btn btn-secondary">Log in</button>
         </div>
     </NotAuthorized>
 </AuthorizeView>
-
-
-@code {
-    private void Register()
-    {
-        NavMan.NavigateTo("Register", forceLoad: true);
-    }
-
-    private void Login()
-    {
-        NavMan.NavigateTo("Login", forceLoad: true);
-    }
-}
