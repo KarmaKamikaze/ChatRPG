@@ -17,8 +17,7 @@ public class EmailSender : IEmailSender
         _senderEmail = configuration.GetSection("ChatRPGEmail").GetValue<string>("Email");
         _senderPassword = configuration.GetSection("ChatRPGEmail").GetValue<string>("Password");
     }
-    
-    
+
     public async Task SendEmailAsync(string email, string subject, string htmlMessage)
     {
         MimeMessage mail = new MimeMessage();
