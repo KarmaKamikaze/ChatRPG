@@ -17,9 +17,9 @@ public partial class UserCampaignOverview : ComponentBase
     private List<CampaignModel> Campaigns { get; set; } = new();
     private List<StartScenario> StartScenarios { get; set; } = new();
 
-    [Required] [BindProperty] private string CharacterName { get; set; } = "";
+    [Required][BindProperty] private string CharacterName { get; set; } = "";
 
-    [Required] [BindProperty] private string CampaignTitle { get; set; } = "";
+    [Required][BindProperty] private string CampaignTitle { get; set; } = "";
 
     [BindProperty] private string CustomStartScenario { get; set; } = "";
 
