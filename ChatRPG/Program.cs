@@ -5,6 +5,7 @@ using ChatRPG.Data.Models;
 using ChatRPG.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,7 +27,8 @@ builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuth
     .AddSingleton<HttpMessageHandler>(_ => httpMessageHandlerFactory.CreateHandler())
     .AddSingleton<IOpenAiLlmClient, OpenAiLlmClient>()
     .AddSingleton<IFoodWasteClient, SallingClient>()
-    .AddTransient<IPersisterService, EfPersisterService>();
+    .AddTransient<IPersisterService, EfPersisterService>()
+    .AddTransient<IEmailSender, EmailSender>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
