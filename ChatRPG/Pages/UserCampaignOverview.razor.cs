@@ -21,7 +21,7 @@ public partial class UserCampaignOverview : ComponentBase
 
     [Required][BindProperty] private string CampaignTitle { get; set; } = "";
 
-    [BindProperty] private string CustomStartScenario { get; set; } = "";
+    [BindProperty] private string CustomStartScenario { get; set; } = null!;
 
     [Inject] private AuthenticationStateProvider? AuthProvider { get; set; }
     [Inject] private UserManager<User>? UserManager { get; set; }
@@ -54,6 +54,6 @@ public partial class UserCampaignOverview : ComponentBase
         // TODO: Redirect to campaign page
         CharacterName = "";
         CampaignTitle = "";
-        CustomStartScenario = "";
+        CustomStartScenario = null!;
     }
 }

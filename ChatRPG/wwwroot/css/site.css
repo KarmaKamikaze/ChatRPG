@@ -68,7 +68,16 @@ a, .btn-link {
     }
 
 .custom-gray-bg {
-    background-color: rgb(80, 80, 80);
+    background-color: #3E3A3A;
+}
+
+.custom-gray-container {
+    background-color: #232323;
+    color: white
+}
+
+.custom-gray-container .form-text-black {
+    color: black
 }
 
 .btn-send {
