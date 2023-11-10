@@ -1,9 +1,11 @@
-﻿@inject NavigationManager NavMan
+﻿@using ChatRPG.Data.Models
+@using Microsoft.AspNetCore.Identity
+@inject NavigationManager NavMan
 
 <AuthorizeView>
     <Authorized>
         <a href="Identity/Account/Manage">Hello, @context.User.Identity?.Name!</a>
-        <button @onclick='() => NavMan.NavigateTo("Logout", forceLoad: true)' class="btn btn-front"><span class="btn-front-span"></span>Log in</button>
+        <button @onclick='() => NavMan.NavigateTo("Logout", forceLoad: true)' class="btn">Log Out</button>
     </Authorized>
     <NotAuthorized>
         <div class="btn-group">

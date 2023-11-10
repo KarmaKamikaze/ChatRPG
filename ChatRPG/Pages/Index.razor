@@ -16,8 +16,29 @@
     <Authorized>
         <PageTitle>Dashboard - ChatRPG</PageTitle>
 
+        <header>
+            <nav class="toast-header navbar navbar-expand-sm navbar-dark custom-gray-container border-bottom box-shadow full-width-element">
+                <div class="container">
+                    <a class="navbar-brand" href="/">ChatRPG</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                        <p>Welcome, @context.User.Identity!.Name! [<a href="/Logout">Logout</a>]</p>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
         <div class="container-front">
             <UserCampaignOverview/>
         </div>
+
+        <footer class="footer pl-3 text-muted footer-formatting fixed-bottom custom-gray-container">
+            <div class="container">
+                &copy; 2023 - ChatRPG
+            </div>
+        </footer>
     </Authorized>
 </AuthorizeView>

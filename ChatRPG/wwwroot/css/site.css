@@ -224,3 +224,11 @@ a, .btn-link {
 .btn-front:hover .btn-front-span {
     width: 100%;
 }
+
+.full-width-element {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 50px;
+}
