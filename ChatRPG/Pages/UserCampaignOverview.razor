@@ -1,16 +1,5 @@
-@using Microsoft.AspNetCore.Identity
 @using ChatRPG.Data.Models
 @using CampaignModel = ChatRPG.Data.Models.Campaign;
-@using System.Security.Authentication
-@using System.Security.Cryptography.Pkcs
-@using ChatRPG.Data
-@using ChatRPG.Services
-@using Microsoft.AspNetCore.Mvc
-@using Environment = ChatRPG.Data.Models.Environment;
-@inherits ComponentBase
-@inject AuthenticationStateProvider AuthProvider
-@inject UserManager<User> UserManager
-@inject IPersisterService PersisterService
 
 <div class="container">
     @if (User is not null)
@@ -18,7 +7,7 @@
         <div class="row gap-3">
             <div class="col rounded bg-light">
                 <h3>Your Campaigns</h3>
-                <div class="vstack">
+                <div class="vstack overflow-auto" style="max-height: 400px;">
                     @foreach (CampaignModel campaign in Campaigns)
                     {
                         <div class="card" style="width: 18rem;">
@@ -26,13 +15,13 @@
                                 <h5 class="card-title">@campaign.Title</h5>
                                 <h6 class="card-subtitle mb-2 text-muted">@campaign.Characters.First(c => c.IsPlayer).Name</h6>
                                 <p class="card-text text-truncate">@(campaign.CustomStartScenario ?? campaign.StartScenario?.Body ?? "No scenario")</p>
-                                <p class="card-text">Started @campaign.StartedOn.ToShortDateString()</p>
+                                <p class="card-text">Started @campaign.StartedOn.ToShortDateString() @campaign.StartedOn.ToShortTimeString()</p>
                                 <a href="#" class="card-link">See more ></a>
                             </div>
                         </div>
                     }
                 </div>
-                <p class="text-muted">Found @(Campaigns.Count) campaign(s).</p>
+                <p class="text-muted">Found @(Campaigns.Count) campaign@(Campaigns.Count == 1 ? "" : "s").</p>
             </div>
             <div class="col rounded bg-light">
                 <h3>Start Scenarios</h3>
@@ -46,7 +35,7 @@
                         </div>
                     </div>
                 }
-                <p class="text-muted">Found @(StartScenarios.Count) scenario(s).</p>
+                <p class="text-muted">Found @(StartScenarios.Count) scenario@(StartScenarios.Count == 1 ? "" : "s").</p>
             </div>
             <div class="col-5 rounded bg-light">
                 <h3>Create a Custom Campaign</h3>
@@ -69,47 +58,3 @@
         </div>
     }
 </div>
-
-@code {
-    private User? User { get; set; } = null;
-    private List<CampaignModel> Campaigns { get; set; } = new();
-    private List<StartScenario> StartScenarios { get; set; } = new();
-
-    [BindProperty]
-    private string CharacterName { get; set; } = "";
-    
-    [BindProperty]
-    private string CampaignTitle { get; set; } = "";
-
-    [BindProperty]
-    private string CustomStartScenario { get; set; } = "";
-    
-    protected override async Task OnInitializedAsync()
-    {
-        AuthenticationState authState = await AuthProvider.GetAuthenticationStateAsync();
-        User = await UserManager.GetUserAsync(authState.User)
-                    ?? throw new AuthenticationException("User is not authorized");
-        Campaigns = await PersisterService.GetCampaignsForUser(User);
-        StartScenarios = await PersisterService.GetStartScenarios();
-    }
-
-    private async Task CreateAndStartCampaign()
-    {
-        if (User is null)
-        {
-            throw new Exception();
-        }
-        CampaignModel campaign = new (User, CampaignTitle, CustomStartScenario);
-        Character player = new Character(campaign, CharacterType.Humanoid, CharacterName, "", true, 100);
-        Environment environment = new(campaign, "Start location", "The place where it all began");
-        player.Environment = environment;
-        campaign.Environments.Add(environment);
-        campaign.Characters.Add(player);
-        await PersisterService.SaveAsync(campaign);
-        // TODO: Redirect to campaign page
-        CharacterName = "";
-        CampaignTitle = "";
-        CustomStartScenario = "";
-    }
-
-}

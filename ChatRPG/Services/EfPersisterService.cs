@@ -52,7 +52,7 @@ public class EfPersisterService : IPersisterService
             .Include(campaign => campaign.Events)
             .Include(campaign => campaign.Characters)
             .ThenInclude(character => character.CharacterAbilities)
-            .ThenInclude(characterAbility => characterAbility.Ability)
+            .ThenInclude(characterAbility => characterAbility!.Ability)
             .AsSplitQuery()
             .FirstAsync();
     }
