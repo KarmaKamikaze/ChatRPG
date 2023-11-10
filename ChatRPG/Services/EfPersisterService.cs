@@ -1,6 +1,7 @@
 ﻿using ChatRPG.Data;
 using ChatRPG.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace ChatRPG.Services;
 
@@ -21,7 +22,7 @@ public class EfPersisterService : IPersisterService
     /// <inheritdoc />
     public async Task SaveAsync(Campaign campaign)
     {
-        await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+        await using IDbContextTransaction transaction = await _dbContext.Database.BeginTransactionAsync();
         try
         {
             if (!_dbContext.Campaigns.Contains(campaign))
