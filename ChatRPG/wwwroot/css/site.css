@@ -225,19 +225,10 @@ a, .btn-link {
     width: 100%;
 }
 
-.full-width-element {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 50px;
-}
-
 .logo-name-group {
     display: flex;
     align-items: center;
     position: relative;
-    top: -5px;
 }
 
 .site-icon {
