@@ -73,11 +73,11 @@ a, .btn-link {
 
 .custom-gray-container {
     background-color: #232323;
-    color: white
+    color: white;
 }
 
 .custom-gray-container .form-text-black {
-    color: black
+    color: black;
 }
 
 .btn-send {
@@ -244,4 +244,9 @@ a, .btn-link {
     width: 35px;
     height: 35px;
     margin-right: 10px;
+}
+
+.campaign-title {
+    padding-top: 80px;
+    color: #ffffff;
 }
