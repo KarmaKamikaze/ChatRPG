@@ -1,6 +1,6 @@
 namespace ChatRPG.Pages;
 
-public partial class Index
+public partial class Index : IDisposable
 {
     private readonly string _fullTitleText = "ChatRPG";
     private string _titleDisplayText = "";

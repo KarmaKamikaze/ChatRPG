@@ -1,5 +1,5 @@
-﻿@page "/"
-@implements IDisposable
+﻿@using ChatRPG.Pages.Shared
+@page "/"
 
 <AuthorizeView>
     <NotAuthorized>
@@ -16,24 +16,7 @@
     <Authorized>
         <PageTitle>Dashboard - ChatRPG</PageTitle>
 
-        <header>
-            <nav class="navbar navbar-dark custom-gray-container border-bottom box-shadow full-width-element">
-                <div class="container">
-                    <a class="navbar-brand" href="/">
-                        <div class="logo-name-group">
-                            <img class="site-icon" src="favicon.png" asp-append-version="true"
-                                 alt="Adventure game logo">
-                            <div class="logo-name-group-text">
-                                ChatRPG
-                            </div>
-                        </div>
-                    </a>
-                    <div class="d-sm-inline-flex flex-sm-row-reverse">
-                        <p>Welcome, @context.User.Identity!.Name! [<a href="/Logout">Logout</a>]</p>
-                    </div>
-                </div>
-            </nav>
-        </header>
+        <Navbar Username="@context.User.Identity!.Name"/>
 
         <div class="container-front">
             <UserCampaignOverview/>
