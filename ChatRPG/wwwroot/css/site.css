@@ -256,3 +256,18 @@ a, .btn-link {
     padding-top: 80px;
     color: #ffffff;
 }
+
+#scrollbar::-webkit-scrollbar {
+    width: 12px;
+}
+
+#scrollbar::-webkit-scrollbar-track {
+    border-radius: 8px;
+    background-color: #95a5a6;
+    border: 1px solid #cacaca;
+}
+
+#scrollbar::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background-color: #3E3A3A;
+}
