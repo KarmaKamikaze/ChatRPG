@@ -232,3 +232,16 @@ a, .btn-link {
     top: 0;
     height: 50px;
 }
+
+.logo-name-group {
+    display: flex;
+    align-items: center;
+    position: relative;
+    top: -5px;
+}
+
+.site-icon {
+    width: 35px;
+    height: 35px;
+    margin-right: 10px;
+}
