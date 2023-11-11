@@ -156,6 +156,21 @@ a, .btn-link {
     height: 100vh;
 }
 
+.dashboard-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.dashboard-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+}
+
 .title-front {
     font-size: 5rem;
 }
