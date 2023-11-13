@@ -9,8 +9,12 @@
     </Authorized>
     <NotAuthorized>
         <div class="btn-group">
-            <button @onclick='() => NavMan.NavigateTo("Register", forceLoad: true)' class="btn btn-front"><span class="btn-front-span"></span>Register</button>
-            <button @onclick='() => NavMan.NavigateTo("Login", forceLoad: true)' class="btn btn-front"><span class="btn-front-span"></span>Log in</button>
+            <button @onclick='() => NavMan.NavigateTo("Register", forceLoad: true)' id="register-button" class="btn btn-front">
+                <span class="btn-front-span"></span>Register
+            </button>
+            <button @onclick='() => NavMan.NavigateTo("Login", forceLoad: true)' id="login-button" class="btn btn-front">
+                <span class="btn-front-span"></span>Log in
+            </button>
         </div>
     </NotAuthorized>
 </AuthorizeView>
