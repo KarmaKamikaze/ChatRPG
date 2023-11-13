@@ -11,16 +11,16 @@ public class EmailSender : IEmailSender
     private readonly string? _senderEmail;
     private readonly string? _senderPassword;
     public readonly bool IsActive;
-    
+
     public EmailSender(IConfiguration configuration)
     {
         IsActive = configuration.GetSection("EmailServiceInfo").GetValue<bool>("ShouldSend");
-        if(IsActive)
+        if (IsActive)
         {
             _senderEmail = configuration.GetSection("EmailServiceInfo").GetValue<string>("Email");
             _senderPassword = configuration.GetSection("EmailServiceInfo").GetValue<string>("Password");
 
-            if(_senderEmail == null || _senderPassword == null)
+            if (_senderEmail == null || _senderPassword == null)
             {
                 throw new ConfigurationErrorsException("Missing 'Email' credentials in appsettings");
             }

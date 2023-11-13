@@ -130,7 +130,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    if (((EmailSender) _emailSender).IsActive)
+                    if (((EmailSender)_emailSender).IsActive)
                     {
                         string userId = await _userManager.GetUserIdAsync(user);
                         string code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -151,7 +151,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account
                     }
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return LocalRedirect(returnUrl);
-                    
+
                 }
 
                 foreach (IdentityError error in result.Errors)

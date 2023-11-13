@@ -117,7 +117,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account.Manage
             string email = await _userManager.GetEmailAsync(user);
             if (Input.NewEmail != email)
             {
-                if (((EmailSender) _emailSender).IsActive)
+                if (((EmailSender)_emailSender).IsActive)
                 {
                     string userId = await _userManager.GetUserIdAsync(user);
                     string code = await _userManager.GenerateChangeEmailTokenAsync(user, Input.NewEmail);
@@ -132,7 +132,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account.Manage
                         "Confirm your email",
                         $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
                 }
-                
+
                 StatusMessage = "Confirmation link to change email sent. Please check your email.";
                 return RedirectToPage();
             }
@@ -155,7 +155,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
-            if (((EmailSender) _emailSender).IsActive)
+            if (((EmailSender)_emailSender).IsActive)
             {
                 string userId = await _userManager.GetUserIdAsync(user);
                 string email = await _userManager.GetEmailAsync(user);
@@ -171,7 +171,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account.Manage
                     "Confirm your email",
                     $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
             }
-            
+
             StatusMessage = "Verification email sent. Please check your email.";
             return RedirectToPage();
         }

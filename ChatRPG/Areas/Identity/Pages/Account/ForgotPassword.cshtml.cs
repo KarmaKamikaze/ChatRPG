@@ -22,7 +22,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account
     {
         private readonly UserManager<User> _userManager;
         private readonly IEmailSender _emailSender;
-        
+
         public ForgotPasswordModel(UserManager<User> userManager, IEmailSender emailSender)
         {
             _userManager = userManager;
@@ -56,7 +56,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account
             if (ModelState.IsValid)
             {
                 User user = await _userManager.FindByEmailAsync(Input.Email);
-                if (((EmailSender) _emailSender).IsActive && user != null && await _userManager.IsEmailConfirmedAsync(user))
+                if (((EmailSender)_emailSender).IsActive && user != null && await _userManager.IsEmailConfirmedAsync(user))
                 {
                     string code = await _userManager.GeneratePasswordResetTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -71,7 +71,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account
                         "Reset Password",
                         $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
                 }
-                
+
                 return RedirectToPage("./ForgotPasswordConfirmation");
             }
 

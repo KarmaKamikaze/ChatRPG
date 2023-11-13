@@ -64,7 +64,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account
             }
 
             User user = await _userManager.FindByEmailAsync(Input.Email);
-            if (((EmailSender) _emailSender).IsActive && user != null)
+            if (((EmailSender)_emailSender).IsActive && user != null)
             {
                 string userId = await _userManager.GetUserIdAsync(user);
                 string code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -79,7 +79,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account
                     "Confirm your email",
                     $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
             }
-            
+
             ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");
             return Page();
         }
