@@ -22,12 +22,12 @@ namespace ChatRPG.Areas.Identity.Pages.Account
     public class ResendEmailConfirmationModel : PageModel
     {
         private readonly UserManager<User> _userManager;
-        private readonly IEmailSender _emailSender;
+        private readonly EmailSender _emailSender;
 
         public ResendEmailConfirmationModel(UserManager<User> userManager, IEmailSender emailSender)
         {
             _userManager = userManager;
-            _emailSender = emailSender;
+            _emailSender = emailSender as EmailSender;
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account
             }
 
             User user = await _userManager.FindByEmailAsync(Input.Email);
-            if (((EmailSender)_emailSender).IsActive && user != null)
+            if (_emailSender.IsActive && user != null)
             {
                 string userId = await _userManager.GetUserIdAsync(user);
                 string code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

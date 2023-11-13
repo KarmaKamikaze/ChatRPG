@@ -24,7 +24,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account
         private readonly IUserStore<User> _userStore;
         private readonly IUserEmailStore<User> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
-        private readonly IEmailSender _emailSender;
+        private readonly EmailSender _emailSender;
 
         public RegisterModel(
             UserManager<User> userManager,
@@ -38,7 +38,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account
             _emailStore = GetEmailStore();
             _signInManager = signInManager;
             _logger = logger;
-            _emailSender = emailSender;
+            _emailSender = emailSender as EmailSender;
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    if (((EmailSender)_emailSender).IsActive)
+                    if (_emailSender.IsActive)
                     {
                         string userId = await _userManager.GetUserIdAsync(user);
                         string code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

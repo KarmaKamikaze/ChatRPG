@@ -21,7 +21,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
-        private readonly IEmailSender _emailSender;
+        private readonly EmailSender _emailSender;
 
         public EmailModel(
             UserManager<User> userManager,
@@ -30,7 +30,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account.Manage
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _emailSender = emailSender;
+            _emailSender = emailSender as EmailSender;
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account.Manage
             string email = await _userManager.GetEmailAsync(user);
             if (Input.NewEmail != email)
             {
-                if (((EmailSender)_emailSender).IsActive)
+                if (_emailSender.IsActive)
                 {
                     string userId = await _userManager.GetUserIdAsync(user);
                     string code = await _userManager.GenerateChangeEmailTokenAsync(user, Input.NewEmail);
@@ -155,7 +155,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
-            if (((EmailSender)_emailSender).IsActive)
+            if (_emailSender.IsActive)
             {
                 string userId = await _userManager.GetUserIdAsync(user);
                 string email = await _userManager.GetEmailAsync(user);
