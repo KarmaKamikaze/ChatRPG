@@ -4,13 +4,13 @@ using OpenQA.Selenium.Support.UI;
 namespace ChatRPGTests;
 
 [Collection("E2E collection")]
-public class IndexE2ETests : IDisposable
+public class UnauthorizedIndexE2ETests : IDisposable
 {
     private readonly ChatRPGFixture _fixture;
     private readonly IWebDriver _driver;
     private readonly WebDriverWait _wait;
 
-    public IndexE2ETests(ChatRPGFixture fixture)
+    public UnauthorizedIndexE2ETests(ChatRPGFixture fixture)
     {
         _fixture = fixture;
         _driver = E2ETestUtility.Setup("/");
@@ -18,7 +18,7 @@ public class IndexE2ETests : IDisposable
     }
 
     [Fact]
-    public void IndexPage_ContainsTitleText()
+    public void UnauthorizedIndexPage_ContainsTitleText()
     {
         // Arrange
         string expectedTitle = "ChatRPG";
@@ -32,7 +32,7 @@ public class IndexE2ETests : IDisposable
     }
 
     [Fact]
-    public void IndexPage_ContainsSloganText()
+    public void UnauthorizedIndexPage_ContainsSloganText()
     {
         // Arrange
         string expectedSlogan = "Immerse yourself in the ultimate AI-powered adventure!";
@@ -46,7 +46,7 @@ public class IndexE2ETests : IDisposable
     }
 
     [Fact]
-    public void IndexPage_ContainsLoginButton()
+    public void UnauthorizedIndexPage_ContainsLoginButton()
     {
         Thread.Sleep(1000); // wait for typing animation to finish
         // Act
@@ -57,7 +57,7 @@ public class IndexE2ETests : IDisposable
     }
 
     [Fact]
-    public void IndexPage_ContainsRegisterButton()
+    public void UnauthorizedIndexPage_ContainsRegisterButton()
     {
         Thread.Sleep(1000); // wait for typing animation to finish
         // Act
@@ -68,7 +68,7 @@ public class IndexE2ETests : IDisposable
     }
 
     [Fact]
-    public void PressingLoginButton_ShouldRedirectToLoginPage()
+    public void UnauthorizedIndexPage_PressingLoginButton_ShouldRedirectToLoginPage()
     {
         Thread.Sleep(1000); // wait for typing animation to finish
         // Act
@@ -81,7 +81,7 @@ public class IndexE2ETests : IDisposable
     }
 
     [Fact]
-    public void PressingRegisterButton_ShouldRedirectToRegisterPage()
+    public void UnauthorizedIndexPage_PressingRegisterButton_ShouldRedirectToRegisterPage()
     {
         Thread.Sleep(1000); // wait for typing animation to finish
         // Act

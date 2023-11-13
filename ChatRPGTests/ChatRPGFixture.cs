@@ -25,7 +25,6 @@ public class ChatRPGFixture : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        // Stop the app when the tests are done
         if (!_appProcess!.HasExited)
         {
             _appProcess.Kill();

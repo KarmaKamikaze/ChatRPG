@@ -25,6 +25,7 @@ public static class E2ETestUtility
         catch
         {
             // Was not logged in or unable to log out
+            // We do not care if it fails during teardown
         }
 
         driver.Close();
