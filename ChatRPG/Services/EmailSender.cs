@@ -1,4 +1,4 @@
-﻿using System.Drawing.Printing;
+﻿using System.Configuration;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using MailKit.Net.Smtp;
 using MimeKit;
@@ -8,14 +8,23 @@ namespace ChatRPG.Services;
 
 public class EmailSender : IEmailSender
 {
-
-    private readonly string _senderEmail;
-    private readonly string _senderPassword;
-
+    private readonly string? _senderEmail;
+    private readonly string? _senderPassword;
+    public readonly bool IsActive;
+    
     public EmailSender(IConfiguration configuration)
     {
-        _senderEmail = configuration.GetSection("ChatRPGEmail").GetValue<string>("Email");
-        _senderPassword = configuration.GetSection("ChatRPGEmail").GetValue<string>("Password");
+        IsActive = configuration.GetSection("EmailServiceInfo").GetValue<bool>("ShouldSend");
+        if(IsActive)
+        {
+            _senderEmail = configuration.GetSection("EmailServiceInfo").GetValue<string>("Email");
+            _senderPassword = configuration.GetSection("EmailServiceInfo").GetValue<string>("Password");
+
+            if(_senderEmail == null || _senderPassword == null)
+            {
+                throw new ConfigurationErrorsException("Missing 'Email' credentials in appsettings");
+            }
+        }
     }
 
     public async Task SendEmailAsync(string email, string subject, string htmlMessage)
