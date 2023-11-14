@@ -22,12 +22,12 @@ namespace ChatRPG.Areas.Identity.Pages.Account
     public class ResendEmailConfirmationModel : PageModel
     {
         private readonly UserManager<User> _userManager;
-        private readonly EmailSender _emailSender;
+        private readonly IConfiguration _configuration;
 
-        public ResendEmailConfirmationModel(UserManager<User> userManager, IEmailSender emailSender)
+        public ResendEmailConfirmationModel(UserManager<User> userManager, IConfiguration configuration)
         {
             _userManager = userManager;
-            _emailSender = emailSender as EmailSender;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account
             }
 
             User user = await _userManager.FindByEmailAsync(Input.Email);
-            if (_emailSender.IsActive && user != null)
+            if (_configuration.GetSection("EmailServiceInfo").GetValue<bool>("ShouldSend") && user != null)
             {
                 string userId = await _userManager.GetUserIdAsync(user);
                 string code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -74,7 +74,10 @@ namespace ChatRPG.Areas.Identity.Pages.Account
                     pageHandler: null,
                     values: new { userId = userId, code = code },
                     protocol: Request.Scheme);
-                await _emailSender.SendEmailAsync(
+                Logger<EmailSender> emailSenderLogger = new Logger<EmailSender>(new LoggerFactory());
+                EmailSender emailSender = new EmailSender(_configuration, emailSenderLogger);
+                
+                await emailSender.SendEmailAsync(
                     Input.Email,
                     "Confirm your email",
                     $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");

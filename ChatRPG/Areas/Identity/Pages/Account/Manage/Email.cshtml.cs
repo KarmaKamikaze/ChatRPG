@@ -21,16 +21,16 @@ namespace ChatRPG.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
-        private readonly EmailSender _emailSender;
+        private readonly IConfiguration _configuration;
 
         public EmailModel(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
-            IEmailSender emailSender)
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _emailSender = emailSender as EmailSender;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account.Manage
             string email = await _userManager.GetEmailAsync(user);
             if (Input.NewEmail != email)
             {
-                if (_emailSender.IsActive)
+                if (_configuration.GetSection("EmailServiceInfo").GetValue<bool>("ShouldSend"))
                 {
                     string userId = await _userManager.GetUserIdAsync(user);
                     string code = await _userManager.GenerateChangeEmailTokenAsync(user, Input.NewEmail);
@@ -127,7 +127,10 @@ namespace ChatRPG.Areas.Identity.Pages.Account.Manage
                         pageHandler: null,
                         values: new { area = "Identity", userId = userId, email = Input.NewEmail, code = code },
                         protocol: Request.Scheme);
-                    await _emailSender.SendEmailAsync(
+                    Logger<EmailSender> emailSenderLogger = new Logger<EmailSender>(new LoggerFactory());
+                    EmailSender emailSender = new EmailSender(_configuration, emailSenderLogger);
+                    
+                    await emailSender.SendEmailAsync(
                         Input.NewEmail,
                         "Confirm your email",
                         $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
@@ -155,7 +158,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
-            if (_emailSender.IsActive)
+            if (_configuration.GetSection("EmailServiceInfo").GetValue<bool>("ShouldSend"))
             {
                 string userId = await _userManager.GetUserIdAsync(user);
                 string email = await _userManager.GetEmailAsync(user);
@@ -166,7 +169,10 @@ namespace ChatRPG.Areas.Identity.Pages.Account.Manage
                     pageHandler: null,
                     values: new { area = "Identity", userId = userId, code = code },
                     protocol: Request.Scheme);
-                await _emailSender.SendEmailAsync(
+                Logger<EmailSender> emailSenderLogger = new Logger<EmailSender>(new LoggerFactory());
+                EmailSender emailSender = new EmailSender(_configuration, emailSenderLogger);
+                
+                await emailSender.SendEmailAsync(
                     email,
                     "Confirm your email",
                     $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
