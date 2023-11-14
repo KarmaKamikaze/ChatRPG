@@ -1,0 +1,31 @@
+@namespace ChatRPG.Pages
+@inherits ComponentBase
+
+<header>
+    <nav class="navbar navbar-dark custom-gray-container border-bottom box-shadow">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <div class="logo-name-group">
+                    <img class="site-icon" src="favicon.png" asp-append-version="true"
+                         alt="Adventure game logo">
+                    <div class="logo-name-group-text">
+                        ChatRPG
+                    </div>
+                </div>
+            </a>
+            <div class="d-sm-inline-flex flex-sm-row-reverse">
+                <p>@WelcomeMessage, @Username! [<a href="/Logout">Logout</a>]</p>
+            </div>
+        </div>
+    </nav>
+</header>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public string Username { get; set; } = null!;
+
+    [Parameter]
+    public string WelcomeMessage { get; set; } = "Welcome";
+
+}

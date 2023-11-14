@@ -5,6 +5,8 @@ VisualStudioVersion = 17.5.33627.172
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRPG", "ChatRPG\ChatRPG.csproj", "{02177064-5C6F-4AD0-A3E2-8FDE212D1B8E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRPGTests", "ChatRPGTests\ChatRPGTests.csproj", "{38AA38FA-5260-4499-8448-97F1D962035B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{02177064-5C6F-4AD0-A3E2-8FDE212D1B8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{02177064-5C6F-4AD0-A3E2-8FDE212D1B8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{02177064-5C6F-4AD0-A3E2-8FDE212D1B8E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38AA38FA-5260-4499-8448-97F1D962035B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38AA38FA-5260-4499-8448-97F1D962035B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38AA38FA-5260-4499-8448-97F1D962035B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38AA38FA-5260-4499-8448-97F1D962035B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

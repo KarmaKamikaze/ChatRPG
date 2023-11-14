@@ -51,9 +51,25 @@ public class EfPersisterService : IPersisterService
             .Include(campaign => campaign.Environments)
             .Include(campaign => campaign.Events)
             .Include(campaign => campaign.Characters)
-                .ThenInclude(character => character.CharacterAbilities)
-                .ThenInclude(characterAbility => characterAbility.Ability)
+            .ThenInclude(character => character.CharacterAbilities)
+            .ThenInclude(characterAbility => characterAbility!.Ability)
             .AsSplitQuery()
             .FirstAsync();
+    }
+
+    /// <inheritdoc />
+    public async Task<List<Campaign>> GetCampaignsForUser(User user)
+    {
+        return await _dbContext.Campaigns
+            .Where(campaign => campaign.User.Equals(user))
+            .Include(campaign => campaign.Characters.Where(c => c.IsPlayer))
+            .Include(campaign => campaign.StartScenario)
+            .ToListAsync();
+    }
+
+    /// <inheritdoc />
+    public async Task<List<StartScenario>> GetStartScenarios()
+    {
+        return await _dbContext.StartScenarios.ToListAsync();
     }
 }
