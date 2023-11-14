@@ -1,0 +1,66 @@
+@using ChatRPG.Data.Models
+@using CampaignModel = ChatRPG.Data.Models.Campaign;
+
+<div class="container">
+    @if (User is not null)
+    {
+        <div class="row gap-3">
+            <div class="col rounded custom-gray-container">
+                <div class="m-3">
+                    <h3>Your Campaigns</h3>
+                    <div class="vstack overflow-auto form-text-black" style="max-height: 400px;" id="scrollbar">
+                        @foreach (CampaignModel campaign in Campaigns)
+                        {
+                            <div class="card" style="width: 18rem;">
+                                <div class="card-body">
+                                    <h5 class="card-title">@campaign.Title</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">@campaign.Characters.First(c => c.IsPlayer).Name</h6>
+                                    <p class="card-text text-truncate">@(campaign.CustomStartScenario ?? campaign.StartScenario?.Body ?? "No scenario")</p>
+                                    <p class="card-text">Started @campaign.StartedOn.ToShortDateString() @campaign.StartedOn.ToShortTimeString()</p>
+                                    <a href="#" class="card-link">See more ></a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <p class="text-muted">Found @(Campaigns.Count) campaign@(Campaigns.Count == 1 ? "" : "s").</p>
+                </div>
+            </div>
+            <div class="col rounded custom-gray-container">
+                <div class="m-3">
+                    <h3>Start Scenarios</h3>
+                    @foreach (StartScenario scenario in StartScenarios)
+                    {
+                        <div class="card" style="width: 18rem;">
+                            <div class="card-body">
+                                <h5 class="card-title">@scenario.Title</h5>
+                                <p class="card-text">@scenario.Body</p>
+                                <a href="#" class="card-link">See more ></a>
+                            </div>
+                        </div>
+                    }
+                    <p class="text-muted">Found @(StartScenarios.Count) scenario@(StartScenarios.Count == 1 ? "" : "s").</p>
+                </div>
+            </div>
+            <div class="col-5 rounded custom-gray-container">
+                <div class="m-3">
+                <h3>Create a Custom Campaign</h3>
+                    <div class="form">
+                        <div class="mb-3">
+                            <label for="inputCharacterName" class="form-label">Character Name*</label>
+                            <input type="text" @bind="CharacterName" class="form-control" id="inputCharacterName"/>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputCampaignTitle" class="form-label">Campaign Title*</label>
+                            <input type="text" @bind="CampaignTitle" class="form-control" id="inputCampaignTitle">
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputCustomStartScenario" class="form-label">Custom Start Scenario</label>
+                            <textarea class="form-control" @bind="CustomStartScenario" id="inputCustomStartScenario" rows="3"></textarea>
+                        </div>
+                        <button class="btn btn-primary" @onclick="CreateAndStartCampaign">Create campaign</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
