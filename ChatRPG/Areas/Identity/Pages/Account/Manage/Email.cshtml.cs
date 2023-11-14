@@ -129,7 +129,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account.Manage
                         protocol: Request.Scheme);
                     Logger<EmailSender> emailSenderLogger = new Logger<EmailSender>(new LoggerFactory());
                     EmailSender emailSender = new EmailSender(_configuration, emailSenderLogger);
-                    
+
                     await emailSender.SendEmailAsync(
                         Input.NewEmail,
                         "Confirm your email",
@@ -171,7 +171,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account.Manage
                     protocol: Request.Scheme);
                 Logger<EmailSender> emailSenderLogger = new Logger<EmailSender>(new LoggerFactory());
                 EmailSender emailSender = new EmailSender(_configuration, emailSenderLogger);
-                
+
                 await emailSender.SendEmailAsync(
                     email,
                     "Confirm your email",

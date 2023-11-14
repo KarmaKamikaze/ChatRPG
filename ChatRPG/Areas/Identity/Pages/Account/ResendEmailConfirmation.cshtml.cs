@@ -76,7 +76,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account
                     protocol: Request.Scheme);
                 Logger<EmailSender> emailSenderLogger = new Logger<EmailSender>(new LoggerFactory());
                 EmailSender emailSender = new EmailSender(_configuration, emailSenderLogger);
-                
+
                 await emailSender.SendEmailAsync(
                     Input.Email,
                     "Confirm your email",

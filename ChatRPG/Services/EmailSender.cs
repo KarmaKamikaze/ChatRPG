@@ -11,7 +11,7 @@ public class EmailSender : IEmailSender
     private readonly string? _senderEmail;
     private readonly string? _senderPassword;
     private readonly ILogger<EmailSender> _logger;
-    
+
     public EmailSender(IConfiguration configuration, ILogger<EmailSender> logger)
     {
         _logger = logger;
