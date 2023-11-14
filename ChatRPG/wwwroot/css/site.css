@@ -223,6 +223,20 @@ a, .btn-link {
     background-color: rgba(0, 0, 0, 0.5); /* Alpha value for transparency */
 }
 
+.card-dim {
+    width: 18rem;
+    background: #dcdcdc;
+}
+
+.line-clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    hyphens: auto;
+    font-size: 12px;
+}
+
 .text-readable {
     z-index: 1; /* Ensure the text is above the overlay */
     color: #98d2d2;
