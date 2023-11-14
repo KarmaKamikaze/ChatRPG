@@ -123,9 +123,9 @@ public partial class Campaign
             _isWaitingForResponse = false;
             UpdateSaveFile(message.Content);
         }
-        else
+        else if (eventArgs.Chunk is not null)
         {
-            message.Content += eventArgs.Chunk;
+            message.AddChunk(eventArgs.Chunk);
             StateHasChanged();
         }
         Task.Run(() => ScrollToElement(BottomId));

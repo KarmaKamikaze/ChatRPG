@@ -14,7 +14,7 @@
     <div class="conversation-text">
         @foreach (OpenAiGptMessage message in _conversation)
         {
-            <OpenAiGptMessageComponent OpenAiGptMessage="@message"/>
+            <OpenAiGptMessageComponent Message="@message"/>
         }
     </div>
 </div>

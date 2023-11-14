@@ -21,14 +21,14 @@ public class GameController
 
     public event EventHandler<ChatCompletionReceivedEventArgs>? ChatCompletionReceived;
     public event EventHandler<ChatCompletionChunkReceivedEventArgs>? ChatCompletionChunkReceived; 
-    
+
     public async Task HandleUserPrompt(IList<OpenAiGptMessage> conversation)
     {
         if (_streamChatCompletions)
         {
             OpenAiGptMessage message = new OpenAiGptMessage(ChatMessageRole.Assistant, "");
             ChatCompletionReceived?.Invoke(this, new ChatCompletionReceivedEventArgs(message));
-            
+
             await foreach (string chunk in _llmClient.GetStreamedChatCompletion(conversation))
             {
                 ChatCompletionChunkReceived?.Invoke(this, new ChatCompletionChunkReceivedEventArgs(false, chunk));
