@@ -19,4 +19,15 @@ public interface IPersisterService
     /// <param name="campaignId">Id of the campaign to load.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     Task<Campaign> LoadFromCampaignIdAsync(int campaignId);
+    /// <summary>
+    /// Loads all campaigns for the given <paramref name="user"/>, along with their <see cref="StartScenario"/>s and player <see cref="Character"/>s.
+    /// </summary>
+    /// <param name="user">The user whose campaigns to load.</param>
+    /// <returns>A list of the user's campaigns.</returns>
+    Task<List<Campaign>> GetCampaignsForUser(User user);
+    /// <summary>
+    /// Loads all start scenarios.
+    /// </summary>
+    /// <returns>A list of all start scenarios.</returns>
+    Task<List<StartScenario>> GetStartScenarios();
 }

@@ -28,7 +28,7 @@ public sealed class ApplicationDbContext : IdentityDbContext<User>
             .Entity<CharacterAbility>(builder =>
             {
                 builder.HasKey("CharacterId", "AbilityId");
-                builder.HasOne(c => c.Character).WithMany(c => c.CharacterAbilities);
+                builder.HasOne(c => c.Character).WithMany(c => c.CharacterAbilities!);
             })
             .Entity<Event>(builder => builder.Property(x => x.Ordering).HasDefaultValue(1))
             ;

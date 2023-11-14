@@ -2,9 +2,7 @@
 
 namespace ChatRPG.Data;
 
-public record MessagePair(string PlayerMessage, string AssistantMessage);
-
-public class FileUtility
+public class FileUtility : IFileUtility
 {
     private readonly string _currentUser;
     private readonly string _path;
@@ -14,6 +12,11 @@ public class FileUtility
     private readonly string _playerKeyword = "#<Player>: ";
     private readonly string _gameKeyword = "#<Game>: ";
 
+    /// <summary>
+    /// Initializes a new instance of the FileUtility class with the specified user and save directory.
+    /// </summary>
+    /// <param name="currentUser">The username of the current user.</param>
+    /// <param name="saveDir">The directory where conversation files are saved (default: "Saves/").</param>
     public FileUtility(string currentUser, string saveDir = "Saves/")
     {
         _currentUser = currentUser;
@@ -21,6 +24,7 @@ public class FileUtility
         _path = SetPath(DateTime.Now);
     }
 
+    /// <inheritdoc />
     public async Task UpdateSaveFileAsync(MessagePair messages)
     {
         // According to .NET docs, you do not need to check if directory exists first
@@ -37,12 +41,19 @@ public class FileUtility
         await fs.WriteAsync(encodedAssistantMessage, 0, encodedAssistantMessage.Length);
     }
 
+    /// <inheritdoc />
     public async Task<List<string>> GetMostRecentConversationAsync(string playerTag, string assistantTag)
     {
         string filePath = GetMostRecentFile(Directory.GetFiles(_saveDir, $"{_currentUser}*"));
         return await GetConversationsStringFromSaveFileAsync(filePath, playerTag, assistantTag);
     }
 
+    /// <summary>
+    /// Prepares a message for saving by ensuring a newline character and specifying the author.
+    /// </summary>
+    /// <param name="message">The message to prepare for saving.</param>
+    /// <param name="isPlayerMessage">A boolean indicating if the message is from the player (default: false).</param>
+    /// <returns>The prepared message with a newline character and author tag.</returns>
     private string PrepareMessageForSave(string message, bool isPlayerMessage = false)
     {
         if (!message.EndsWith("\n"))
@@ -52,6 +63,13 @@ public class FileUtility
         return message;
     }
 
+    /// <summary>
+    /// Reads a conversation string from a save file asynchronously and converts it into a list of messages.
+    /// </summary>
+    /// <param name="path">The path to the save file to read.</param>
+    /// <param name="playerTag">The tag to mark a player message.</param>
+    /// <param name="assistantTag">The tag to mark an assistant message.</param>
+    /// <returns>A list of messages extracted from the save file.</returns>
     private async Task<List<string>> GetConversationsStringFromSaveFileAsync(string path, string playerTag,
         string assistantTag)
     {
@@ -70,6 +88,11 @@ public class FileUtility
         return ConvertConversationStringToList(sb.ToString(), playerTag, assistantTag);
     }
 
+    /// <summary>
+    /// Gets the most recent file from a list of files based on their timestamps.
+    /// </summary>
+    /// <param name="files">An array of file paths to choose from.</param>
+    /// <returns>The path to the most recent file.</returns>
     private string GetMostRecentFile(string[] files)
     {
         DateTime mostRecent = new DateTime(1, 1, 1, 0, 0, 0); // Hello Jesus
@@ -130,6 +153,11 @@ public class FileUtility
         return fullConversation;
     }
 
+    /// <summary>
+    /// Sets the path for a save file based on the user and a timestamp.
+    /// </summary>
+    /// <param name="timestamp">The timestamp used to create the file name.</param>
+    /// <returns>The complete path to the save file.</returns>
     private string SetPath(DateTime timestamp)
     {
         // Add save directory and file name to path
