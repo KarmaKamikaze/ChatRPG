@@ -92,11 +92,11 @@
 
         if (_shouldStream)
         {
-            await HandleStreamedResponse(OpenAiLlmClient.GetStreamedChatCompletion(userInput));
+            await HandleStreamedResponse(OpenAiLlmClient.GetStreamedChatCompletion(_conversation.ToArray()));
         }
         else
         {
-            string response = await OpenAiLlmClient.GetChatCompletion(userInput);
+            string response = await OpenAiLlmClient.GetChatCompletion(_conversation.ToArray());
             HandleResponse(response);
         }
 

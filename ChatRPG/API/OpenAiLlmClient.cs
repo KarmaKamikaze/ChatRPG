@@ -6,10 +6,11 @@ namespace ChatRPG.API;
 
 public class OpenAiLlmClient : IOpenAiLlmClient
 {
-    private const string Model = "gpt-3.5-turbo";
+    private const string Model = "gpt-4";
     private const double Temperature = 0.7;
 
     private readonly OpenAIAPI _openAiApi;
+    private readonly string _systemPrompt;
 
     public OpenAiLlmClient(IConfiguration configuration, IHttpClientFactory httpClientFactory)
     {
@@ -17,6 +18,7 @@ public class OpenAiLlmClient : IOpenAiLlmClient
         _openAiApi.Chat.DefaultChatRequestArgs.Model = Model;
         _openAiApi.Chat.DefaultChatRequestArgs.Temperature = Temperature;
         _openAiApi.HttpClientFactory = httpClientFactory;
+        _systemPrompt = configuration.GetValue<string>("OpenAiSystemPrompt", "")!;
     }
 
     public async Task<string> GetChatCompletion(params OpenAiGptMessage[] inputs)
@@ -38,6 +40,10 @@ public class OpenAiLlmClient : IOpenAiLlmClient
         if (messages.IsNullOrEmpty()) throw new ArgumentNullException(nameof(messages));
 
         Conversation chat = _openAiApi.Chat.CreateConversation();
+        if (!string.IsNullOrEmpty(_systemPrompt))
+        {
+            chat.AppendSystemMessage(_systemPrompt);
+        }
         foreach (OpenAiGptMessage openAiGptInputMessage in messages)
         {
             chat.AppendMessage(ChatMessageRole.FromString(openAiGptInputMessage.Role), openAiGptInputMessage.Content);
