@@ -16,6 +16,7 @@ public class EmailSender : IEmailSender
 
     public EmailSender(IConfiguration configuration, ILogger<EmailSender> logger)
     {
+        _logger = logger;
         IsActive = configuration.GetSection("EmailServiceInfo").GetValue<bool>("ShouldSend");
         if (IsActive)
         {
@@ -40,10 +41,17 @@ public class EmailSender : IEmailSender
             Text = htmlMessage
         };
 
-        SmtpClient smtpClient = new SmtpClient();
-        await smtpClient.ConnectAsync("smtp.gmail.com", 0, true);
-        await smtpClient.AuthenticateAsync(_senderEmail, _senderPassword);
-        await smtpClient.SendAsync(mail);
-        await smtpClient.DisconnectAsync(true);
+        try
+        {
+            SmtpClient smtpClient = new SmtpClient();
+            await smtpClient.ConnectAsync("smtp.gmail.com", 0, true);
+            await smtpClient.AuthenticateAsync(_senderEmail, _senderPassword);
+            await smtpClient.SendAsync(mail);
+            await smtpClient.DisconnectAsync(true);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to send email");
+        }
     }
 }
