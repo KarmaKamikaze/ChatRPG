@@ -10,9 +10,11 @@ public class EmailSender : IEmailSender
 {
     private readonly string? _senderEmail;
     private readonly string? _senderPassword;
+    private readonly ILogger<EmailSender> _logger;
     public readonly bool IsActive;
+    
 
-    public EmailSender(IConfiguration configuration)
+    public EmailSender(IConfiguration configuration, ILogger<EmailSender> logger)
     {
         IsActive = configuration.GetSection("EmailServiceInfo").GetValue<bool>("ShouldSend");
         if (IsActive)
