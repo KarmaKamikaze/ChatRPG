@@ -271,3 +271,10 @@ a, .btn-link {
     border-radius: 8px;
     background-color: #3E3A3A;
 }
+
+.required-keyword {
+    color: #ff1f1f;
+    font-size: 10px;
+    position: relative;
+    top: -10px;
+}

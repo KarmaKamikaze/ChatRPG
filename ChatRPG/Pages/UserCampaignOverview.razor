@@ -28,16 +28,18 @@
             <div class="col rounded custom-gray-container">
                 <div class="m-3">
                     <h3>Start Scenarios</h3>
-                    @foreach (StartScenario scenario in StartScenarios)
-                    {
-                        <div class="card" style="width: 18rem;">
-                            <div class="card-body">
-                                <h5 class="card-title">@scenario.Title</h5>
-                                <p class="card-text">@scenario.Body</p>
-                                <a href="#" class="card-link">See more ></a>
+                    <div class="vstack overflow-auto form-text-black" style="max-height: 400px;" id="scrollbar">
+                        @foreach (StartScenario scenario in StartScenarios)
+                        {
+                            <div class="card" style="width: 18rem;">
+                                <div class="card-body">
+                                    <h5 class="card-title">@scenario.Title</h5>
+                                    <p class="card-text">@scenario.Body</p>
+                                    <a href="#" class="card-link">See more ></a>
+                                </div>
                             </div>
-                        </div>
-                    }
+                        }
+                    </div>
                     <p class="text-muted">Found @(StartScenarios.Count) scenario@(StartScenarios.Count == 1 ? "" : "s").</p>
                 </div>
             </div>
@@ -46,11 +48,11 @@
                 <h3>Create a Custom Campaign</h3>
                     <div class="form">
                         <div class="mb-3">
-                            <label for="inputCharacterName" class="form-label">Character Name*</label>
+                            <label for="inputCharacterName" class="form-label">Character Name<span class="required-keyword">(Required)</span></label>
                             <input type="text" @bind="CharacterName" class="form-control" id="inputCharacterName"/>
                         </div>
                         <div class="mb-3">
-                            <label for="inputCampaignTitle" class="form-label">Campaign Title*</label>
+                            <label for="inputCampaignTitle" class="form-label">Campaign Title<span class="required-keyword">(Required)</span></label>
                             <input type="text" @bind="CampaignTitle" class="form-control" id="inputCampaignTitle">
                         </div>
                         <div class="mb-3">
