@@ -24,21 +24,21 @@ namespace ChatRPG.Areas.Identity.Pages.Account
         private readonly IUserStore<User> _userStore;
         private readonly IUserEmailStore<User> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
-        private readonly EmailSender _emailSender;
+        private readonly IConfiguration _configuration;
 
         public RegisterModel(
             UserManager<User> userManager,
             IUserStore<User> userStore,
             SignInManager<User> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _userStore = userStore;
             _emailStore = GetEmailStore();
             _signInManager = signInManager;
             _logger = logger;
-            _emailSender = emailSender as EmailSender;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    if (_emailSender.IsActive)
+                    if (_configuration.GetSection("EmailServiceInfo").GetValue<bool>("ShouldSend"))
                     {
                         string userId = await _userManager.GetUserIdAsync(user);
                         string code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -140,8 +140,10 @@ namespace ChatRPG.Areas.Identity.Pages.Account
                             pageHandler: null,
                             values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                             protocol: Request.Scheme);
-
-                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                        Logger<EmailSender> emailSenderLogger = new Logger<EmailSender>(new LoggerFactory());
+                        EmailSender emailSender = new EmailSender(_configuration, emailSenderLogger);
+                        
+                        await emailSender.SendEmailAsync(Input.Email, "Confirm your email",
                             $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
                     }
 
