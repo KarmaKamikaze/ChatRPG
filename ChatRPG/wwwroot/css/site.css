@@ -86,28 +86,29 @@ a, .btn-link {
     border-color: #1861ac;
 }
 
-.user-message-container {
+.message-container {
+    border-radius: 10px; /* Adds rounded corners to the container */
+    padding: 10px; /* Adds padding to the container */
+    margin: 10px 0;
+}
+
+.message-container.message-container-player {
     background-color: rgb(222, 222, 222);
-    border-radius: 10px; /* Adds rounded corners to the container */
-    padding: 10px; /* Adds padding to the container */
-    margin: 10px 0;
 }
 
-.assistant-message-container {
+.message-container-assistant.message-container-assistant {
     background-color: rgb(200, 200, 200);
-    border-radius: 10px; /* Adds rounded corners to the container */
-    padding: 10px; /* Adds padding to the container */
-    margin: 10px 0;
 }
 
-.user-message {
+.message {
     color: rgb(0, 0, 0);
     margin: 10px 0;
 }
 
-.assistant-message {
-    color: rgb(0, 0, 0);
-    margin: 10px 0;
+.message-player {
+}
+
+.message-assistant {
 }
 
 .custom-text-field {

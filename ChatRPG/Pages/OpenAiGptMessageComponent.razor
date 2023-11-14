@@ -1,24 +1,16 @@
 ﻿@using ChatRPG.API
+@using OpenAI_API.Chat
+@using static OpenAI_API.Chat.ChatMessageRole
 @inherits ComponentBase
 
-<div class="@($"{OpenAiGptMessage.Role}-message-container")">
-    <p class="@($"{OpenAiGptMessage.Role}-message")">@MessagePrefix@OpenAiGptMessage.Content</p>
+<div class="message-container message-container-@($"{MessagePrefix.ToLower()}")">
+    <p class="message message-@($"{MessagePrefix.ToLower()}")">@(MessagePrefix): @(OpenAiGptMessage.Content)</p>
 </div>
 
 @code {
     [Parameter]
     public required OpenAiGptMessage OpenAiGptMessage { get; set; }
 
-    private string MessagePrefix
-    {
-        get
-        {
-            return OpenAiGptMessage.Role switch
-            {
-                "assistant" => "Assistant: ",
-                "user" => "Player: ",
-                _ => ""
-            };
-        }
-    }
+    private string MessagePrefix => OpenAiGptMessage.Role.Equals(ChatMessageRole.Assistant) 
+        ? "Assistant" : "Player";
 }

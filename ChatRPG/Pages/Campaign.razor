@@ -16,12 +16,6 @@
         {
             <OpenAiGptMessageComponent OpenAiGptMessage="@message"/>
         }
-        @if (!_tempMessage.IsNullOrEmpty())
-        {
-            <div class="@("assistant-message-container")">
-                <p class="@("assistant-message")">Assistant: @_tempMessage</p>
-            </div>
-        }
     </div>
 </div>
 

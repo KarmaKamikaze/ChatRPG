@@ -6,7 +6,7 @@ namespace ChatRPG.API;
 
 public class OpenAiLlmClient : IOpenAiLlmClient
 {
-    private const string Model = "gpt-4";
+    private const string Model = "gpt-3.5-turbo";
     private const double Temperature = 0.7;
 
     private readonly OpenAIAPI _openAiApi;
@@ -21,21 +21,21 @@ public class OpenAiLlmClient : IOpenAiLlmClient
         _systemPrompt = configuration.GetValue<string>("OpenAiSystemPrompt", "")!;
     }
 
-    public async Task<string> GetChatCompletion(params OpenAiGptMessage[] inputs)
+    public async Task<string> GetChatCompletion(IList<OpenAiGptMessage> inputs)
     {
         Conversation chat = CreateConversation(inputs);
 
         return await chat.GetResponseFromChatbotAsync();
     }
 
-    public IAsyncEnumerable<string> GetStreamedChatCompletion(params OpenAiGptMessage[] inputs)
+    public IAsyncEnumerable<string> GetStreamedChatCompletion(IList<OpenAiGptMessage> inputs)
     {
         Conversation chat = CreateConversation(inputs);
 
         return chat.StreamResponseEnumerableFromChatbotAsync();
     }
 
-    private Conversation CreateConversation(params OpenAiGptMessage[] messages)
+    private Conversation CreateConversation(IList<OpenAiGptMessage> messages)
     {
         if (messages.IsNullOrEmpty()) throw new ArgumentNullException(nameof(messages));
 
@@ -46,7 +46,7 @@ public class OpenAiLlmClient : IOpenAiLlmClient
         }
         foreach (OpenAiGptMessage openAiGptInputMessage in messages)
         {
-            chat.AppendMessage(ChatMessageRole.FromString(openAiGptInputMessage.Role), openAiGptInputMessage.Content);
+            chat.AppendMessage(openAiGptInputMessage.Role, openAiGptInputMessage.Content);
         }
 
         return chat;
