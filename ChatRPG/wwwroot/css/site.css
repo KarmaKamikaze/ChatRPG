@@ -141,9 +141,9 @@ a, .btn-link {
 }
 
 .footer-formatting {
-    overflow: hidden; 
-    position: fixed; 
-    bottom: 0; 
+    overflow: hidden;
+    position: fixed;
+    bottom: 0;
     padding: 10px;
 }
 
@@ -262,13 +262,13 @@ a, .btn-link {
 
 .btn-in {
     position: relative;
-    width: 100px;
-    padding: 5px 0;
+    width: auto;
+    padding: 5px 15px;
     text-align: center;
-    margin: 2px 10px;
+    margin: 2px 2px;
     font-weight: bold;
-    border: 2px solid #98d2d2;
-    background-color: rgb(152, 210, 210, 0.5);
+    border: 2px solid #685f5f;
+    background-color: rgb(35, 35, 35, 0.5);
     color: #ffffff;
     cursor: pointer;
     overflow: hidden;
@@ -277,7 +277,7 @@ a, .btn-link {
 }
 
 .btn-in-span {
-    background: #98d2d2;
+    background: #685f5f;
     height: 100%;
     width: 0;
     position: absolute;

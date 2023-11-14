@@ -16,7 +16,9 @@
             </a>
             <div class="d-sm-inline-flex flex-sm-row-reverse">
                 <div class="hstack">
-                    <p>@WelcomeMessage, @Username!</p>
+                    <button @onclick='() => NavMan.NavigateTo("Manage", forceLoad: true)' class="btn btn-in">
+                        <span class="btn-in-span"></span>@Username
+                    </button>
                     <button @onclick='() => NavMan.NavigateTo("Logout", forceLoad: true)' class="btn btn-in">
                         <span class="btn-in-span"></span>Log Out
                     </button>
@@ -30,8 +32,5 @@
 
     [Parameter, EditorRequired]
     public string Username { get; set; } = null!;
-
-    [Parameter]
-    public string WelcomeMessage { get; set; } = "Welcome";
 
 }
