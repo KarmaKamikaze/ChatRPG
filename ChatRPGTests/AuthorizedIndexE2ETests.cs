@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 
@@ -97,17 +98,33 @@ public class AuthorizedIndexE2ETests : IDisposable
     }
 
     [Fact]
-    public void AuthorizedIndexPage_DashboardWrapper_ContainsDashboardTitle()
+    public void AuthorizedIndexPage_Dashboard_ContainsCorrectDashboardTitle()
     {
         // Arranged
         string expectedDashboardTitle = "Dashboard";
 
         // Act
-        IWebElement? wrapper = _wait.Until(webDriver => webDriver.FindElement(By.ClassName("dashboard-wrapper")));
-        IWebElement? actualDashboardTitle = wrapper.FindElement(By.TagName("h1"));
+        IWebElement? actualDashboardTitle = _wait.Until(webDriver => webDriver.FindElement(By.ClassName("dashboard-title")));
 
         // Assert
         Assert.Equal(expectedDashboardTitle, actualDashboardTitle.Text);
+    }
+
+    [Fact]
+    public void AuthorizedIndexPage_StartScenarios_ContainsSameAmountOfScenariosAsDisplayed()
+    {
+        // Arranged
+        IWebElement? startScenariosContainer = _wait.Until(webDriver => webDriver.FindElement(By.Id("start-scenarios")));
+        ReadOnlyCollection<IWebElement>? startScenarios = startScenariosContainer.FindElements(By.ClassName("card"));
+        string expectedAmountOfScenarios = startScenarios.Count.ToString();
+
+        // Act
+        IWebElement? scenariosCounter = _wait.Until(webDriver => webDriver.FindElement(By.Id("scenarios-count")));
+        Match match = Regex.Match(scenariosCounter.Text, @"\d+");
+        string actualAmountOfScenarios = match.Value;
+
+        // Assert
+        Assert.Equal(expectedAmountOfScenarios, actualAmountOfScenarios);
     }
 
     public void Dispose()

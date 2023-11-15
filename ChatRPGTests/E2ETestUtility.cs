@@ -8,8 +8,8 @@ public static class E2ETestUtility
     public static IWebDriver Setup(string page)
     {
         ChromeOptions chromeOptions = new ChromeOptions();
-        chromeOptions.AddArguments("--ignore-certificate-errors",
-            "--start-maximized", "--disable-popup-blocking", "headless");
+        chromeOptions.AddArguments("--ignore-certificate-errors", "--start-maximized",
+            "--disable-popup-blocking", "--window-size=1920,1080", "headless");
         IWebDriver driver = new ChromeDriver(chromeOptions);
         driver.Navigate().GoToUrl($"http://localhost:5111{page}");
 

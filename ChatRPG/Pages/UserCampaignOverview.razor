@@ -4,11 +4,14 @@
 <div class="container">
     @if (User is not null)
     {
+        <div class="dashboard-title-container">
+            <h1 class="title dashboard-title text-center">Dashboard</h1>
+        </div>
         <div class="row gap-3">
             <div class="col rounded custom-gray-container">
                 <div class="m-3">
                     <h3 class="text-center mb-4">Your Campaigns</h3>
-                    <div class="vstack overflow-auto form-text-black mb-1" style="max-height: 400px;" id="scrollbar">
+                    <div class="vstack overflow-auto form-text-black mb-1 scrollbar" style="max-height: 400px;" id="your-campaigns">
                         @foreach (CampaignModel campaign in Campaigns)
                         {
                             <div class="card card-dim mb-2">
@@ -28,20 +31,21 @@
             </div>
             <div class="col rounded custom-gray-container">
                 <div class="m-3">
-                    <h3 class="text-center mb-4">Start Scenarios</h3>
-                    <div class="vstack overflow-auto form-text-black mb-1" style="max-height: 400px;" id="scrollbar">
+                    <h3 class="text-center mb-4">Starting Scenarios</h3>
+                    <div class="vstack overflow-auto form-text-black mb-1 scrollbar" style="max-height: 400px;" id="start-scenarios">
                         @foreach (StartScenario scenario in StartScenarios)
                         {
                             <div class="card card-dim mb-2">
                                 <div class="card-body">
                                     <h5 class="card-title">@scenario.Title</h5>
-                                    <p class="card-text">@scenario.Body</p>
+                                    <hr/>
+                                    <p class="card-text" style="font-size: 14px;">@scenario.Body</p>
                                     <a href="#" class="card-link">See more ></a>
                                 </div>
                             </div>
                         }
                     </div>
-                    <p class="text-muted">Found @(StartScenarios.Count) scenario@(StartScenarios.Count == 1 ? "" : "s").</p>
+                    <p class="text-muted" id="scenarios-count">Found @(StartScenarios.Count) scenario@(StartScenarios.Count == 1 ? "" : "s").</p>
                 </div>
             </div>
             <div class="col-5 rounded custom-gray-container">
