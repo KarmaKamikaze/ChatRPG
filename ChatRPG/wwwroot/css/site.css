@@ -343,3 +343,15 @@ a, .btn-link {
     position: relative;
     top: -10px;
 }
+
+.dashboard-title {
+    color: #ffffff;
+    text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.dashboard-title-container {
+    position: absolute;
+    top: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+}

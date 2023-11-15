@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 
@@ -93,6 +94,20 @@ public class AuthorizedIndexE2ETests : IDisposable
 
         // Assert
         Assert.Equal(expectedSlogan, actualSlogan.Text);
+    }
+
+    [Fact]
+    public void AuthorizedIndexPage_DashboardWrapper_ContainsDashboardTitle()
+    {
+        // Arranged
+        string expectedDashboardTitle = "Dashboard";
+
+        // Act
+        IWebElement? wrapper = _wait.Until(webDriver => webDriver.FindElement(By.ClassName("dashboard-wrapper")));
+        IWebElement? actualDashboardTitle = wrapper.FindElement(By.TagName("h1"));
+
+        // Assert
+        Assert.Equal(expectedDashboardTitle, actualDashboardTitle.Text);
     }
 
     public void Dispose()
