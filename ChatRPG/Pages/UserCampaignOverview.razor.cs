@@ -56,4 +56,14 @@ public partial class UserCampaignOverview : ComponentBase
         CampaignTitle = "";
         CustomStartScenario = null!;
     }
+
+    private async Task ContinueOldCampaign()
+    {
+        Console.WriteLine("Continuing Campaign...");
+    }
+
+    private async Task ApplyStartingScenario()
+    {
+        throw new NotImplementedException();
+    }
 }

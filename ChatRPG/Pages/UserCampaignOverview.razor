@@ -14,16 +14,15 @@
                     <div class="vstack overflow-auto form-text-black mb-1 scrollbar" style="max-height: 400px;" id="your-campaigns">
                         @foreach (CampaignModel campaign in Campaigns)
                         {
-                            <div class="card card-dim mb-2">
-                                <div class="card-body">
+                            <button class="card card-dim mb-2" @onclick='ContinueOldCampaign'>
+                                <div class="card-body col-12">
                                     <h5 class="card-title">@campaign.Title</h5>
                                     <h6 class="card-subtitle mb-2 text-muted" style="font-size: 14px;">@campaign.Characters.First(c => c.IsPlayer).Name</h6>
                                     <hr/>
-                                    <p class="card-text line-clamp">@(campaign.CustomStartScenario ?? campaign.StartScenario?.Body ?? "No scenario")</p>
+                                    <p class="card-text line-clamp text-start">@(campaign.CustomStartScenario ?? campaign.StartScenario?.Body ?? "No scenario")</p>
                                     <p class="card-text" style="font-size: 14px;">Started @campaign.StartedOn.ToShortDateString() @campaign.StartedOn.ToShortTimeString()</p>
-                                    <a href="#" class="card-link">See more ></a>
                                 </div>
-                            </div>
+                            </button>
                         }
                     </div>
                     <p class="text-muted">Found @(Campaigns.Count) campaign@(Campaigns.Count == 1 ? "" : "s").</p>
@@ -35,14 +34,13 @@
                     <div class="vstack overflow-auto form-text-black mb-1 scrollbar" style="max-height: 400px;" id="start-scenarios">
                         @foreach (StartScenario scenario in StartScenarios)
                         {
-                            <div class="card card-dim mb-2">
-                                <div class="card-body">
+                            <button class="card card-dim mb-2" @onclick='ApplyStartingScenario'>
+                                <div class="card-body col-12">
                                     <h5 class="card-title">@scenario.Title</h5>
                                     <hr/>
-                                    <p class="card-text" style="font-size: 14px;">@scenario.Body</p>
-                                    <a href="#" class="card-link">See more ></a>
+                                    <p class="card-text text-start" style="font-size: 14px;">@scenario.Body</p>
                                 </div>
-                            </div>
+                            </button>
                         }
                     </div>
                     <p class="text-muted" id="scenarios-count">Found @(StartScenarios.Count) scenario@(StartScenarios.Count == 1 ? "" : "s").</p>
