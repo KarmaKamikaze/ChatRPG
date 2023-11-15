@@ -62,8 +62,10 @@ public partial class UserCampaignOverview : ComponentBase
         Console.WriteLine("Continuing Campaign...");
     }
 
-    private async Task ApplyStartingScenario()
+    private void ApplyStartingScenario(string title, string scenario)
     {
-        throw new NotImplementedException();
+        CampaignTitle = title;
+        CustomStartScenario = scenario;
+        StateHasChanged();
     }
 }

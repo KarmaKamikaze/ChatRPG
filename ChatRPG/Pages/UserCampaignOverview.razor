@@ -34,13 +34,7 @@
                     <div class="vstack overflow-auto form-text-black mb-1 scrollbar" style="max-height: 400px;" id="start-scenarios">
                         @foreach (StartScenario scenario in StartScenarios)
                         {
-                            <button class="card card-dim mb-2" @onclick='ApplyStartingScenario'>
-                                <div class="card-body col-12">
-                                    <h5 class="card-title">@scenario.Title</h5>
-                                    <hr/>
-                                    <p class="card-text text-start" style="font-size: 14px;">@scenario.Body</p>
-                                </div>
-                            </button>
+                            <Scenario ApplyScenario="ApplyStartingScenario" Title="@scenario.Title" Body="@scenario.Body"/>
                         }
                     </div>
                     <p class="text-muted" id="scenarios-count">Found @(StartScenarios.Count) scenario@(StartScenarios.Count == 1 ? "" : "s").</p>
