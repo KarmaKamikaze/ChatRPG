@@ -25,7 +25,7 @@
                             </button>
                         }
                     </div>
-                    <p class="text-muted">Found @(Campaigns.Count) campaign@(Campaigns.Count == 1 ? "" : "s").</p>
+                    <p class="text-muted" id="campaigns-count">Found @(Campaigns.Count) campaign@(Campaigns.Count == 1 ? "" : "s").</p>
                 </div>
             </div>
             <div class="col rounded custom-gray-container">
@@ -42,7 +42,7 @@
             </div>
             <div class="col-5 rounded custom-gray-container">
                 <div class="m-3">
-                <h3 class="text-center mb-4">Create a Custom Campaign</h3>
+                    <h3 class="text-center mb-4">Create a Custom Campaign</h3>
                     <div class="form">
                         <div class="mb-3">
                             <label for="inputCampaignTitle" class="form-label">Campaign Title<span class="required-keyword">(Required)</span></label>
@@ -54,7 +54,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="inputCustomStartScenario" class="form-label">Custom Start Scenario</label>
-                            <textarea class="form-control" @bind="CustomStartScenario" id="inputCustomStartScenario" rows="3"></textarea>
+                            <textarea class="form-control scrollbar" style="resize: none;" @bind="CustomStartScenario" id="inputCustomStartScenario" rows="6"></textarea>
                         </div>
                         <button class="btn btn-primary" style="width: 100%" @onclick="CreateAndStartCampaign">Create campaign</button>
                     </div>

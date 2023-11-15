@@ -111,6 +111,22 @@ public class AuthorizedIndexE2ETests : IDisposable
     }
 
     [Fact]
+    public void AuthorizedIndexPage_YourCampaigns_ContainsSameAmountOfCampaignsAsDisplayed()
+    {
+        // Arranged
+        IWebElement? campaignsContainer = _wait.Until(webDriver => webDriver.FindElement(By.Id("your-campaigns")));
+        ReadOnlyCollection<IWebElement>? campaigns = campaignsContainer.FindElements(By.ClassName("card"));
+        string expectedAmountOfScenarios = campaigns.Count.ToString();
+
+        // Act
+        IWebElement? campaignsCounter = _wait.Until(webDriver => webDriver.FindElement(By.Id("campaigns-count")));
+        string actualAmountOfScenarios = Regex.Match(campaignsCounter.Text, @"\d+").Value;
+
+        // Assert
+        Assert.Equal(expectedAmountOfScenarios, actualAmountOfScenarios);
+    }
+
+    [Fact]
     public void AuthorizedIndexPage_StartScenarios_ContainsSameAmountOfScenariosAsDisplayed()
     {
         // Arranged
@@ -120,8 +136,7 @@ public class AuthorizedIndexE2ETests : IDisposable
 
         // Act
         IWebElement? scenariosCounter = _wait.Until(webDriver => webDriver.FindElement(By.Id("scenarios-count")));
-        Match match = Regex.Match(scenariosCounter.Text, @"\d+");
-        string actualAmountOfScenarios = match.Value;
+        string actualAmountOfScenarios = Regex.Match(scenariosCounter.Text, @"\d+").Value;
 
         // Assert
         Assert.Equal(expectedAmountOfScenarios, actualAmountOfScenarios);
