@@ -2,7 +2,6 @@ using ChatRPG.Data;
 using ChatRPG.API;
 using ChatRPG.Services;
 using ChatRPG.Data.Models;
-using ChatRPG.Services;
 using ChatRPG.Services.Events;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
