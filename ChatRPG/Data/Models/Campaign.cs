@@ -33,4 +33,5 @@ public class Campaign
     public ICollection<Character> Characters { get; } = new List<Character>();
     public ICollection<Event> Events { get; } = new List<Event>();
     public ICollection<Environment> Environments { get; } = new List<Environment>();
+    public Character Player => Characters.First(c => c.IsPlayer);
 }

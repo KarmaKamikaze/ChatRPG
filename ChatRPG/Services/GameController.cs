@@ -1,16 +1,22 @@
 using ChatRPG.API;
+using ChatRPG.Data.Models;
 using ChatRPG.Services.Events;
 using OpenAI_API.Chat;
+using Org.BouncyCastle.Pqc.Crypto.Crystals.Dilithium;
 
 namespace ChatRPG.Services;
 
 public class GameController
 {
+    private readonly ILogger<GameController> _logger;
     private readonly IOpenAiLlmClient _llmClient;
     private readonly bool _streamChatCompletions;
-    
-    public GameController(IOpenAiLlmClient llmClient, IConfiguration configuration)
+
+    public Campaign? Campaign { get; set; }
+
+    public GameController(ILogger<GameController> logger, IOpenAiLlmClient llmClient, IConfiguration configuration)
     {
+        _logger = logger;
         _llmClient = llmClient;
         _streamChatCompletions = configuration.GetValue("StreamChatCompletions", true);
         if (configuration.GetValue("UseMocks", false))
@@ -20,26 +26,41 @@ public class GameController
     }
 
     public event EventHandler<ChatCompletionReceivedEventArgs>? ChatCompletionReceived;
-    public event EventHandler<ChatCompletionChunkReceivedEventArgs>? ChatCompletionChunkReceived; 
+    public event EventHandler<ChatCompletionChunkReceivedEventArgs>? ChatCompletionChunkReceived;
+
+    private void OnChatCompletionReceived(OpenAiGptMessage message)
+    {
+        ChatCompletionReceived?.Invoke(this, new ChatCompletionReceivedEventArgs(message));
+    }
+
+    private void OnChatCompletionChunkReceived(bool isStreamingDone, string? chunk = null)
+    {
+        ChatCompletionChunkReceivedEventArgs args = (chunk is null)
+            ? new ChatCompletionChunkReceivedEventArgs(isStreamingDone)
+            : new ChatCompletionChunkReceivedEventArgs(isStreamingDone, chunk);
+        ChatCompletionChunkReceived?.Invoke(this, args);
+    }
 
     public async Task HandleUserPrompt(IList<OpenAiGptMessage> conversation)
     {
+        if (Campaign is null) return;
+
         if (_streamChatCompletions)
         {
             OpenAiGptMessage message = new OpenAiGptMessage(ChatMessageRole.Assistant, "");
-            ChatCompletionReceived?.Invoke(this, new ChatCompletionReceivedEventArgs(message));
+            OnChatCompletionReceived(message);
 
             await foreach (string chunk in _llmClient.GetStreamedChatCompletion(conversation))
             {
-                ChatCompletionChunkReceived?.Invoke(this, new ChatCompletionChunkReceivedEventArgs(false, chunk));
+                OnChatCompletionChunkReceived(isStreamingDone: false, chunk);
             }
-            ChatCompletionChunkReceived?.Invoke(this, new ChatCompletionChunkReceivedEventArgs(true));
+            OnChatCompletionChunkReceived(isStreamingDone: true);
         }
         else
         {
             string response = await _llmClient.GetChatCompletion(conversation);
             OpenAiGptMessage message = new OpenAiGptMessage(ChatMessageRole.Assistant, response);
-            ChatCompletionReceived?.Invoke(this, new ChatCompletionReceivedEventArgs(message));
+            OnChatCompletionReceived(message);
         }
     }
 }
