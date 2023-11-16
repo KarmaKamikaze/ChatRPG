@@ -37,8 +37,7 @@ public partial class OpenAiGptMessage
         }
         catch (JsonException e)
         {
-            // TODO: Format was unexpected
-            return new LlmResponse { Narrative = Content };
+            return new LlmResponse { Narrative = Content }; // Format was unexpected
         }
     }
 
