@@ -6,16 +6,17 @@ public class Event
     {
     }
 
-    public Event(Campaign campaign, Environment environment, EventType type, string description)
+    public Event(Campaign campaign, Environment environment, EventType type, string name, string description)
     {
+        Name = name;
         Campaign = campaign;
         Environment = environment;
         Type = type;
         Description = description;
     }
 
-    public Event(Campaign campaign, Environment environment, EventType type, string description, Character character)
-        : this(campaign, environment, type, description)
+    public Event(Campaign campaign, Environment environment, EventType type, string name, string description, Character character)
+        : this(campaign, environment, type, name, description)
     {
         Character = character;
     }
@@ -27,4 +28,5 @@ public class Event
     public EventType Type { get; private set; } = EventType.Other;
     public string Description { get; private set; } = null!;
     public int Ordering { get; private set; }
+    public string Name { get; private set; } = null!;
 }

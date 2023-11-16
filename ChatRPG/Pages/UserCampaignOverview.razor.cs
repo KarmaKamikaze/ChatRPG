@@ -45,9 +45,8 @@ public partial class UserCampaignOverview : ComponentBase
         }
 
         CampaignModel campaign = new(User, CampaignTitle, CustomStartScenario);
-        Character player = new Character(campaign, CharacterType.Humanoid, CharacterName, "", true, 100);
         Environment environment = new(campaign, "Start location", "The place where it all began");
-        player.Environment = environment;
+        Character player = new(campaign, environment, CharacterType.Humanoid, CharacterName, "", true, 100);
         campaign.Environments.Add(environment);
         campaign.Characters.Add(player);
         await PersisterService!.SaveAsync(campaign);

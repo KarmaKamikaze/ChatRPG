@@ -29,7 +29,9 @@ builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuth
     .AddSingleton<IHttpClientFactory, HttpClientFactory>()
     .AddSingleton<IOpenAiLlmClient, OpenAiLlmClient>()
     .AddTransient<IPersisterService, EfPersisterService>()
-    .AddTransient<IEmailSender, EmailSender>();
+    .AddTransient<IEmailSender, EmailSender>()
+    .AddTransient<GameInputHandler>()
+    .AddTransient<GameStateManager>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {

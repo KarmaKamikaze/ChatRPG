@@ -17,7 +17,7 @@
                                     <h6 class="card-subtitle mb-2 text-muted">@campaign.Characters.First(c => c.IsPlayer).Name</h6>
                                     <p class="card-text text-truncate">@(campaign.CustomStartScenario ?? campaign.StartScenario?.Body ?? "No scenario")</p>
                                     <p class="card-text">Started @campaign.StartedOn.ToShortDateString() @campaign.StartedOn.ToShortTimeString()</p>
-                                    <a href="#" class="card-link">See more ></a>
+                                    <a href="/campaign/@campaign.Id" class="card-link">See more ></a>
                                 </div>
                             </div>
                         }
