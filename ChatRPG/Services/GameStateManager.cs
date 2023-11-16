@@ -9,10 +9,12 @@ namespace ChatRPG.Services;
 public class GameStateManager
 {
     private readonly ILogger<GameStateManager> _logger;
+    private readonly IPersisterService _persisterService;
 
-    public GameStateManager(ILogger<GameStateManager> logger)
+    public GameStateManager(ILogger<GameStateManager> logger, IPersisterService persisterService)
     {
         _logger = logger;
+        _persisterService = persisterService;
     }
 
     public void UpdateStateFromMessage(Campaign campaign, OpenAiGptMessage gptMessage)
@@ -67,6 +69,11 @@ public class GameStateManager
         {
             _logger.LogError(e, "Failed to parse message content as response: \"{Content}\"", message.Content);
         }
+    }
+
+    public async Task SaveCurrentState(Campaign campaign)
+    {
+        await _persisterService.SaveAsync(campaign);
     }
 
     private static T ParseToEnum<T>(string input, T defaultVal) where T : struct, Enum

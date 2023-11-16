@@ -18,7 +18,7 @@ public partial class CampaignPage
     private bool _shouldSave;
     private IJSObjectReference? _scrollJsScript;
     private FileUtility? _fileUtil;
-    private readonly List<OpenAiGptMessage> _conversation = new();
+    private List<OpenAiGptMessage> _conversation = new();
     private string _userInput = "";
     private bool _isWaitingForResponse;
     private OpenAiGptMessage? _latestPlayerMessage;
@@ -40,6 +40,10 @@ public partial class CampaignPage
     protected override async Task OnInitializedAsync()
     {
         _campaign = await PersisterService!.LoadFromCampaignIdAsync(Id);
+        if (_campaign != null)
+        {
+            _conversation = _campaign.Messages.Select(OpenAiGptMessage.FromMessage).ToList();
+        }
         AuthenticationState authenticationState = await AuthenticationStateProvider!.GetAuthenticationStateAsync();
         _loggedInUsername = authenticationState.User.Identity?.Name;
         if (_loggedInUsername != null) _fileUtil = new FileUtility(_loggedInUsername);
@@ -83,7 +87,7 @@ public partial class CampaignPage
             return;
         }
         _isWaitingForResponse = true;
-        OpenAiGptMessage userInput = new OpenAiGptMessage(ChatMessageRole.User, _userInput);
+        OpenAiGptMessage userInput = new(ChatMessageRole.User, _userInput);
         _conversation.Add(userInput);
         _latestPlayerMessage = userInput;
         _userInput = string.Empty;
@@ -110,7 +114,6 @@ public partial class CampaignPage
         UpdateSaveFile(eventArgs.Message.Content);
         Task.Run(() => ScrollToElement(BottomId));
         _isWaitingForResponse = false;
-        Save().Wait();
     }
 
     /// <summary>
@@ -132,7 +135,6 @@ public partial class CampaignPage
             StateHasChanged();
         }
         Task.Run(() => ScrollToElement(BottomId));
-        Save().Wait();
     }
 
     private void UpdateSaveFile(string asstMessage)
@@ -140,13 +142,5 @@ public partial class CampaignPage
         if (!_shouldSave || _fileUtil == null || string.IsNullOrEmpty(asstMessage)) return;
         MessagePair messagePair = new MessagePair(_latestPlayerMessage?.Content ?? "", asstMessage);
         Task.Run(() => _fileUtil.UpdateSaveFileAsync(messagePair));
-    }
-
-    private async Task Save()
-    {
-        if (PersisterService != null && _campaign != null)
-        {
-            await PersisterService.SaveAsync(_campaign);
-        }
     }
 }

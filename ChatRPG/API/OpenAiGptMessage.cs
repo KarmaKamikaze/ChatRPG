@@ -2,6 +2,8 @@ using OpenAI_API.Chat;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using ChatRPG.API.Response;
+using ChatRPG.Data.Models;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ChatRPG.API;
 
@@ -13,6 +15,10 @@ public partial class OpenAiGptMessage
         Content = content;
         NarrativePart = "";
         UpdateNarrativePart();
+        if (!Content.IsNullOrEmpty() && NarrativePart.IsNullOrEmpty() && role.Equals(ChatMessageRole.Assistant))
+        {
+            NarrativePart = Content;
+        }
     }
 
     public ChatMessageRole Role { get; }
@@ -21,11 +27,19 @@ public partial class OpenAiGptMessage
 
     public LlmResponse? TryParseFromJson()
     {
-        JsonSerializerOptions options = new()
+        try
         {
-            PropertyNameCaseInsensitive = true
-        };
-        return JsonSerializer.Deserialize<LlmResponse>(Content, options);
+            JsonSerializerOptions options = new()
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            return JsonSerializer.Deserialize<LlmResponse>(Content, options);
+        }
+        catch (JsonException e)
+        {
+            // TODO: Format was unexpected
+            return new LlmResponse { Narrative = Content };
+        }
     }
 
     public void AddChunk(string chunk)
@@ -45,4 +59,10 @@ public partial class OpenAiGptMessage
 
     [GeneratedRegex("^\\s*{\\s*\"narrative\":\\s*\"([^\"]*)", RegexOptions.IgnoreCase)]
     private static partial Regex NarrativeRegex();
+
+    public static OpenAiGptMessage FromMessage(Message message)
+    {
+        ChatMessageRole role = ChatMessageRole.FromString(message.Role.ToString().ToLower());
+        return new OpenAiGptMessage(role, message.Content);
+    }
 }

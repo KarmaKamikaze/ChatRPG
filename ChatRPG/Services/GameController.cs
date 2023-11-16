@@ -55,6 +55,7 @@ public class GameController
             }
             OnChatCompletionChunkReceived(isStreamingDone: true);
             _gameStateManager.UpdateStateFromMessage(campaign, message);
+            await _gameStateManager.SaveCurrentState(campaign);
         }
         else
         {
@@ -62,6 +63,7 @@ public class GameController
             OpenAiGptMessage message = new(ChatMessageRole.Assistant, response);
             OnChatCompletionReceived(message);
             _gameStateManager.UpdateStateFromMessage(campaign, message);
+            await _gameStateManager.SaveCurrentState(campaign);
         }
         _logger.LogInformation("Finished processing prompt.");
     }

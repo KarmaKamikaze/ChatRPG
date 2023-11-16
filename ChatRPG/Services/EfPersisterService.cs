@@ -32,6 +32,7 @@ public class EfPersisterService : IPersisterService
             }
             await _dbContext.SaveChangesAsync();
             await transaction.CommitAsync();
+            _logger.LogInformation("Saved campaign with id {Id} successfully", campaign.Id);
         }
         catch (Exception e)
         {
