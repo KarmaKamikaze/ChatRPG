@@ -1,10 +1,10 @@
 ﻿using System.Configuration;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using MailKit.Net.Smtp;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using MimeKit;
 using MimeKit.Text;
 
-namespace ChatRPG.Services;
+namespace ChatRPG.Data;
 
 public class EmailSender : IEmailSender
 {
