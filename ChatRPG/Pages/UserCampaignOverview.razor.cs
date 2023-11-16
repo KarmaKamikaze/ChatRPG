@@ -26,6 +26,8 @@ public partial class UserCampaignOverview : ComponentBase
     [Inject] private AuthenticationStateProvider? AuthProvider { get; set; }
     [Inject] private UserManager<User>? UserManager { get; set; }
     [Inject] private IPersisterService? PersisterService { get; set; }
+    [Inject] private ICampaignMediatorService? CampaignMediatorService { get; set; }
+    [Inject] private NavigationManager? NavMan { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -57,9 +59,10 @@ public partial class UserCampaignOverview : ComponentBase
         CustomStartScenario = null!;
     }
 
-    private async Task ContinueOldCampaign()
+    private void ContinueOldCampaign(int id)
     {
-        Console.WriteLine("Continuing Campaign...");
+        CampaignMediatorService!.Id = id;
+        NavMan!.NavigateTo("Campaign", forceLoad: true);
     }
 
     private void ApplyStartingScenario(string title, string scenario)

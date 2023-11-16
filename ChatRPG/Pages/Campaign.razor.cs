@@ -1,5 +1,6 @@
 using ChatRPG.Data;
 using ChatRPG.API;
+using ChatRPG.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -19,11 +20,14 @@ public partial class Campaign
     private string _tempMessage = "";
     private bool _shouldStream;
     private bool _isWaitingForResponse;
+    private Data.Models.Campaign? _campaign;
 
     [Inject] private IConfiguration? Configuration { get; set; }
     [Inject] private IOpenAiLlmClient? OpenAiLlmClient { get; set; }
     [Inject] private IJSRuntime? JsRuntime { get; set; }
     [Inject] private AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
+    [Inject] private IPersisterService? PersisterService { get; set; }
+    [Inject] private ICampaignMediatorService? CampaignMediatorService { get; set; }
 
     /// <summary>
     /// Initializes the Campaign page component by setting up configuration parameters.
@@ -31,6 +35,8 @@ public partial class Campaign
     /// <returns>A task that represents the asynchronous initialization process.</returns>
     protected override async Task OnInitializedAsync()
     {
+
+        _campaign = await PersisterService!.LoadFromCampaignIdAsync(CampaignMediatorService!.Id);
         AuthenticationState authenticationState = await AuthenticationStateProvider!.GetAuthenticationStateAsync();
         _loggedInUsername = authenticationState.User.Identity?.Name;
         if (_loggedInUsername != null) _fileUtil = new FileUtility(_loggedInUsername);

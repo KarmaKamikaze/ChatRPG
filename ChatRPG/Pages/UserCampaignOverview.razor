@@ -1,4 +1,5 @@
 @using ChatRPG.Data.Models
+@using ChatRPG.Services
 @using CampaignModel = ChatRPG.Data.Models.Campaign;
 
 <div class="container">
@@ -14,7 +15,7 @@
                     <div class="vstack overflow-auto form-text-black mb-1 scrollbar" style="max-height: 400px;" id="your-campaigns">
                         @foreach (CampaignModel campaign in Campaigns)
                         {
-                            <button class="card card-dim mb-2" @onclick='ContinueOldCampaign'>
+                            <button class="card card-dim mb-2" @onclick='() => ContinueOldCampaign(campaign.Id)'>
                                 <div class="card-body col-12">
                                     <h5 class="card-title">@campaign.Title</h5>
                                     <h6 class="card-subtitle mb-2 text-muted" style="font-size: 14px;">@campaign.Characters.First(c => c.IsPlayer).Name</h6>
