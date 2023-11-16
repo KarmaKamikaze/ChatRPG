@@ -52,13 +52,11 @@ public partial class UserCampaignOverview : ComponentBase
         campaign.Environments.Add(environment);
         campaign.Characters.Add(player);
         await PersisterService!.SaveAsync(campaign);
-        // TODO: Redirect to campaign page
-        CharacterName = "";
-        CampaignTitle = "";
-        CustomStartScenario = null!;
+        List<Campaign> campaigns = await PersisterService!.GetCampaignsForUser(User);
+        LaunchCampaign(campaigns.MaxBy(c => c.Id)!.Id);
     }
 
-    private void ContinueOldCampaign(int id)
+    private void LaunchCampaign(int id)
     {
         CampaignMediatorService!.UserCampaignDict[User!.UserName!] = id;
         NavMan!.NavigateTo("Campaign", forceLoad: true);
