@@ -117,7 +117,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account.Manage
             string email = await _userManager.GetEmailAsync(user);
             if (Input.NewEmail != email)
             {
-                if (_configuration.GetSection("EmailServiceInfo").GetValue<bool>("ShouldSend"))
+                if (_configuration.GetValue<bool>("ShouldSendEmails"))
                 {
                     string userId = await _userManager.GetUserIdAsync(user);
                     string code = await _userManager.GenerateChangeEmailTokenAsync(user, Input.NewEmail);
@@ -158,7 +158,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
-            if (_configuration.GetSection("EmailServiceInfo").GetValue<bool>("ShouldSend"))
+            if (_configuration.GetValue<bool>("ShouldSendEmails"))
             {
                 string userId = await _userManager.GetUserIdAsync(user);
                 string email = await _userManager.GetEmailAsync(user);

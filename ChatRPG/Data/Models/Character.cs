@@ -6,10 +6,11 @@ public class Character
     {
     }
 
-    public Character(Campaign campaign, CharacterType type, string name, string description, bool isPlayer,
+    public Character(Campaign campaign, Environment environment, CharacterType type, string name, string description, bool isPlayer,
         int maxHealth)
     {
         Campaign = campaign;
+        Environment = environment;
         Type = type;
         Name = name;
         Description = description;
@@ -18,9 +19,9 @@ public class Character
         CurrentHealth = maxHealth;
     }
 
-    public Character(Campaign campaign, CharacterType type, string name, string description, bool isPlayer,
+    public Character(Campaign campaign, Environment environment, CharacterType type, string name, string description, bool isPlayer,
         int maxHealth, int currentHealth)
-        : this(campaign, type, name, description, isPlayer, maxHealth)
+        : this(campaign, environment, type, name, description, isPlayer, maxHealth)
     {
         CurrentHealth = currentHealth;
     }

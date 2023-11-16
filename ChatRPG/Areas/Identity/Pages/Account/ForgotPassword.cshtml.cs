@@ -56,7 +56,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account
             if (ModelState.IsValid)
             {
                 User user = await _userManager.FindByEmailAsync(Input.Email);
-                if (_configuration.GetSection("EmailServiceInfo").GetValue<bool>("ShouldSend") && user != null && await _userManager.IsEmailConfirmedAsync(user))
+                if (_configuration.GetValue<bool>("ShouldSendEmails") && user != null && await _userManager.IsEmailConfirmedAsync(user))
                 {
                     string code = await _userManager.GeneratePasswordResetTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));

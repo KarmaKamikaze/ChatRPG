@@ -130,7 +130,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    if (_configuration.GetSection("EmailServiceInfo").GetValue<bool>("ShouldSend"))
+                    if (_configuration.GetValue<bool>("ShouldSendEmails"))
                     {
                         string userId = await _userManager.GetUserIdAsync(user);
                         string code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

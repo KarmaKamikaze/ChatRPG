@@ -2,8 +2,6 @@ namespace ChatRPG.API;
 
 public interface IOpenAiLlmClient
 {
-    Task<string> GetChatCompletion(params OpenAiGptMessage[] inputs);
-    IAsyncEnumerable<string> GetStreamedChatCompletion(params OpenAiGptMessage[] inputs);
+    Task<string> GetChatCompletion(IList<OpenAiGptMessage> inputs);
+    IAsyncEnumerable<string> GetStreamedChatCompletion(IList<OpenAiGptMessage> inputs);
 }
-
-public record OpenAiGptMessage(string Role, string Content);
