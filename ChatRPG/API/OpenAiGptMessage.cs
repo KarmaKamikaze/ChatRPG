@@ -35,7 +35,7 @@ public partial class OpenAiGptMessage
             };
             return JsonSerializer.Deserialize<LlmResponse>(Content, options);
         }
-        catch (JsonException e)
+        catch (JsonException)
         {
             return new LlmResponse { Narrative = Content }; // Format was unexpected
         }

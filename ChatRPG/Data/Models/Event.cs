@@ -28,5 +28,5 @@ public class Event
     public EventType Type { get; private set; } = EventType.Other;
     public string Description { get; private set; } = null!;
     public int Ordering { get; private set; }
-    public string Name { get; private set; }
+    public string Name { get; private set; } = null!;
 }

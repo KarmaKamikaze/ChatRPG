@@ -27,6 +27,11 @@ public class GameStateManager
         }
     }
 
+    public async Task SaveCurrentState(Campaign campaign)
+    {
+        await _persisterService.SaveAsync(campaign);
+    }
+
     private void UpdateStateFromResponse(Campaign campaign, OpenAiGptMessage message)
     {
         try
@@ -69,11 +74,6 @@ public class GameStateManager
         {
             _logger.LogError(e, "Failed to parse message content as response: \"{Content}\"", message.Content);
         }
-    }
-
-    public async Task SaveCurrentState(Campaign campaign)
-    {
-        await _persisterService.SaveAsync(campaign);
     }
 
     private static T ParseToEnum<T>(string input, T defaultVal) where T : struct, Enum
