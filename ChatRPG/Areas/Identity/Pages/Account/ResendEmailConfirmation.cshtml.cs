@@ -64,7 +64,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account
             }
 
             User user = await _userManager.FindByEmailAsync(Input.Email);
-            if (_configuration.GetSection("EmailServiceInfo").GetValue<bool>("ShouldSend") && user != null)
+            if (_configuration.GetValue<bool>("ShouldSendEmails") && user != null)
             {
                 string userId = await _userManager.GetUserIdAsync(user);
                 string code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
