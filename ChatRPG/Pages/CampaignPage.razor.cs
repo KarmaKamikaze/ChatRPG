@@ -33,6 +33,7 @@ public partial class CampaignPage
     [Inject] private IPersisterService? PersisterService { get; set; }
     [Inject] private ICampaignMediatorService? CampaignMediatorService { get; set; }
     [Inject] private GameInputHandler GameInputHandler { get; set; } = null!;
+    [Inject] private NavigationManager? NavMan { get; set; }
 
     /// <summary>
     /// Initializes the Campaign page component by setting up configuration parameters.
@@ -40,13 +41,20 @@ public partial class CampaignPage
     /// <returns>A task that represents the asynchronous initialization process.</returns>
     protected override async Task OnInitializedAsync()
     {
-        _campaign = await PersisterService!.LoadFromCampaignIdAsync(CampaignMediatorService!.Id);
+        AuthenticationState authenticationState = await AuthenticationStateProvider!.GetAuthenticationStateAsync();
+        _loggedInUsername = authenticationState.User.Identity?.Name;
+        if (_loggedInUsername is null || !CampaignMediatorService!.UserCampaignDict.ContainsKey(_loggedInUsername!))
+        {
+            NavMan!.NavigateTo("/", forceLoad: true);
+        }
+
+        _campaign = await PersisterService!.LoadFromCampaignIdAsync(
+            CampaignMediatorService!.UserCampaignDict[_loggedInUsername!]);
         if (_campaign != null)
         {
             _conversation = _campaign.Messages.Select(OpenAiGptMessage.FromMessage).ToList();
         }
-        AuthenticationState authenticationState = await AuthenticationStateProvider!.GetAuthenticationStateAsync();
-        _loggedInUsername = authenticationState.User.Identity?.Name;
+
         if (_loggedInUsername != null) _fileUtil = new FileUtility(_loggedInUsername);
         _shouldSave = Configuration!.GetValue<bool>("SaveConversationsToFile");
         GameInputHandler.ChatCompletionReceived += OnChatCompletionReceived;
@@ -87,6 +95,7 @@ public partial class CampaignPage
         {
             return;
         }
+
         _isWaitingForResponse = true;
         OpenAiGptMessage userInput = new(ChatMessageRole.User, _userInput);
         _conversation.Add(userInput);
@@ -135,6 +144,7 @@ public partial class CampaignPage
             message.AddChunk(eventArgs.Chunk);
             StateHasChanged();
         }
+
         Task.Run(() => ScrollToElement(BottomId));
     }
 

@@ -2,5 +2,5 @@ namespace ChatRPG.Services;
 
 public interface ICampaignMediatorService
 {
-    int Id { get; set; }
+    IDictionary<string, int> UserCampaignDict { get; set; }
 }

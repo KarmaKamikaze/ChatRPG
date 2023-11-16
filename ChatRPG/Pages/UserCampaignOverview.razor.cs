@@ -60,7 +60,7 @@ public partial class UserCampaignOverview : ComponentBase
 
     private void ContinueOldCampaign(int id)
     {
-        CampaignMediatorService!.Id = id;
+        CampaignMediatorService!.UserCampaignDict[User!.UserName!] = id;
         NavMan!.NavigateTo("Campaign", forceLoad: true);
     }
 

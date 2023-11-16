@@ -14,7 +14,7 @@ configuration.AddUserSecrets<Program>();
 
 // Add services to the container.
 string connectionString = configuration.GetConnectionString("DefaultConnection") ??
-                       throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+                          throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<User>()
@@ -32,7 +32,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuth
     .AddTransient<IEmailSender, EmailSender>()
     .AddTransient<GameInputHandler>()
     .AddTransient<GameStateManager>()
-    .AddScoped<ICampaignMediatorService, CampaignMediatorService>();
+    .AddSingleton<ICampaignMediatorService, CampaignMediatorService>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
