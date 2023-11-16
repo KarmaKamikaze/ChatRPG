@@ -52,8 +52,7 @@ public partial class UserCampaignOverview : ComponentBase
         campaign.Environments.Add(environment);
         campaign.Characters.Add(player);
         await PersisterService!.SaveAsync(campaign);
-        List<Campaign> campaigns = await PersisterService!.GetCampaignsForUser(User);
-        LaunchCampaign(campaigns.MaxBy(c => c.Id)!.Id);
+        LaunchCampaign(campaign.Id);
     }
 
     private void LaunchCampaign(int id)
