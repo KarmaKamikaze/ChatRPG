@@ -5,8 +5,8 @@ using ChatRPG.Data.Models;
 using ChatRPG.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using OpenAI_API.Chat;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
@@ -28,6 +28,8 @@ builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuth
     .AddSingleton(httpMessageHandlerFactory)
     .AddSingleton<IHttpClientFactory, HttpClientFactory>()
     .AddSingleton<IOpenAiLlmClient, OpenAiLlmClient>()
+    .AddTransient<IPersisterService, EfPersisterService>()
+    .AddTransient<IEmailSender, EmailSender>()
     .AddTransient<IPersisterService, EfPersisterService>()
     .AddTransient<GameController>();
 
