@@ -25,7 +25,7 @@ namespace ChatRPG.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql($"delete * from \"StartScenarios\" where \"Title\" in ({string.Join(',', _tuples.Select(t => $"'{t.Item1}'"))})");
+            migrationBuilder.Sql($"delete from \"StartScenarios\" where \"Title\" in ({string.Join(',', _tuples.Select(t => $"'{t.Item1}'"))})");
         }
     }
 }
