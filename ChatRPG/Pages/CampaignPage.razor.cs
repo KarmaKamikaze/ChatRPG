@@ -30,7 +30,7 @@ public partial class CampaignPage
     [Inject] private IPersisterService? PersisterService { get; set; }
     [Inject] private IJSRuntime? JsRuntime { get; set; }
     [Inject] private AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
-    [Inject] private GameController GameController { get; set; } = null!;
+    [Inject] private GameInputHandler GameInputHandler { get; set; } = null!;
     [Parameter] public int Id { get; set; }
 
     /// <summary>
@@ -48,8 +48,8 @@ public partial class CampaignPage
         _loggedInUsername = authenticationState.User.Identity?.Name;
         if (_loggedInUsername != null) _fileUtil = new FileUtility(_loggedInUsername);
         _shouldSave = Configuration!.GetValue<bool>("SaveConversationsToFile");
-        GameController.ChatCompletionReceived += OnChatCompletionReceived;
-        GameController.ChatCompletionChunkReceived += OnChatCompletionChunkReceived;
+        GameInputHandler.ChatCompletionReceived += OnChatCompletionReceived;
+        GameInputHandler.ChatCompletionChunkReceived += OnChatCompletionChunkReceived;
     }
 
     /// <summary>
@@ -91,7 +91,7 @@ public partial class CampaignPage
         _conversation.Add(userInput);
         _latestPlayerMessage = userInput;
         _userInput = string.Empty;
-        await GameController.HandleUserPrompt(_campaign, _conversation);
+        await GameInputHandler.HandleUserPrompt(_campaign, _conversation);
     }
 
     /// <summary>

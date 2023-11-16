@@ -30,7 +30,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuth
     .AddSingleton<IOpenAiLlmClient, OpenAiLlmClient>()
     .AddTransient<IPersisterService, EfPersisterService>()
     .AddTransient<IEmailSender, EmailSender>()
-    .AddTransient<GameController>()
+    .AddTransient<GameInputHandler>()
     .AddTransient<GameStateManager>();
 
 builder.Services.Configure<IdentityOptions>(options =>

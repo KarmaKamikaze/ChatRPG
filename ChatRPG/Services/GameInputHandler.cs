@@ -6,14 +6,14 @@ using Org.BouncyCastle.Pqc.Crypto.Crystals.Dilithium;
 
 namespace ChatRPG.Services;
 
-public class GameController
+public class GameInputHandler
 {
-    private readonly ILogger<GameController> _logger;
+    private readonly ILogger<GameInputHandler> _logger;
     private readonly IOpenAiLlmClient _llmClient;
     private readonly GameStateManager _gameStateManager;
     private readonly bool _streamChatCompletions;
 
-    public GameController(ILogger<GameController> logger, IOpenAiLlmClient llmClient, GameStateManager gameStateManager, IConfiguration configuration)
+    public GameInputHandler(ILogger<GameInputHandler> logger, IOpenAiLlmClient llmClient, GameStateManager gameStateManager, IConfiguration configuration)
     {
         _logger = logger;
         _llmClient = llmClient;
