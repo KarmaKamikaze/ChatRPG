@@ -4,7 +4,7 @@ using ChatRPG.Services;
 using Microsoft.Extensions.Logging;
 using Moq;
 using OpenAI_API.Chat;
-using RichardSzalay.MockHttp;
+using Environment = ChatRPG.Data.Models.Environment;
 
 namespace ChatRPGTests;
 
@@ -14,6 +14,7 @@ public class GameStateManagerTests
     private readonly User _user;
     private readonly Campaign _campaign;
     private readonly Character _player;
+    private readonly Environment _environment;
 
     public GameStateManagerTests()
     {
@@ -21,7 +22,8 @@ public class GameStateManagerTests
         _parser = new GameStateManager(logger);
         _user = new User("test");
         _campaign = new Campaign(_user, "Test");
-        _player = new Character(_campaign, CharacterType.Humanoid, "Player", "The player", true, 100);
+        _environment = new Environment(_campaign, "Environment", "Test environment");
+        _player = new Character(_campaign, _environment, CharacterType.Humanoid, "Player", "The player", true, 100);
         _campaign.Characters.Add(_player);
     }
 

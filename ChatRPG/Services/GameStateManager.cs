@@ -44,8 +44,9 @@ public class GameStateManager
             {
                 foreach (LlmResponseCharacter resChar in response.Characters.Where(c => c is { Name: not null, Description: not null, Type: not null }))
                 {
-                    Character character = new(campaign, ParseToEnum(resChar.Type!, CharacterType.Humanoid), resChar.Name!, resChar.Description!,
-                        false, resChar.HealthPoints);
+                    Environment environment = campaign.Environments.Last();
+                    Character character = new(campaign, environment, ParseToEnum(resChar.Type!, CharacterType.Humanoid),
+                        resChar.Name!, resChar.Description!, false, resChar.HealthPoints);
                     campaign.Characters.Add(character);
                     _logger.LogInformation("Created character: \"{Name}\"", character.Name);
                 }

@@ -1,5 +1,6 @@
 using ChatRPG.Data;
 using ChatRPG.API;
+using ChatRPG.Data.Models;
 using ChatRPG.Services;
 using ChatRPG.Services.Events;
 using Microsoft.AspNetCore.Components;
@@ -11,7 +12,7 @@ using OpenAiGptMessage = ChatRPG.API.OpenAiGptMessage;
 
 namespace ChatRPG.Pages;
 
-public partial class Campaign
+public partial class CampaignPage
 {
     private string? _loggedInUsername;
     private bool _shouldSave;
@@ -19,16 +20,18 @@ public partial class Campaign
     private FileUtility? _fileUtil;
     private readonly List<OpenAiGptMessage> _conversation = new();
     private string _userInput = "";
-    private bool _shouldStream;
     private bool _isWaitingForResponse;
     private OpenAiGptMessage? _latestPlayerMessage;
     private const string BottomId = "bottom-id";
+    private Campaign? _campaign;
 
     [Inject] private IConfiguration? Configuration { get; set; }
     [Inject] private IOpenAiLlmClient? OpenAiLlmClient { get; set; }
+    [Inject] private IPersisterService? PersisterService { get; set; }
     [Inject] private IJSRuntime? JsRuntime { get; set; }
     [Inject] private AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
     [Inject] private GameController GameController { get; set; } = null!;
+    [Parameter] public int Id { get; set; }
 
     /// <summary>
     /// Initializes the Campaign page component by setting up configuration parameters.
@@ -36,12 +39,11 @@ public partial class Campaign
     /// <returns>A task that represents the asynchronous initialization process.</returns>
     protected override async Task OnInitializedAsync()
     {
+        _campaign = await PersisterService!.LoadFromCampaignIdAsync(Id);
         AuthenticationState authenticationState = await AuthenticationStateProvider!.GetAuthenticationStateAsync();
         _loggedInUsername = authenticationState.User.Identity?.Name;
         if (_loggedInUsername != null) _fileUtil = new FileUtility(_loggedInUsername);
         _shouldSave = Configuration!.GetValue<bool>("SaveConversationsToFile");
-        _shouldStream = !Configuration!.GetValue<bool>("UseMocks") &&
-                        Configuration!.GetValue<bool>("StreamChatCompletions");
         GameController.ChatCompletionReceived += OnChatCompletionReceived;
         GameController.ChatCompletionChunkReceived += OnChatCompletionChunkReceived;
     }
@@ -76,7 +78,7 @@ public partial class Campaign
     /// </summary>
     private async Task SendPrompt()
     {
-        if (string.IsNullOrWhiteSpace(_userInput))
+        if (string.IsNullOrWhiteSpace(_userInput) || _campaign is null)
         {
             return;
         }
@@ -85,7 +87,7 @@ public partial class Campaign
         _conversation.Add(userInput);
         _latestPlayerMessage = userInput;
         _userInput = string.Empty;
-        await GameController.HandleUserPrompt(_conversation);
+        await GameController.HandleUserPrompt(_campaign, _conversation);
     }
 
     /// <summary>
@@ -108,6 +110,7 @@ public partial class Campaign
         UpdateSaveFile(eventArgs.Message.Content);
         Task.Run(() => ScrollToElement(BottomId));
         _isWaitingForResponse = false;
+        Save().Wait();
     }
 
     /// <summary>
@@ -129,6 +132,7 @@ public partial class Campaign
             StateHasChanged();
         }
         Task.Run(() => ScrollToElement(BottomId));
+        Save().Wait();
     }
 
     private void UpdateSaveFile(string asstMessage)
@@ -136,5 +140,13 @@ public partial class Campaign
         if (!_shouldSave || _fileUtil == null || string.IsNullOrEmpty(asstMessage)) return;
         MessagePair messagePair = new MessagePair(_latestPlayerMessage?.Content ?? "", asstMessage);
         Task.Run(() => _fileUtil.UpdateSaveFileAsync(messagePair));
+    }
+
+    private async Task Save()
+    {
+        if (PersisterService != null && _campaign != null)
+        {
+            await PersisterService.SaveAsync(_campaign);
+        }
     }
 }
