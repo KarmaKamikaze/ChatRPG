@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.JSInterop;
 using Environment = ChatRPG.Data.Models.Environment;
 using CampaignModel = ChatRPG.Data.Models.Campaign;
+using StartScenarioModel = ChatRPG.Data.Models.StartScenario;
 
 namespace ChatRPG.Pages;
 
@@ -25,7 +26,7 @@ public partial class UserCampaignOverview : ComponentBase
 
     [Required][BindProperty] private string CampaignTitle { get; set; } = "";
 
-    [BindProperty] private string CustomStartScenario { get; set; } = null!;
+    [BindProperty] private string StartScenario { get; set; } = null!;
 
     [Inject] private AuthenticationStateProvider? AuthProvider { get; set; }
     [Inject] private UserManager<User>? UserManager { get; set; }
@@ -57,7 +58,8 @@ public partial class UserCampaignOverview : ComponentBase
             return;
         }
 
-        CampaignModel campaign = new(User, CampaignTitle, CustomStartScenario);
+        StartScenarioModel startScenario = new StartScenario(CampaignTitle, StartScenario);
+        CampaignModel campaign = new(User, CampaignTitle, startScenario);
         Environment environment = new(campaign, "Start location", "The place where it all began");
         Character player = new(campaign, environment, CharacterType.Humanoid, CharacterName, "", true, 100);
         campaign.Environments.Add(environment);
@@ -75,7 +77,7 @@ public partial class UserCampaignOverview : ComponentBase
     private void ApplyStartingScenario(string title, string scenario)
     {
         CampaignTitle = title;
-        CustomStartScenario = scenario;
+        StartScenario = scenario;
         StateHasChanged();
     }
 

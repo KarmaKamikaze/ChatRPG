@@ -18,15 +18,9 @@ public class Campaign
         StartScenario = startScenario;
     }
 
-    public Campaign(User user, string title, string customStartScenario) : this(user, title)
-    {
-        CustomStartScenario = customStartScenario;
-    }
-
     public int Id { get; private set; }
     public StartScenario? StartScenario { get; private set; }
     public User User { get; private set; } = null!;
-    public string? CustomStartScenario { get; private set; }
     public string Title { get; private set; } = null!;
     public DateTime StartedOn { get; private set; }
     public ICollection<Message> Messages { get; } = new List<Message>();
