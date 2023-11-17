@@ -47,15 +47,27 @@
                     <div class="form">
                         <div class="mb-3">
                             <label for="inputCampaignTitle" class="form-label">Campaign Title<span class="required-keyword">(Required)</span></label>
-                            <input type="text" @bind="CampaignTitle" class="form-control" id="inputCampaignTitle">
+                            <input type="text" @bind="CampaignTitle" class="form-control" id="inputCampaignTitle" data-toggle="tooltip" data-placement="top" title="Campaign title is required.">
+                            @if (string.IsNullOrWhiteSpace(CampaignTitle) && TestFields)
+                            {
+                                <div class="alert-sm alert-danger alert-inside-input mt-1 p-2 rounded" role="alert">
+                                    Campaign title is required.
+                                </div>
+                            }
                         </div>
                         <div class="mb-3">
                             <label for="inputCharacterName" class="form-label">Character Name<span class="required-keyword">(Required)</span></label>
-                            <input type="text" @bind="CharacterName" class="form-control" id="inputCharacterName"/>
+                            <input type="text" @bind="CharacterName" class="form-control" id="inputCharacterName" data-toggle="tooltip" data-placement="top" title="Character name is required."/>
+                            @if (string.IsNullOrWhiteSpace(CharacterName) && TestFields)
+                            {
+                                <div class="alert-sm alert-danger alert-inside-input mt-1 p-2 rounded" role="alert">
+                                    Character name is required.
+                                </div>
+                            }
                         </div>
                         <div class="mb-3">
                             <label for="inputCustomStartScenario" class="form-label">Custom Start Scenario</label>
-                            <textarea class="form-control scrollbar" style="resize: none;" @bind="CustomStartScenario" id="inputCustomStartScenario" rows="6"></textarea>
+                            <textarea class="form-control scrollbar" style="resize: none;" @bind="CustomStartScenario" id="inputCustomStartScenario" rows="@TextAreaRows"></textarea>
                         </div>
                         <button class="btn btn-primary" style="width: 100%" @onclick="CreateAndStartCampaign" id="create-campaign-button">Create Campaign</button>
                     </div>

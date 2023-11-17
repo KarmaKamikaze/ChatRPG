@@ -16,6 +16,8 @@ public partial class UserCampaignOverview : ComponentBase
     private User? User { get; set; } = null;
     private List<CampaignModel> Campaigns { get; set; } = new();
     private List<StartScenario> StartScenarios { get; set; } = new();
+    private bool TestFields { get; set; }
+    private int TextAreaRows { get; set; } = 6;
 
     [Required][BindProperty] private string CharacterName { get; set; } = "";
 
@@ -44,6 +46,15 @@ public partial class UserCampaignOverview : ComponentBase
         if (User is null)
         {
             throw new Exception();
+        }
+
+        // Alert user if they have not set CampaignTitle or CharacterName in form
+        TestFields = true;
+        if (string.IsNullOrWhiteSpace(CampaignTitle) || string.IsNullOrWhiteSpace(CharacterName))
+        {
+            TextAreaRows = 2;
+            StateHasChanged();
+            return;
         }
 
         CampaignModel campaign = new(User, CampaignTitle, CustomStartScenario);
