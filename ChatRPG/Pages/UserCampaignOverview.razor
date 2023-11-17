@@ -50,7 +50,7 @@
                             <input type="text" @bind="CampaignTitle" @oninput="UpdateCampaignTitleOnKeyPress" class="form-control" id="inputCampaignTitle" data-toggle="tooltip" data-placement="top" title="Campaign title is required.">
                             @if (string.IsNullOrWhiteSpace(CampaignTitle) && TestFields)
                             {
-                                <div class="alert-sm alert-danger alert-inside-input mt-1 p-2 rounded" role="alert">
+                                <div class="alert-sm alert-danger alert-inside-input mt-1 p-2 rounded" role="alert" id="campaign-title-alert">
                                     Campaign title is required.
                                 </div>
                             }
@@ -60,7 +60,7 @@
                             <input type="text" @bind="CharacterName" @oninput="UpdateCharacterNameOnKeyPress" class="form-control" id="inputCharacterName" data-toggle="tooltip" data-placement="top" title="Character name is required."/>
                             @if (string.IsNullOrWhiteSpace(CharacterName) && TestFields)
                             {
-                                <div class="alert-sm alert-danger alert-inside-input mt-1 p-2 rounded" role="alert">
+                                <div class="alert-sm alert-danger alert-inside-input mt-1 p-2 rounded" role="alert" id="character-name-alert">
                                     Character name is required.
                                 </div>
                             }

@@ -269,7 +269,8 @@ public class AuthorizedIndexE2ETests : IDisposable
         string expectedCharacterName = string.Empty;
 
         // Act
-        IWebElement? campaignCharacterName = _wait.Until(webDriver => webDriver.FindElement(By.Id("inputCharacterName")));
+        IWebElement? campaignCharacterName =
+            _wait.Until(webDriver => webDriver.FindElement(By.Id("inputCharacterName")));
         string actualCharacterName = campaignCharacterName.GetAttribute("value");
 
         // Assert
@@ -283,7 +284,8 @@ public class AuthorizedIndexE2ETests : IDisposable
         string expectedStartScenario = string.Empty;
 
         // Act
-        IWebElement? campaignStartScenario = _wait.Until(webDriver => webDriver.FindElement(By.Id("inputCustomStartScenario")));
+        IWebElement? campaignStartScenario =
+            _wait.Until(webDriver => webDriver.FindElement(By.Id("inputCustomStartScenario")));
         string actualStartScenario = campaignStartScenario.GetAttribute("value");
 
         // Assert
@@ -294,10 +296,132 @@ public class AuthorizedIndexE2ETests : IDisposable
     public void AuthorizedIndexPage_CustomCampaign_CreateCampaignButtonIsDisplayed()
     {
         // Act
-        IWebElement? startCampaignButton = _wait.Until(webDriver => webDriver.FindElement(By.Id("create-campaign-button")));
+        IWebElement? startCampaignButton =
+            _wait.Until(webDriver => webDriver.FindElement(By.Id("create-campaign-button")));
 
         // Assert
         Assert.True(startCampaignButton.Displayed);
+    }
+
+    [Fact]
+    public void AuthorizedIndexPage_CustomCampaign_NoMissingCampaignTitleAlertsOnInitialization()
+    {
+        // Arrange
+        By campaignTitleAlert = By.Id("campaign-title-alert");
+
+        // Act
+        ReadOnlyCollection<IWebElement>? matchingAlerts = _driver.FindElements(campaignTitleAlert);
+
+        // Assert
+        Assert.DoesNotContain(matchingAlerts, element => element.Displayed);
+    }
+
+    [Fact]
+    public void
+        AuthorizedIndexPage_CustomCampaign_CampaignTitleAlertIsDisplayedWhenTryingToStartNewCampaignWithoutCampaignTitle()
+    {
+        // Arrange
+        IWebElement? startCampaignButton =
+            _wait.Until(webDriver => webDriver.FindElement(By.Id("create-campaign-button")));
+
+        // Act
+        startCampaignButton.Click();
+        IWebElement? campaignTitleAlert =
+            _wait.Until(webDriver => webDriver.FindElement(By.Id("campaign-title-alert")));
+
+        // Assert
+        Assert.True(campaignTitleAlert.Displayed);
+    }
+
+    [Fact]
+    public void
+        AuthorizedIndexPage_CustomCampaign_OnlyCampaignTitleAlertIsDisplayedWhenTryingToStartNewCampaignWithoutOnlyCampaignTitle()
+    {
+        // Arrange
+        IWebElement? startCampaignButton =
+            _wait.Until(webDriver => webDriver.FindElement(By.Id("create-campaign-button")));
+        IWebElement? characterNameInput = _wait.Until(webDriver => webDriver.FindElement(By.Id("inputCharacterName")));
+
+        // Act
+        characterNameInput.SendKeys("test");
+        startCampaignButton.Click();
+        IWebElement? campaignTitleAlert =
+            _wait.Until(webDriver => webDriver.FindElement(By.Id("campaign-title-alert")));
+        ReadOnlyCollection<IWebElement>? anyCharacterAlerts = _driver.FindElements(By.Id("character-name-alert"));
+
+        // Assert
+        Assert.True(campaignTitleAlert.Displayed);
+        Assert.DoesNotContain(anyCharacterAlerts, element => element.Displayed);
+    }
+
+    [Fact]
+    public void AuthorizedIndexPage_CustomCampaign_NoMissingCharacterNameAlertsOnInitialization()
+    {
+        // Arrange
+        By characterNameAlert = By.Id("character-name-alert");
+
+        // Act
+        ReadOnlyCollection<IWebElement>? matchingAlerts = _driver.FindElements(characterNameAlert);
+
+        // Assert
+        Assert.DoesNotContain(matchingAlerts, element => element.Displayed);
+    }
+
+    [Fact]
+    public void
+        AuthorizedIndexPage_CustomCampaign_CharacterNameAlertIsDisplayedWhenTryingToStartNewCampaignWithoutCharacterName()
+    {
+        // Arrange
+        IWebElement? startCampaignButton =
+            _wait.Until(webDriver => webDriver.FindElement(By.Id("create-campaign-button")));
+
+        // Act
+        startCampaignButton.Click();
+        IWebElement? characterNameAlert =
+            _wait.Until(webDriver => webDriver.FindElement(By.Id("character-name-alert")));
+
+        // Assert
+        Assert.True(characterNameAlert.Displayed);
+    }
+
+    [Fact]
+    public void
+        AuthorizedIndexPage_CustomCampaign_OnlyCharacterNameAlertIsDisplayedWhenTryingToStartNewCampaignWithoutOnlyCharacterName()
+    {
+        // Arrange
+        IWebElement? startCampaignButton =
+            _wait.Until(webDriver => webDriver.FindElement(By.Id("create-campaign-button")));
+        IWebElement? campaignTitleInput = _wait.Until(webDriver => webDriver.FindElement(By.Id("inputCampaignTitle")));
+
+        // Act
+        campaignTitleInput.SendKeys("test");
+        startCampaignButton.Click();
+        IWebElement? characterNameAlert =
+            _wait.Until(webDriver => webDriver.FindElement(By.Id("character-name-alert")));
+        ReadOnlyCollection<IWebElement>? anyCampaignAlerts = _driver.FindElements(By.Id("campaign-title-alert"));
+
+        // Assert
+        Assert.True(characterNameAlert.Displayed);
+        Assert.DoesNotContain(anyCampaignAlerts, element => element.Displayed);
+    }
+
+    [Fact]
+    public void
+        AuthorizedIndexPage_CustomCampaign_CampaignTitleAndCharacterNameAlertsIsDisplayedWhenTryingToStartNewCampaignWithoutCampaignTitleAndCharacterName()
+    {
+        // Arrange
+        IWebElement? startCampaignButton =
+            _wait.Until(webDriver => webDriver.FindElement(By.Id("create-campaign-button")));
+
+        // Act
+        startCampaignButton.Click();
+        IWebElement? campaignTitleAlert =
+            _wait.Until(webDriver => webDriver.FindElement(By.Id("campaign-title-alert")));
+        IWebElement? characterNameAlert =
+            _wait.Until(webDriver => webDriver.FindElement(By.Id("character-name-alert")));
+
+        // Assert
+        Assert.True(characterNameAlert.Displayed && campaignTitleAlert.Displayed);
     }
 
     public void Dispose()
