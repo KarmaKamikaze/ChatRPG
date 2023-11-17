@@ -20,7 +20,7 @@
                                     <h5 class="card-title">@campaign.Title</h5>
                                     <h6 class="card-subtitle mb-2 text-muted" style="font-size: 14px;">@campaign.Player.Name</h6>
                                     <hr/>
-                                    <p class="card-text line-clamp text-start">@(campaign.StartScenario?.Body ?? "No scenario")</p>
+                                    <p class="card-text line-clamp text-start">@(campaign.StartScenario ?? "No scenario")</p>
                                     <p class="card-text" style="font-size: 14px;">Started @campaign.StartedOn.ToShortDateString() @campaign.StartedOn.ToShortTimeString()</p>
                                 </div>
                             </button>

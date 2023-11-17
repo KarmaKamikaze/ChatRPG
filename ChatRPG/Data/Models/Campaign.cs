@@ -13,13 +13,13 @@ public class Campaign
         StartedOn = DateTime.UtcNow;
     }
 
-    public Campaign(User user, string title, StartScenario startScenario) : this(user, title)
+    public Campaign(User user, string title, string startScenario) : this(user, title)
     {
         StartScenario = startScenario;
     }
 
     public int Id { get; private set; }
-    public StartScenario? StartScenario { get; private set; }
+    public string? StartScenario { get; private set; }
     public User User { get; private set; } = null!;
     public string Title { get; private set; } = null!;
     public DateTime StartedOn { get; private set; }

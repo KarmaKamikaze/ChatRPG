@@ -48,7 +48,6 @@ public class EfPersisterService : IPersisterService
         return await _dbContext.Campaigns
             .Where(campaign => campaign.Id == campaignId)
             .Include(campaign => campaign.Messages)
-            .Include(campaign => campaign.StartScenario)
             .Include(campaign => campaign.Environments)
             .Include(campaign => campaign.Events)
             .Include(campaign => campaign.Characters)
@@ -64,7 +63,6 @@ public class EfPersisterService : IPersisterService
         return await _dbContext.Campaigns
             .Where(campaign => campaign.User.Equals(user))
             .Include(campaign => campaign.Characters.Where(c => c.IsPlayer))
-            .Include(campaign => campaign.StartScenario)
             .ToListAsync();
     }
 
