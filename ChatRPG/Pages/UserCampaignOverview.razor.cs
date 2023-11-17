@@ -107,12 +107,14 @@ public partial class UserCampaignOverview : ComponentBase
     private void UpdateCharacterNameOnKeyPress(ChangeEventArgs e)
     {
         if (e.Value != null) CharacterName = e.Value.ToString()!;
+        StateHasChanged();
         AdjustAlerts();
     }
 
     private void AdjustAlerts()
     {
-        StateHasChanged();
+        if (!TestFields) return;
+        
         if (!string.IsNullOrWhiteSpace(CampaignTitle) && !string.IsNullOrWhiteSpace(CharacterName))
         {
             TextAreaRows = 6;
