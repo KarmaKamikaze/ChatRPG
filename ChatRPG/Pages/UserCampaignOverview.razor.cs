@@ -4,8 +4,10 @@ using ChatRPG.Data.Models;
 using ChatRPG.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.JSInterop;
 using Environment = ChatRPG.Data.Models.Environment;
 using CampaignModel = ChatRPG.Data.Models.Campaign;
 
@@ -19,9 +21,9 @@ public partial class UserCampaignOverview : ComponentBase
     private bool TestFields { get; set; }
     private int TextAreaRows { get; set; } = 6;
 
-    [Required][BindProperty] private string CharacterName { get; set; } = "";
+    [Required] [BindProperty] private string CharacterName { get; set; } = "";
 
-    [Required][BindProperty] private string CampaignTitle { get; set; } = "";
+    [Required] [BindProperty] private string CampaignTitle { get; set; } = "";
 
     [BindProperty] private string CustomStartScenario { get; set; } = null!;
 
@@ -50,10 +52,8 @@ public partial class UserCampaignOverview : ComponentBase
 
         // Alert user if they have not set CampaignTitle or CharacterName in form
         TestFields = true;
-        if (string.IsNullOrWhiteSpace(CampaignTitle) || string.IsNullOrWhiteSpace(CharacterName))
+        if (FieldIsEmpty())
         {
-            TextAreaRows = 2;
-            StateHasChanged();
             return;
         }
 
@@ -77,5 +77,56 @@ public partial class UserCampaignOverview : ComponentBase
         CampaignTitle = title;
         CustomStartScenario = scenario;
         StateHasChanged();
+    }
+
+    private bool FieldIsEmpty()
+    {
+        if (string.IsNullOrWhiteSpace(CampaignTitle) && string.IsNullOrWhiteSpace(CharacterName))
+        {
+            TextAreaRows = 2;
+            StateHasChanged();
+            return true;
+        }
+
+        if (string.IsNullOrWhiteSpace(CampaignTitle) || string.IsNullOrWhiteSpace(CharacterName))
+        {
+            TextAreaRows = 4;
+            StateHasChanged();
+            return true;
+        }
+
+        return false;
+    }
+
+    private void UpdateCampaignTitleOnKeyPress(ChangeEventArgs e)
+    {
+        if (e.Value != null) CampaignTitle = e.Value.ToString()!;
+        AdjustAlerts();
+    }
+
+    private void UpdateCharacterNameOnKeyPress(ChangeEventArgs e)
+    {
+        if (e.Value != null) CharacterName = e.Value.ToString()!;
+        AdjustAlerts();
+    }
+
+    private void AdjustAlerts()
+    {
+        StateHasChanged();
+        if (!string.IsNullOrWhiteSpace(CampaignTitle) && !string.IsNullOrWhiteSpace(CharacterName))
+        {
+            TextAreaRows = 6;
+            StateHasChanged();
+        }
+        else if (!string.IsNullOrWhiteSpace(CampaignTitle) || !string.IsNullOrWhiteSpace(CharacterName))
+        {
+            TextAreaRows = 4;
+            StateHasChanged();
+        }
+        else
+        {
+            TextAreaRows = 2;
+            StateHasChanged();
+        }
     }
 }
