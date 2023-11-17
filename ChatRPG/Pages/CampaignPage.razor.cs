@@ -1,5 +1,4 @@
 using ChatRPG.Data;
-using ChatRPG.API;
 using ChatRPG.Services;
 using ChatRPG.Data.Models;
 using ChatRPG.Services.Events;
@@ -26,12 +25,11 @@ public partial class CampaignPage
     private Campaign? _campaign;
 
     [Inject] private IConfiguration? Configuration { get; set; }
-    [Inject] private IOpenAiLlmClient? OpenAiLlmClient { get; set; }
     [Inject] private IJSRuntime? JsRuntime { get; set; }
     [Inject] private AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
     [Inject] private IPersisterService? PersisterService { get; set; }
     [Inject] private ICampaignMediatorService? CampaignMediatorService { get; set; }
-    [Inject] private GameInputHandler GameInputHandler { get; set; } = null!;
+    [Inject] private GameInputHandler? GameInputHandler { get; set; }
     [Inject] private NavigationManager? NavMan { get; set; }
 
     /// <summary>
@@ -56,8 +54,8 @@ public partial class CampaignPage
 
         if (_loggedInUsername != null) _fileUtil = new FileUtility(_loggedInUsername);
         _shouldSave = Configuration!.GetValue<bool>("SaveConversationsToFile");
-        GameInputHandler.ChatCompletionReceived += OnChatCompletionReceived;
-        GameInputHandler.ChatCompletionChunkReceived += OnChatCompletionChunkReceived;
+        GameInputHandler!.ChatCompletionReceived += OnChatCompletionReceived;
+        GameInputHandler!.ChatCompletionChunkReceived += OnChatCompletionChunkReceived;
     }
 
     /// <summary>
@@ -100,7 +98,7 @@ public partial class CampaignPage
         _conversation.Add(userInput);
         _latestPlayerMessage = userInput;
         _userInput = string.Empty;
-        await GameInputHandler.HandleUserPrompt(_campaign, _conversation);
+        await GameInputHandler!.HandleUserPrompt(_campaign, _conversation);
     }
 
     /// <summary>
