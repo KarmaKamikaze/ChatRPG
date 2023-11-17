@@ -47,7 +47,7 @@
                     <div class="form">
                         <div class="mb-3">
                             <label for="inputCampaignTitle" class="form-label">Campaign Title<span class="required-keyword">(Required)</span></label>
-                            <input type="text" @bind="CampaignTitle" @oninput ="UpdateCampaignTitleOnKeyPress" class="form-control" id="inputCampaignTitle" data-toggle="tooltip" data-placement="top" title="Campaign title is required.">
+                            <input type="text" @bind="CampaignTitle" @oninput="UpdateCampaignTitleOnKeyPress" class="form-control" id="inputCampaignTitle" data-toggle="tooltip" data-placement="top" title="Campaign title is required.">
                             @if (string.IsNullOrWhiteSpace(CampaignTitle) && TestFields)
                             {
                                 <div class="alert-sm alert-danger alert-inside-input mt-1 p-2 rounded" role="alert">
@@ -57,7 +57,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="inputCharacterName" class="form-label">Character Name<span class="required-keyword">(Required)</span></label>
-                            <input type="text" @bind="CharacterName" @oninput ="UpdateCharacterNameOnKeyPress" class="form-control" id="inputCharacterName" data-toggle="tooltip" data-placement="top" title="Character name is required."/>
+                            <input type="text" @bind="CharacterName" @oninput="UpdateCharacterNameOnKeyPress" class="form-control" id="inputCharacterName" data-toggle="tooltip" data-placement="top" title="Character name is required."/>
                             @if (string.IsNullOrWhiteSpace(CharacterName) && TestFields)
                             {
                                 <div class="alert-sm alert-danger alert-inside-input mt-1 p-2 rounded" role="alert">
