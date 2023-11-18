@@ -1,5 +1,6 @@
 ﻿@page "/Campaign"
 @using OpenAiGptMessage = ChatRPG.API.OpenAiGptMessage
+@using OpenAI_API.Chat
 
 <PageTitle>Campaign - @_campaign?.Title</PageTitle>
 
@@ -11,7 +12,7 @@
 
 <div class="conversation mx-auto col-8 mt-4 rounded p-5 text-black">
     <div class="conversation-text">
-        @foreach (OpenAiGptMessage message in _conversation)
+        @foreach (OpenAiGptMessage message in _conversation.Where(m => !m.Role.Equals(ChatMessageRole.System)))
         {
             <OpenAiGptMessageComponent Message="@message"/>
         }

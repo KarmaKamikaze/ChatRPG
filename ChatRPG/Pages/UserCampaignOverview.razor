@@ -66,6 +66,16 @@
                             }
                         </div>
                         <div class="mb-3">
+                            <label for="inputCharacterDescription" class="form-label">Character Description<span class="required-keyword">(Required)</span></label>
+                            <input type="text" @bind="CharacterDescription" @oninput="UpdateCharacterDescriptionOnKeyPress" class="form-control" id="inputCharacterDescription" data-toggle="tooltip" data-placement="top" title="Character description is required."/>
+                            @if (string.IsNullOrWhiteSpace(CharacterDescription) && TestFields)
+                            {
+                                <div class="alert-sm alert-danger alert-inside-input mt-1 p-2 rounded" role="alert" id="character-description-alert">
+                                    Character description is required.
+                                </div>
+                            }
+                        </div>
+                        <div class="mb-3">
                             <label for="inputCustomStartScenario" class="form-label">Custom Start Scenario</label>
                             <textarea class="form-control scrollbar" style="resize: none;" @bind="StartScenario" id="inputCustomStartScenario" rows="@TextAreaRows"></textarea>
                         </div>

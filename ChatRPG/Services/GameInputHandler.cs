@@ -66,10 +66,5 @@ public class GameInputHandler
             await _gameStateManager.SaveCurrentState(campaign);
         }
         _logger.LogInformation("Finished processing prompt.");
-    }
-
-    public void SendCharacterAndStartScenarioInput(Campaign campaign)
-    {
-        _gameStateManager.InitializeStateForCampaign(campaign);
-    }
+    } 
 }
