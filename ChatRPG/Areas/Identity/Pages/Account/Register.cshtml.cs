@@ -72,7 +72,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
             [Required]
-            [StringLength(100)]
+            [StringLength(25)]
             [DataType(DataType.Text)]
             [Display(Name = "Username")]
             public string Username { get; set; }

@@ -142,9 +142,9 @@ a, .btn-link {
 }
 
 .footer-formatting {
-    overflow: hidden; 
-    position: fixed; 
-    bottom: 0; 
+    overflow: hidden;
+    position: fixed;
+    bottom: 0;
     padding: 10px;
 }
 
@@ -190,6 +190,7 @@ a, .btn-link {
     align-items: center;
     justify-content: center;
     overflow-y: auto;
+    margin-top: -120px;
 }
 
 .title-front {
@@ -222,6 +223,20 @@ a, .btn-link {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5); /* Alpha value for transparency */
+}
+
+.card-dim {
+    width: 18rem;
+    background: #dcdcdc;
+}
+
+.line-clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    hyphens: auto;
+    font-size: 14px;
 }
 
 .text-readable {
@@ -261,6 +276,37 @@ a, .btn-link {
     width: 100%;
 }
 
+.btn-in {
+    position: relative;
+    width: auto;
+    padding: 5px 15px;
+    text-align: center;
+    margin: 2px 2px;
+    font-weight: bold;
+    border: 2px solid #685f5f;
+    background-color: rgb(35, 35, 35, 0.5);
+    color: #ffffff;
+    cursor: pointer;
+    overflow: hidden;
+    z-index: 0;
+    text-transform: uppercase;
+}
+
+.btn-in-span {
+    background: #685f5f;
+    height: 100%;
+    width: 0;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: -1;
+    transition: 0.5s;
+}
+
+.btn-in:hover .btn-in-span {
+    width: 100%;
+}
+
 .logo-name-group {
     display: flex;
     align-items: center;
@@ -278,17 +324,33 @@ a, .btn-link {
     color: #ffffff;
 }
 
-#scrollbar::-webkit-scrollbar {
+.scrollbar::-webkit-scrollbar {
     width: 12px;
 }
 
-#scrollbar::-webkit-scrollbar-track {
+.scrollbar::-webkit-scrollbar-track {
     border-radius: 8px;
     background-color: #95a5a6;
     border: 1px solid #cacaca;
 }
 
-#scrollbar::-webkit-scrollbar-thumb {
+.scrollbar::-webkit-scrollbar-thumb {
     border-radius: 8px;
     background-color: #3E3A3A;
+}
+
+.required-keyword {
+    color: #ff1f1f;
+    font-size: 10px;
+    position: relative;
+    top: -10px;
+}
+
+.dashboard-title {
+    color: #ffffff;
+    text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.dashboard-title-container {
+    padding-bottom: 60px;
 }

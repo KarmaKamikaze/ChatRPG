@@ -5,7 +5,9 @@
 <AuthorizeView>
     <Authorized>
         <a href="Identity/Account/Manage">Hello, @context.User.Identity?.Name!</a>
-        <button @onclick='() => NavMan.NavigateTo("Logout", forceLoad: true)' class="btn">Log Out</button>
+        <button @onclick='() => NavMan.NavigateTo("Logout", forceLoad: true)' class="btn btn-in">
+            <span class="btn-in-span"></span>Log Out
+        </button>
     </Authorized>
     <NotAuthorized>
         <div class="btn-group">

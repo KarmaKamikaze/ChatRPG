@@ -3,6 +3,7 @@ using System;
 using ChatRPG.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChatRPG.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231117220541_RemoveCustomScenario")]
+    partial class RemoveCustomScenario
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,9 +55,6 @@ namespace ChatRPG.Data.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("StartScenario")
-                        .HasColumnType("text");
 
                     b.Property<int?>("StartScenarioId")
                         .HasColumnType("integer");
@@ -457,13 +457,15 @@ namespace ChatRPG.Data.Migrations
 
             modelBuilder.Entity("ChatRPG.Data.Models.Campaign", b =>
                 {
-                    b.HasOne("ChatRPG.Data.Models.StartScenario", null)
+                    b.HasOne("ChatRPG.Data.Models.StartScenario", "StartScenario")
                         .WithMany("Campaigns")
                         .HasForeignKey("StartScenarioId");
 
                     b.HasOne("ChatRPG.Data.Models.User", "User")
                         .WithMany("Campaigns")
                         .HasForeignKey("UserId");
+
+                    b.Navigation("StartScenario");
 
                     b.Navigation("User");
                 });

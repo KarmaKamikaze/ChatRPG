@@ -2,7 +2,6 @@
 using ChatRPG.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using Environment = ChatRPG.Data.Models.Environment;
 
 namespace ChatRPG.Services;
 
@@ -30,6 +29,7 @@ public class EfPersisterService : IPersisterService
             {
                 await _dbContext.Campaigns.AddAsync(campaign);
             }
+
             await _dbContext.SaveChangesAsync();
             await transaction.CommitAsync();
             _logger.LogInformation("Saved campaign with id {Id} successfully", campaign.Id);
@@ -48,7 +48,6 @@ public class EfPersisterService : IPersisterService
         return await _dbContext.Campaigns
             .Where(campaign => campaign.Id == campaignId)
             .Include(campaign => campaign.Messages)
-            .Include(campaign => campaign.StartScenario)
             .Include(campaign => campaign.Environments)
             .Include(campaign => campaign.Events)
             .Include(campaign => campaign.Characters)
@@ -64,7 +63,6 @@ public class EfPersisterService : IPersisterService
         return await _dbContext.Campaigns
             .Where(campaign => campaign.User.Equals(user))
             .Include(campaign => campaign.Characters.Where(c => c.IsPlayer))
-            .Include(campaign => campaign.StartScenario)
             .ToListAsync();
     }
 

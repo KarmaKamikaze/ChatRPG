@@ -1,7 +1,6 @@
 using ChatRPG.Data;
-using ChatRPG.API;
-using ChatRPG.Data.Models;
 using ChatRPG.Services;
+using ChatRPG.Data.Models;
 using ChatRPG.Services.Events;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -27,12 +26,12 @@ public partial class CampaignPage
     private Campaign? _campaign;
 
     [Inject] private IConfiguration? Configuration { get; set; }
-    [Inject] private IOpenAiLlmClient? OpenAiLlmClient { get; set; }
-    [Inject] private IPersisterService? PersisterService { get; set; }
     [Inject] private IJSRuntime? JsRuntime { get; set; }
     [Inject] private AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
-    [Inject] private GameInputHandler GameInputHandler { get; set; } = null!;
-    [Parameter] public int Id { get; set; }
+    [Inject] private IPersisterService? PersisterService { get; set; }
+    [Inject] private ICampaignMediatorService? CampaignMediatorService { get; set; }
+    [Inject] private GameInputHandler? GameInputHandler { get; set; }
+    [Inject] private NavigationManager? NavMan { get; set; }
 
     /// <summary>
     /// Initializes the Campaign page component by setting up configuration parameters.
@@ -40,7 +39,15 @@ public partial class CampaignPage
     /// <returns>A task that represents the asynchronous initialization process.</returns>
     protected override async Task OnInitializedAsync()
     {
-        _campaign = await PersisterService!.LoadFromCampaignIdAsync(Id);
+        AuthenticationState authenticationState = await AuthenticationStateProvider!.GetAuthenticationStateAsync();
+        _loggedInUsername = authenticationState.User.Identity?.Name;
+        if (_loggedInUsername is null || !CampaignMediatorService!.UserCampaignDict.ContainsKey(_loggedInUsername!))
+        {
+            NavMan!.NavigateTo("/", forceLoad: true);
+        }
+
+        _campaign = await PersisterService!.LoadFromCampaignIdAsync(
+            CampaignMediatorService!.UserCampaignDict[_loggedInUsername!]);
         if (_campaign != null)
         {
             _conversation = _campaign.Messages.Select(OpenAiGptMessage.FromMessage).ToList();
@@ -49,12 +56,11 @@ public partial class CampaignPage
                 GameInputHandler.SendCharacterAndStartScenarioInput(_campaign);
             }
         }
-        AuthenticationState authenticationState = await AuthenticationStateProvider!.GetAuthenticationStateAsync();
-        _loggedInUsername = authenticationState.User.Identity?.Name;
+
         if (_loggedInUsername != null) _fileUtil = new FileUtility(_loggedInUsername);
         _shouldSave = Configuration!.GetValue<bool>("SaveConversationsToFile");
-        GameInputHandler.ChatCompletionReceived += OnChatCompletionReceived;
-        GameInputHandler.ChatCompletionChunkReceived += OnChatCompletionChunkReceived;
+        GameInputHandler!.ChatCompletionReceived += OnChatCompletionReceived;
+        GameInputHandler!.ChatCompletionChunkReceived += OnChatCompletionChunkReceived;
     }
 
     /// <summary>
@@ -91,12 +97,13 @@ public partial class CampaignPage
         {
             return;
         }
+
         _isWaitingForResponse = true;
         OpenAiGptMessage userInput = new(ChatMessageRole.User, _userInput);
         _conversation.Add(userInput);
         _latestPlayerMessage = userInput;
         _userInput = string.Empty;
-        await GameInputHandler.HandleUserPrompt(_campaign, _conversation);
+        await GameInputHandler!.HandleUserPrompt(_campaign, _conversation);
     }
 
     /// <summary>
@@ -139,6 +146,7 @@ public partial class CampaignPage
             message.AddChunk(eventArgs.Chunk);
             StateHasChanged();
         }
+
         Task.Run(() => ScrollToElement(BottomId));
     }
 
