@@ -6,6 +6,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
+using ChatRPG.Data;
 using Microsoft.AspNetCore.Authentication;
 using ChatRPG.Data.Models;
 using ChatRPG.Services;

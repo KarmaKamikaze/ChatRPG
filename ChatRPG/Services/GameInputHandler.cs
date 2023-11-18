@@ -67,4 +67,9 @@ public class GameInputHandler
         }
         _logger.LogInformation("Finished processing prompt.");
     }
+
+    public void SendCharacterAndStartScenarioInput(Campaign campaign)
+    {
+        _gameStateManager.InitializeStateForCampaign(campaign);
+    }
 }

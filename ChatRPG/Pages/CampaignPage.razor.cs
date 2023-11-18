@@ -6,6 +6,7 @@ using ChatRPG.Services.Events;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.JSInterop;
 using OpenAI_API.Chat;
 using OpenAiGptMessage = ChatRPG.API.OpenAiGptMessage;
@@ -43,6 +44,10 @@ public partial class CampaignPage
         if (_campaign != null)
         {
             _conversation = _campaign.Messages.Select(OpenAiGptMessage.FromMessage).ToList();
+            if (_conversation.Count == 0)
+            {
+                GameInputHandler.SendCharacterAndStartScenarioInput(_campaign);
+            }
         }
         AuthenticationState authenticationState = await AuthenticationStateProvider!.GetAuthenticationStateAsync();
         _loggedInUsername = authenticationState.User.Identity?.Name;

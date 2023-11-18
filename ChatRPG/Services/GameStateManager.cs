@@ -1,3 +1,4 @@
+using System.Text;
 using ChatRPG.API;
 using ChatRPG.API.Response;
 using ChatRPG.Data.Models;
@@ -15,6 +16,18 @@ public class GameStateManager
     {
         _logger = logger;
         _persisterService = persisterService;
+    }
+
+    public void InitializeStateForCampaign(Campaign campaign)
+    {
+        string content = $"I am {campaign.Player.Name}, a character described as \"{campaign.Player.Description}\".";
+        if (campaign.CustomStartScenario != null)
+        {
+            content += "\n" + campaign.CustomStartScenario;
+        }
+        
+        OpenAiGptMessage message = new(ChatMessageRole.User, content);
+        UpdateStateFromMessage(campaign, message);
     }
 
     public void UpdateStateFromMessage(Campaign campaign, OpenAiGptMessage gptMessage)
