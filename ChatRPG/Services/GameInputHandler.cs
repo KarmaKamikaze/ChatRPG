@@ -66,5 +66,5 @@ public class GameInputHandler
             await _gameStateManager.SaveCurrentState(campaign);
         }
         _logger.LogInformation("Finished processing prompt.");
-    } 
+    }
 }

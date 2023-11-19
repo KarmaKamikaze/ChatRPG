@@ -118,7 +118,7 @@ public partial class UserCampaignOverview : ComponentBase
         StateHasChanged();
         AdjustAlerts();
     }
-    
+
     private void AdjustAlerts()
     {
         if (!TestFields) return;
