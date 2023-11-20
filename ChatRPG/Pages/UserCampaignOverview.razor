@@ -12,7 +12,7 @@
             <div class="col rounded custom-gray-container">
                 <div class="m-3">
                     <h3 class="text-center mb-4">Your Campaigns</h3>
-                    <div class="vstack overflow-auto form-text-black mb-1 scrollbar" style="max-height: 400px;" id="your-campaigns">
+                    <div class="vstack overflow-auto form-text-black mb-1 scrollbar" style="max-height: 500px;" id="your-campaigns">
                         @foreach (CampaignModel campaign in Campaigns)
                         {
                             <button class="card card-dim mb-2" @onclick='() => LaunchCampaign(campaign.Id)'>
@@ -32,7 +32,7 @@
             <div class="col rounded custom-gray-container">
                 <div class="m-3">
                     <h3 class="text-center mb-4">Starting Scenarios</h3>
-                    <div class="vstack overflow-auto form-text-black mb-1 scrollbar" style="max-height: 400px;" id="start-scenarios">
+                    <div class="vstack overflow-auto form-text-black mb-1 scrollbar" style="max-height: 500px;" id="start-scenarios">
                         @foreach (StartScenario scenario in StartScenarios)
                         {
                             <Scenario ApplyScenario="ApplyStartingScenario" Title="@scenario.Title" Body="@scenario.Body"/>
@@ -64,6 +64,10 @@
                                     Character name is required.
                                 </div>
                             }
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputCharacterDescription" class="form-label">Character Description</label>
+                            <textarea class="form-control scrollbar" style="resize: none;" @bind="CharacterDescription" id="inputCharacterDescription" rows="2"></textarea>
                         </div>
                         <div class="mb-3">
                             <label for="inputCustomStartScenario" class="form-label">Custom Start Scenario</label>

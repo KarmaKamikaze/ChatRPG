@@ -21,10 +21,9 @@ public partial class UserCampaignOverview : ComponentBase
     private bool TestFields { get; set; }
     private int TextAreaRows { get; set; } = 6;
 
-    [Required][BindProperty] private string CharacterName { get; set; } = "";
-
-    [Required][BindProperty] private string CampaignTitle { get; set; } = "";
-
+    [Required] [BindProperty] private string CampaignTitle { get; set; } = "";
+    [Required] [BindProperty] private string CharacterName { get; set; } = "";
+    [BindProperty] private string CharacterDescription { get; set; } = "";
     [BindProperty] private string StartScenario { get; set; } = null!;
 
     [Inject] private AuthenticationStateProvider? AuthProvider { get; set; }
@@ -59,7 +58,8 @@ public partial class UserCampaignOverview : ComponentBase
 
         CampaignModel campaign = new(User, CampaignTitle, StartScenario);
         Environment environment = new(campaign, "Start location", "The place where it all began");
-        Character player = new(campaign, environment, CharacterType.Humanoid, CharacterName, "", true, 100);
+        Character player = new(campaign, environment, CharacterType.Humanoid, CharacterName, CharacterDescription, true,
+            100);
         campaign.Environments.Add(environment);
         campaign.Characters.Add(player);
         await PersisterService!.SaveAsync(campaign);
