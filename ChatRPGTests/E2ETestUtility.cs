@@ -44,7 +44,7 @@ public static class E2ETestUtility
         Thread.Sleep(500); // wait for page to load fully
     }
 
-    public static void CreateTestCampaign(IWebDriver driver, WebDriverWait wait)
+    public static void CreateTestCampaign(IWebDriver driver, WebDriverWait wait, bool goToCampaign = false)
     {
         driver.Navigate().GoToUrl("http://localhost:5111/");
         Thread.Sleep(500);
@@ -54,8 +54,11 @@ public static class E2ETestUtility
         wait.Until(webDriver => webDriver.FindElement(By.Id("inputCustomStartScenario"))).SendKeys("Test Scenario");
         wait.Until(webDriver => webDriver.FindElement(By.Id("create-campaign-button"))).Click();
         Thread.Sleep(200); // Wait for page to load
-        driver.Navigate().GoToUrl("http://localhost:5111/");
-        Thread.Sleep(500);
+        if (!goToCampaign)
+        {
+            driver.Navigate().GoToUrl("http://localhost:5111/");
+            Thread.Sleep(500);
+        }
     }
 
     public static void RemoveTestCampaign(IWebDriver driver, WebDriverWait wait)

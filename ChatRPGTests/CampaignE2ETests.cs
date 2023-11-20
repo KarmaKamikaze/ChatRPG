@@ -18,12 +18,14 @@ public class CampaignE2ETests : IDisposable
         _driver = E2ETestUtility.Setup("/");
         _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
 
-        // Login and prepare to test Campaign page
+        // Login, create test campaign and prepare to test Campaign page
         E2ETestUtility.Login(_wait, _testUsername, _testPassword);
+        E2ETestUtility.CreateTestCampaign(_driver, _wait, true);
     }
 
     public void Dispose()
     {
+        E2ETestUtility.RemoveTestCampaign(_driver, _wait);
         E2ETestUtility.Teardown(_driver);
         _driver.Dispose();
     }
