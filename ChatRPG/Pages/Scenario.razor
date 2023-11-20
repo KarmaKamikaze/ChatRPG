@@ -1,0 +1,30 @@
+@namespace ChatRPG.Pages
+
+<button class="card card-dim mb-2" @onclick='InvokeApplyScenarioInParent' id="scenario-card">
+    <div class="card-body col-12">
+        <h5 class="card-title">@Title</h5>
+        <hr/>
+        <p class="card-text text-start" style="font-size: 14px;">@Body</p>
+    </div>
+</button>
+
+@code {
+
+    [Parameter]
+    [EditorRequired]
+    public string? Title { get; set; }
+
+    [Parameter]
+    [EditorRequired]
+    public string? Body { get; set; }
+
+    [Parameter]
+    [EditorRequired]
+    public Action<string, string>? ApplyScenario { get; set; }
+
+    private void InvokeApplyScenarioInParent()
+    {
+        ApplyScenario?.Invoke(Title!, Body!);
+    }
+
+}
