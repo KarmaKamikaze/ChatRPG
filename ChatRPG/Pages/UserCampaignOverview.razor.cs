@@ -21,8 +21,8 @@ public partial class UserCampaignOverview : ComponentBase
     private bool TestFields { get; set; }
     private int TextAreaRows { get; set; } = 6;
 
-    [Required] [BindProperty] private string CampaignTitle { get; set; } = "";
-    [Required] [BindProperty] private string CharacterName { get; set; } = "";
+    [Required][BindProperty] private string CampaignTitle { get; set; } = "";
+    [Required][BindProperty] private string CharacterName { get; set; } = "";
     [BindProperty] private string CharacterDescription { get; set; } = "";
     [BindProperty] private string StartScenario { get; set; } = null!;
 
