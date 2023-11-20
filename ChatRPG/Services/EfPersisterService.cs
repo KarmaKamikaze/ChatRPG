@@ -42,6 +42,7 @@ public class EfPersisterService : IPersisterService
         }
     }
 
+    /// <inheritdoc />
     public async Task DeleteAsync(Campaign campaign)
     {
         if (!(await _dbContext.Campaigns.ContainsAsync(campaign)))

@@ -1,3 +1,4 @@
+using Blazored.Modal;
 using ChatRPG.API;
 using ChatRPG.Areas.Identity;
 using ChatRPG.Data;
@@ -22,6 +23,7 @@ builder.Services.AddDefaultIdentity<User>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddBlazoredModal();
 
 HttpMessageHandlerFactory httpMessageHandlerFactory = new HttpMessageHandlerFactory(configuration);
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<User>>()

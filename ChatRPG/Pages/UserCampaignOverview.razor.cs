@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Security.Authentication;
+using Blazored.Modal;
+using Blazored.Modal.Services;
 using ChatRPG.Data.Models;
 using ChatRPG.Services;
 using Microsoft.AspNetCore.Components;
@@ -31,6 +33,8 @@ public partial class UserCampaignOverview : ComponentBase
     [Inject] private IPersisterService? PersisterService { get; set; }
     [Inject] private ICampaignMediatorService? CampaignMediatorService { get; set; }
     [Inject] private NavigationManager? NavMan { get; set; }
+
+    [CascadingParameter] public IModalService? ConfirmDeleteModal { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -76,6 +80,25 @@ public partial class UserCampaignOverview : ComponentBase
     {
         CampaignTitle = title;
         StartScenario = scenario;
+        StateHasChanged();
+    }
+
+    private async Task ShowCampaignDeleteModal(Campaign campaign)
+    {
+        IModalReference modal = ConfirmDeleteModal!.Show<ConfirmModal>("Delete Campaign",
+            new ModalParameters().Add(nameof(ConfirmModal.CampaignToDelete), campaign));
+
+        ModalResult shouldDelete = await modal.Result;
+        if (shouldDelete.Confirmed)
+        {
+            await ModalClosed();
+        }
+    }
+
+    private async Task ModalClosed()
+    {
+        Campaigns = await PersisterService!.GetCampaignsForUser(User!);
+        Campaigns.Reverse(); // Reverse to display latest campaign first
         StateHasChanged();
     }
 

@@ -230,7 +230,6 @@ a, .btn-link {
 }
 
 .card-dim {
-    width: 18rem;
     background: #dcdcdc;
 }
 
@@ -357,4 +356,17 @@ a, .btn-link {
 
 .dashboard-title-container {
     padding-bottom: 60px;
+}
+
+.campaign-button {
+    position: relative;
+}
+
+.delete-campaign-button {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    background: #ececec;
 }

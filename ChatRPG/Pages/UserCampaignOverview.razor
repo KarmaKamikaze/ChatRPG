@@ -15,7 +15,7 @@
                     <div class="vstack overflow-auto form-text-black mb-1 scrollbar" style="max-height: 500px;" id="your-campaigns">
                         @foreach (CampaignModel campaign in Campaigns)
                         {
-                            <button class="card card-dim mb-2" @onclick='() => LaunchCampaign(campaign.Id)'>
+                            <button class="campaign-button card card-dim mb-2" @onclick='() => LaunchCampaign(campaign.Id)'>
                                 <div class="card-body col-12">
                                     <h5 class="card-title">@campaign.Title</h5>
                                     <h6 class="card-subtitle mb-2 text-muted" style="font-size: 14px;">@campaign.Player.Name</h6>
@@ -23,6 +23,9 @@
                                     <p class="card-text line-clamp text-start">@(campaign.StartScenario ?? "No scenario")</p>
                                     <p class="card-text" style="font-size: 14px;">Started @campaign.StartedOn.ToShortDateString() @campaign.StartedOn.ToShortTimeString()</p>
                                 </div>
+                                <button class="delete-campaign-button rounded" @onclick='() => ShowCampaignDeleteModal(campaign)' @onclick:stopPropagation>
+                                    <i class="bi bi-trash3 text-danger"></i>
+                                </button>
                             </button>
                         }
                     </div>
