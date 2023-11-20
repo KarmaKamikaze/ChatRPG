@@ -164,7 +164,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account.Manage
                     pageHandler: null,
                     values: new { area = "Identity", userId = userId, code = code },
                     protocol: Request.Scheme);
-               
+
                 await _emailSender.SendEmailAsync(
                     email,
                     "Confirm your email",
