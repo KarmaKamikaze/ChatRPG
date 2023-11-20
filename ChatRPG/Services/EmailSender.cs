@@ -1,6 +1,6 @@
 ﻿using System.Configuration;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using MailKit.Net.Smtp;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using MimeKit;
 using MimeKit.Text;
 
@@ -17,15 +17,16 @@ public class EmailSender : IEmailSender
         _logger = logger;
         _senderEmail = configuration.GetSection("EmailServiceInfo").GetValue<string>("Email");
         _senderPassword = configuration.GetSection("EmailServiceInfo").GetValue<string>("Password");
-
-        if (_senderEmail == null || _senderPassword == null)
-        {
-            throw new ConfigurationErrorsException("Missing 'Email' credentials in appsettings");
-        }
     }
 
     public async Task SendEmailAsync(string email, string subject, string htmlMessage)
     {
+        if (_senderEmail == null || _senderPassword == null)
+        {
+            _logger.LogError("Missing 'Email' credentials in appsettings");
+            return;
+        }
+
         MimeMessage mail = new MimeMessage();
         mail.From.Add(new MailboxAddress("ChatRPG", _senderEmail));
         mail.To.Add(new MailboxAddress(email, email));

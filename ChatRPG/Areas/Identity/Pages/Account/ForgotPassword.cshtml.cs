@@ -22,11 +22,13 @@ namespace ChatRPG.Areas.Identity.Pages.Account
     {
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration;
+        private readonly IEmailSender _emailSender;
 
-        public ForgotPasswordModel(UserManager<User> userManager, IConfiguration configuration)
+        public ForgotPasswordModel(UserManager<User> userManager, IConfiguration configuration, IEmailSender emailSender)
         {
             _userManager = userManager;
             _configuration = configuration;
+            _emailSender = emailSender;
         }
 
         /// <summary>
@@ -65,9 +67,8 @@ namespace ChatRPG.Areas.Identity.Pages.Account
                         pageHandler: null,
                         values: new { area = "Identity", code },
                         protocol: Request.Scheme);
-                    Logger<EmailSender> emailSenderLogger = new Logger<EmailSender>(new LoggerFactory());
-                    EmailSender emailSender = new EmailSender(_configuration, emailSenderLogger);
-                    await emailSender.SendEmailAsync(
+
+                    await _emailSender.SendEmailAsync(
                         Input.Email,
                         "Reset Password",
                         $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
