@@ -424,6 +424,21 @@ public class AuthorizedIndexE2ETests : IDisposable
         Assert.True(characterNameAlert.Displayed && campaignTitleAlert.Displayed);
     }
 
+    [Fact]
+    public void AuthorizedIndexPage_CustomCampaign_CharacterDescriptionIsEmptyOnInitialization()
+    {
+        // Arrange
+        string expectedCharacterDescription = string.Empty;
+
+        // Act
+        IWebElement? characterDescription =
+            _wait.Until(webDriver => webDriver.FindElement(By.Id("inputCharacterDescription")));
+        string actualCharacterDescription = characterDescription.Text;
+
+        // Assert
+        Assert.Equal(expectedCharacterDescription, actualCharacterDescription);
+    }
+
     public void Dispose()
     {
         E2ETestUtility.Teardown(_driver);
