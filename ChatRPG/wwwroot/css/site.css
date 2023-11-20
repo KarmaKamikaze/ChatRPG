@@ -368,5 +368,12 @@ a, .btn-link {
     right: 0;
     margin-right: 5px;
     margin-bottom: 5px;
-    background: #ececec;
+    background: none;
+    overflow: hidden;
+    outline:none;
+    border:solid 1px black;
+}
+
+.delete-campaign-button:hover {
+    background: #eaeaea;
 }

@@ -1,5 +1,7 @@
+using System.Collections.ObjectModel;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
 
 namespace ChatRPGTests;
 
@@ -30,5 +32,41 @@ public static class E2ETestUtility
 
         driver.Close();
         driver.Quit();
+    }
+
+    public static void Login(WebDriverWait wait, string username, string password)
+    {
+        Thread.Sleep(1000); // wait for Index title animation to finish
+        wait.Until(webDriver => webDriver.FindElement(By.Id("login-button"))).Click();
+        wait.Until(webDriver => webDriver.FindElement(By.Id("username-form"))).SendKeys(username);
+        wait.Until(webDriver => webDriver.FindElement(By.Id("password-form"))).SendKeys(password);
+        wait.Until(webDriver => webDriver.FindElement(By.Id("login-submit"))).Submit();
+        Thread.Sleep(500); // wait for page to load fully
+    }
+
+    public static void CreateTestCampaign(IWebDriver driver, WebDriverWait wait)
+    {
+        driver.Navigate().GoToUrl("http://localhost:5111/");
+        Thread.Sleep(500);
+        wait.Until(webDriver => webDriver.FindElement(By.Id("inputCampaignTitle"))).SendKeys("Test Title");
+        wait.Until(webDriver => webDriver.FindElement(By.Id("inputCharacterName"))).SendKeys("Test Name");
+        wait.Until(webDriver => webDriver.FindElement(By.Id("inputCharacterDescription"))).SendKeys("Test Description");
+        wait.Until(webDriver => webDriver.FindElement(By.Id("inputCustomStartScenario"))).SendKeys("Test Scenario");
+        wait.Until(webDriver => webDriver.FindElement(By.Id("create-campaign-button"))).Click();
+        Thread.Sleep(200); // Wait for page to load
+        driver.Navigate().GoToUrl("http://localhost:5111/");
+        Thread.Sleep(500);
+    }
+
+    public static void RemoveTestCampaign(IWebDriver driver, WebDriverWait wait)
+    {
+        driver.Navigate().GoToUrl("http://localhost:5111/");
+        Thread.Sleep(500); // Wait for page to load
+        IWebElement? yourCampaignsContainer =
+            wait.Until(webDriver => webDriver.FindElement(By.Id("your-campaigns")));
+        ReadOnlyCollection<IWebElement>? removeButtons = yourCampaignsContainer.FindElements(By.ClassName("delete-campaign-button"));
+        removeButtons[0].Click(); // Remove latest campaign
+        wait.Until(webDriver => webDriver.FindElement(By.Id("modal-confirm"))).Click();
+        Thread.Sleep(200);
     }
 }
