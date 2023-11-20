@@ -107,7 +107,6 @@ public partial class UserCampaignOverview : ComponentBase
     private void UpdateCharacterNameOnKeyPress(ChangeEventArgs e)
     {
         if (e.Value != null) CharacterName = e.Value.ToString()!;
-        StateHasChanged();
         AdjustAlerts();
     }
 
