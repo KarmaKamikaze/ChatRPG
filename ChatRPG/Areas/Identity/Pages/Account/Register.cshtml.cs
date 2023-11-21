@@ -9,7 +9,6 @@ using System.Text.Encodings.Web;
 using ChatRPG.Data;
 using Microsoft.AspNetCore.Authentication;
 using ChatRPG.Data.Models;
-using ChatRPG.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -26,13 +25,15 @@ namespace ChatRPG.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<User> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IConfiguration _configuration;
+        private readonly IEmailSender _emailSender;
 
         public RegisterModel(
             UserManager<User> userManager,
             IUserStore<User> userStore,
             SignInManager<User> signInManager,
             ILogger<RegisterModel> logger,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IEmailSender emailSender)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -40,6 +41,7 @@ namespace ChatRPG.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _configuration = configuration;
+            _emailSender = emailSender;
         }
 
         /// <summary>
@@ -141,10 +143,8 @@ namespace ChatRPG.Areas.Identity.Pages.Account
                             pageHandler: null,
                             values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                             protocol: Request.Scheme);
-                        Logger<EmailSender> emailSenderLogger = new Logger<EmailSender>(new LoggerFactory());
-                        EmailSender emailSender = new EmailSender(_configuration, emailSenderLogger);
 
-                        await emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
                             $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
                     }
 

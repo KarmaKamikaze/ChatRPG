@@ -21,11 +21,9 @@ public partial class UserCampaignOverview : ComponentBase
     private bool TestFields { get; set; }
     private int TextAreaRows { get; set; } = 6;
 
-    [Required][BindProperty] private string CharacterName { get; set; } = "";
-    [Required][BindProperty] private string CharacterDescription { get; set; } = "";
-
     [Required][BindProperty] private string CampaignTitle { get; set; } = "";
-
+    [Required][BindProperty] private string CharacterName { get; set; } = "";
+    [BindProperty] private string CharacterDescription { get; set; } = "";
     [BindProperty] private string StartScenario { get; set; } = null!;
 
     [Inject] private AuthenticationStateProvider? AuthProvider { get; set; }
@@ -60,7 +58,8 @@ public partial class UserCampaignOverview : ComponentBase
 
         CampaignModel campaign = new(User, CampaignTitle, StartScenario);
         Environment environment = new(campaign, "Start location", "The place where it all began");
-        Character player = new(campaign, environment, CharacterType.Humanoid, CharacterName, CharacterDescription, true, 100);
+        Character player = new(campaign, environment, CharacterType.Humanoid, CharacterName, CharacterDescription, true,
+            100);
         campaign.Environments.Add(environment);
         campaign.Characters.Add(player);
         await PersisterService!.SaveAsync(campaign);
@@ -82,14 +81,14 @@ public partial class UserCampaignOverview : ComponentBase
 
     private bool FieldIsEmpty()
     {
-        if (string.IsNullOrWhiteSpace(CampaignTitle) && string.IsNullOrWhiteSpace(CharacterName) && string.IsNullOrWhiteSpace(CharacterDescription))
+        if (string.IsNullOrWhiteSpace(CampaignTitle) && string.IsNullOrWhiteSpace(CharacterName))
         {
             TextAreaRows = 2;
             StateHasChanged();
             return true;
         }
 
-        if (string.IsNullOrWhiteSpace(CampaignTitle) || string.IsNullOrWhiteSpace(CharacterName) || string.IsNullOrWhiteSpace(CharacterDescription))
+        if (string.IsNullOrWhiteSpace(CampaignTitle) || string.IsNullOrWhiteSpace(CharacterName))
         {
             TextAreaRows = 4;
             StateHasChanged();
@@ -108,26 +107,18 @@ public partial class UserCampaignOverview : ComponentBase
     private void UpdateCharacterNameOnKeyPress(ChangeEventArgs e)
     {
         if (e.Value != null) CharacterName = e.Value.ToString()!;
-        StateHasChanged();
-        AdjustAlerts();
-    }
-
-    private void UpdateCharacterDescriptionOnKeyPress(ChangeEventArgs e)
-    {
-        if (e.Value != null) CharacterDescription = e.Value.ToString()!;
-        StateHasChanged();
         AdjustAlerts();
     }
 
     private void AdjustAlerts()
     {
         if (!TestFields) return;
-        if (!string.IsNullOrWhiteSpace(CampaignTitle) && !string.IsNullOrWhiteSpace(CharacterName) && !string.IsNullOrWhiteSpace(CharacterDescription))
+        if (!string.IsNullOrWhiteSpace(CampaignTitle) && !string.IsNullOrWhiteSpace(CharacterName))
         {
             TextAreaRows = 6;
             StateHasChanged();
         }
-        else if (!string.IsNullOrWhiteSpace(CampaignTitle) || !string.IsNullOrWhiteSpace(CharacterName) || !string.IsNullOrWhiteSpace(CharacterDescription))
+        else if (!string.IsNullOrWhiteSpace(CampaignTitle) || !string.IsNullOrWhiteSpace(CharacterName))
         {
             TextAreaRows = 4;
             StateHasChanged();
