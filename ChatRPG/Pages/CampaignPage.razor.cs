@@ -16,6 +16,8 @@ public partial class CampaignPage
     private string? _loggedInUsername;
     private bool _shouldSave;
     private IJSObjectReference? _scrollJsScript;
+    private IJSObjectReference? _detectScrollBarJsScript;
+    private bool _hasScrollBar = false;
     private FileUtility? _fileUtil;
     private List<OpenAiGptMessage> _conversation = new();
     private string _userInput = "";
@@ -62,18 +64,6 @@ public partial class CampaignPage
         }
     }
 
-    private void InitializeCampaign()
-    {
-        string content = $"The player is {_campaign!.Player.Name}, described as \"{_campaign.Player.Description}\".";
-        if (_campaign.StartScenario != null)
-        {
-            content += "\n" + _campaign.StartScenario;
-        }
-        OpenAiGptMessage message = new(ChatMessageRole.System, content);
-        _conversation.Add(message);
-        GameInputHandler?.HandleUserPrompt(_campaign, _conversation);
-    }
-
     /// <summary>
     /// Executes after the component has rendered and initializes JavaScript interop for scrolling.
     /// </summary>
@@ -84,7 +74,21 @@ public partial class CampaignPage
         if (firstRender)
         {
             _scrollJsScript ??= await JsRuntime!.InvokeAsync<IJSObjectReference>("import", "./js/scroll.js");
+            _detectScrollBarJsScript ??= await JsRuntime!.InvokeAsync<IJSObjectReference>("import", "./js/detectScrollBar.js");
+            await ScrollToElement(BottomId); // scroll down to latest message
         }
+    }
+
+    private void InitializeCampaign()
+    {
+        string content = $"The player is {_campaign!.Player.Name}, described as \"{_campaign.Player.Description}\".";
+        if (_campaign.StartScenario != null)
+        {
+            content += "\n" + _campaign.StartScenario;
+        }
+        OpenAiGptMessage message = new(ChatMessageRole.System, content);
+        _conversation.Add(message);
+        GameInputHandler?.HandleUserPrompt(_campaign, _conversation);
     }
 
     /// <summary>
@@ -124,6 +128,8 @@ public partial class CampaignPage
     private async Task ScrollToElement(string elementId)
     {
         await _scrollJsScript!.InvokeVoidAsync("ScrollToId", elementId);
+        _hasScrollBar = await _detectScrollBarJsScript!.InvokeAsync<bool>("DetectScrollBar");
+        StateHasChanged();
     }
 
     /// <summary>
