@@ -24,12 +24,23 @@
         <input type="text" style="resize:vertical;" class="form-control user-prompt custom-text-field"
                @bind="_userInput" placeholder="What do you do?" @onkeyup="@EnterKeyHandler" disabled="@_isWaitingForResponse"/>
         <div class="input-group-append">
-            <button class="btn btn-send ml-2" type="button" @onclick="SendPrompt" disabled="@_isWaitingForResponse">
+            <button class="btn btn-primary ml-2" type="button" @onclick="SendPrompt" disabled="@_isWaitingForResponse">
                 Send
             </button>
         </div>
 
     </div>
+
+    <div class="rz-p-12 rz-text-align-center">
+        <RadzenSelectBar @bind-Value=@_activePromptType TValue="PromptType" class="mb-5">
+            <Items>
+                <RadzenSelectBarItem Text="Do" Value="PromptType.Do" />
+                <RadzenSelectBarItem Text="Say" Value="PromptType.Say" />
+                <RadzenSelectBarItem Text="Attack" Value="PromptType.Attack" />
+            </Items>
+        </RadzenSelectBar>
+    </div>
+
     @if (_hasScrollBar)
     {
         <button class="btn-scroll-to-top text-xl-center rounded" @onclick='() => ScrollToElement("campaign-title")'>
@@ -38,7 +49,7 @@
     }
 </div>
 
-<span id="bottom-id"></span>
+<span id="bottom-id" style="margin-bottom: 50px;"></span>
 
 <footer class="footer pl-3 text-muted footer-formatting fixed-bottom custom-gray-container">
     <div class="container">

@@ -25,6 +25,7 @@ public partial class CampaignPage
     private OpenAiGptMessage? _latestPlayerMessage;
     private const string BottomId = "bottom-id";
     private Campaign? _campaign;
+    private PromptType _activePromptType = PromptType.Do;
 
     [Inject] private IConfiguration? Configuration { get; set; }
     [Inject] private IJSRuntime? JsRuntime { get; set; }
@@ -173,4 +174,11 @@ public partial class CampaignPage
         MessagePair messagePair = new MessagePair(_latestPlayerMessage?.Content ?? "", asstMessage);
         Task.Run(() => _fileUtil.UpdateSaveFileAsync(messagePair));
     }
+}
+
+public enum PromptType
+{
+    Do,
+    Say,
+    Attack
 }
