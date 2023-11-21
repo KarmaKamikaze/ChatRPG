@@ -11,7 +11,8 @@ public class GameStateManager
 {
     private readonly ILogger<GameStateManager> _logger;
     private readonly IPersisterService _persisterService;
-
+    public bool CombatMode { get; private set; }
+    
     public GameStateManager(ILogger<GameStateManager> logger, IPersisterService persisterService)
     {
         _logger = logger;
@@ -70,6 +71,9 @@ public class GameStateManager
                     _logger.LogInformation("Created event: \"{Name}\"", @event.Name);
                 }
             }
+
+            CombatMode = response.IsInCombat;
+
         }
         catch (Exception e)
         {
