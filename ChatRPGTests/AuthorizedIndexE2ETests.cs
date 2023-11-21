@@ -21,7 +21,7 @@ public class AuthorizedIndexE2ETests : IDisposable
         _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
 
         // Login and prepare to test Authorized Index
-        Login(_testUsername, _testPassword);
+        E2ETestUtility.Login(_wait, _testUsername, _testPassword);
     }
 
     [Fact]
@@ -116,14 +116,14 @@ public class AuthorizedIndexE2ETests : IDisposable
         // Arranged
         IWebElement? campaignsContainer = _wait.Until(webDriver => webDriver.FindElement(By.Id("your-campaigns")));
         ReadOnlyCollection<IWebElement>? campaigns = campaignsContainer.FindElements(By.ClassName("card"));
-        string expectedAmountOfScenarios = campaigns.Count.ToString();
+        string expectedAmountOfCampaigns = campaigns.Count.ToString();
 
         // Act
         IWebElement? campaignsCounter = _wait.Until(webDriver => webDriver.FindElement(By.Id("campaigns-count")));
-        string actualAmountOfScenarios = Regex.Match(campaignsCounter.Text, @"\d+").Value;
+        string actualAmountOfCampaigns = Regex.Match(campaignsCounter.Text, @"\d+").Value;
 
         // Assert
-        Assert.Equal(expectedAmountOfScenarios, actualAmountOfScenarios);
+        Assert.Equal(expectedAmountOfCampaigns, actualAmountOfCampaigns);
     }
 
     [Fact]
@@ -424,22 +424,161 @@ public class AuthorizedIndexE2ETests : IDisposable
         Assert.True(characterNameAlert.Displayed && campaignTitleAlert.Displayed);
     }
 
+    [Fact]
+    public void AuthorizedIndexPage_CustomCampaign_CharacterDescriptionIsEmptyOnInitialization()
+    {
+        // Arrange
+        string expectedCharacterDescription = string.Empty;
+
+        // Act
+        IWebElement? characterDescription =
+            _wait.Until(webDriver => webDriver.FindElement(By.Id("inputCharacterDescription")));
+        string actualCharacterDescription = characterDescription.Text;
+
+        // Assert
+        Assert.Equal(expectedCharacterDescription, actualCharacterDescription);
+    }
+
+    [Fact]
+    public void AuthorizedIndexPage_YourCampaigns_DisplaysRemoveCampaignButtonWhenEarlierCampaignExists()
+    {
+        // Arrange
+        E2ETestUtility.CreateTestCampaign(_driver, _wait);
+
+        // Act
+        IWebElement? firstRemoveCampaignButton = _wait.Until(webDriver => webDriver.FindElements(By.ClassName("delete-campaign-button")))[0];
+
+        // Assert
+        Assert.True(firstRemoveCampaignButton.Displayed);
+        E2ETestUtility.RemoveTestCampaign(_driver, _wait);
+    }
+
+    [Fact]
+    public void AuthorizedIndexPage_DeleteCampaignModal_ModalIsDisplayedAfterRemoveCampaignButtonIsClicked()
+    {
+        // Arrange
+        E2ETestUtility.CreateTestCampaign(_driver, _wait);
+
+        // Act
+        _wait.Until(webDriver => webDriver.FindElements(By.ClassName("delete-campaign-button")))[0].Click();
+        Thread.Sleep(200); // wait for modal to load
+        IWebElement? modal = _wait.Until(webDriver => webDriver.FindElement(By.ClassName("modal")));
+
+        // Assert
+        Assert.True(modal.Displayed);
+        E2ETestUtility.RemoveTestCampaign(_driver, _wait);
+    }
+
+    [Fact]
+    public void AuthorizedIndexPage_DeleteCampaignModal_ModalCloseButtonIsDisplayedWhenModalIsActivated()
+    {
+        // Arrange
+        E2ETestUtility.CreateTestCampaign(_driver, _wait);
+
+        // Act
+        _wait.Until(webDriver => webDriver.FindElements(By.ClassName("delete-campaign-button")))[0].Click();
+        Thread.Sleep(200); // wait for modal to load
+        IWebElement? modalCloseButton = _wait.Until(webDriver => webDriver.FindElement(By.Id("modal-close")));
+
+        // Assert
+        Assert.True(modalCloseButton.Displayed);
+        E2ETestUtility.RemoveTestCampaign(_driver, _wait);
+    }
+
+    [Fact]
+    public void AuthorizedIndexPage_DeleteCampaignModal_ModalConfirmButtonIsDisplayedWhenModalIsActivated()
+    {
+        // Arrange
+        E2ETestUtility.CreateTestCampaign(_driver, _wait);
+
+        // Act
+        _wait.Until(webDriver => webDriver.FindElements(By.ClassName("delete-campaign-button")))[0].Click();
+        Thread.Sleep(200); // wait for modal to load
+        IWebElement? modalConfirmButton = _wait.Until(webDriver => webDriver.FindElement(By.Id("modal-confirm")));
+
+        // Assert
+        Assert.True(modalConfirmButton.Displayed);
+        E2ETestUtility.RemoveTestCampaign(_driver, _wait);
+    }
+
+    [Fact]
+    public void AuthorizedIndexPage_DeleteCampaignModal_ModalBodyContainsCorrectCampaignTitle()
+    {
+        // Arrange
+        E2ETestUtility.CreateTestCampaign(_driver, _wait);
+        _wait.Until(webDriver => webDriver.FindElements(By.ClassName("delete-campaign-button")))[0].Click();
+        Thread.Sleep(200); // wait for modal to load
+        string expectedCampaignTitleString = "Campaign title: Test Title";
+
+        // Act
+        IWebElement? modalBody = _wait.Until(webDriver => webDriver.FindElement(By.ClassName("modal-body")));
+
+        // Assert
+        Assert.Contains(expectedCampaignTitleString, modalBody.Text);
+        E2ETestUtility.RemoveTestCampaign(_driver, _wait);
+    }
+
+    [Fact]
+    public void AuthorizedIndexPage_DeleteCampaignModal_ModalBodyContainsCorrectCharacterName()
+    {
+        // Arrange
+        E2ETestUtility.CreateTestCampaign(_driver, _wait);
+        _wait.Until(webDriver => webDriver.FindElements(By.ClassName("delete-campaign-button")))[0].Click();
+        Thread.Sleep(200); // wait for modal to load
+        string expectedCharacterName = "Character name: Test Name";
+
+        // Act
+        IWebElement? modalBody = _wait.Until(webDriver => webDriver.FindElement(By.ClassName("modal-body")));
+
+        // Assert
+        Assert.Contains(expectedCharacterName, modalBody.Text);
+        E2ETestUtility.RemoveTestCampaign(_driver, _wait);
+    }
+
+    [Fact]
+    public void AuthorizedIndexPage_DeleteCampaignModal_CampaignIsDeletedAndRemovedFromCampaignListWhenModalIsConfirmed()
+    {
+        // Arrange
+        E2ETestUtility.CreateTestCampaign(_driver, _wait);
+        IWebElement? campaignsCounterBefore = _wait.Until(webDriver => webDriver.FindElement(By.Id("campaigns-count")));
+        int expectedAmountOfCampaigns = int.Parse(Regex.Match(campaignsCounterBefore.Text, @"\d+").Value) - 1;
+        _wait.Until(webDriver => webDriver.FindElements(By.ClassName("delete-campaign-button")))[0].Click();
+        Thread.Sleep(200); // wait for modal to load
+
+        // Act
+        _wait.Until(webDriver => webDriver.FindElement(By.Id("modal-confirm"))).Click();
+        Thread.Sleep(500); // Wait for page to update
+        IWebElement? campaignsCounterAfter = _wait.Until(webDriver => webDriver.FindElement(By.Id("campaigns-count")));
+        int actualAmountOfCampaigns = int.Parse(Regex.Match(campaignsCounterAfter.Text, @"\d+").Value);
+
+        // Assert
+        Assert.Equal(expectedAmountOfCampaigns, actualAmountOfCampaigns);
+    }
+
+    [Fact]
+    public void AuthorizedIndexPage_DeleteCampaignModal_CampaignIsPreservedInCampaignListWhenModalIsClosed()
+    {
+        // Arrange
+        E2ETestUtility.CreateTestCampaign(_driver, _wait);
+        IWebElement? campaignsCounterBefore = _wait.Until(webDriver => webDriver.FindElement(By.Id("campaigns-count")));
+        int expectedAmountOfCampaigns = int.Parse(Regex.Match(campaignsCounterBefore.Text, @"\d+").Value);
+        _wait.Until(webDriver => webDriver.FindElements(By.ClassName("delete-campaign-button")))[0].Click();
+        Thread.Sleep(200); // wait for modal to load
+
+        // Act
+        _wait.Until(webDriver => webDriver.FindElement(By.Id("modal-close"))).Click();
+        Thread.Sleep(500); // Wait for page to update
+        IWebElement? campaignsCounterAfter = _wait.Until(webDriver => webDriver.FindElement(By.Id("campaigns-count")));
+        int actualAmountOfCampaigns = int.Parse(Regex.Match(campaignsCounterAfter.Text, @"\d+").Value);
+
+        // Assert
+        Assert.Equal(expectedAmountOfCampaigns, actualAmountOfCampaigns);
+    }
+
     public void Dispose()
     {
         E2ETestUtility.Teardown(_driver);
         _driver.Dispose();
-    }
-
-    private void Login(string username, string password)
-    {
-        Thread.Sleep(1000); // wait for Index title animation to finish
-        _wait.Until(webDriver => webDriver.FindElement(By.Id("login-button"))).Click();
-        IWebElement? usernameForm = _wait.Until(webDriver => webDriver.FindElement(By.Id("username-form")));
-        usernameForm.SendKeys(username);
-        IWebElement? passwordForm = _wait.Until(webDriver => webDriver.FindElement(By.Id("password-form")));
-        passwordForm.SendKeys(password);
-        _wait.Until(webDriver => webDriver.FindElement(By.Id("login-submit"))).Submit();
-        Thread.Sleep(500); // wait for page to load fully
     }
 
     public static IEnumerable<object[]> StartScenarioTitles => new List<object[]>

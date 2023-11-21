@@ -43,6 +43,32 @@ public class EfPersisterService : IPersisterService
     }
 
     /// <inheritdoc />
+    public async Task DeleteAsync(Campaign campaign)
+    {
+        if (!(await _dbContext.Campaigns.ContainsAsync(campaign)))
+        {
+            return;
+        }
+
+        await using IDbContextTransaction transaction = await _dbContext.Database.BeginTransactionAsync();
+        try
+        {
+            int campaignId = campaign.Id;
+            _dbContext.Campaigns.Remove(campaign);
+
+            await _dbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
+            _logger.LogInformation("Deleted campaign with id {Id} successfully", campaignId);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "An error occurred while deleting");
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    /// <inheritdoc />
     public async Task<Campaign> LoadFromCampaignIdAsync(int campaignId)
     {
         return await _dbContext.Campaigns

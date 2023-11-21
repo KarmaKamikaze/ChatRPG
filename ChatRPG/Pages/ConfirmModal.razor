@@ -1,0 +1,58 @@
+@using ChatRPG.Services
+@using ChatRPG.Data.Models
+
+<div class="modal fade show d-block" tabindex="-1" role="dialog">
+    <div class="modal-backdrop fade show" @onclick="Cancel"></div>
+    <div class="modal-dialog" style="z-index: 1050">
+        <!-- Pop it above the backdrop -->
+        <div class="modal-content custom-gray-bg text-white">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Campaign?</h5>
+                <button type="button" class="close" aria-label="Close" @onclick="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Do you really want to delete the campaign?</p>
+                <p>
+                    <b>Campaign title:</b> @CampaignToDelete!.Title
+                </p>
+                <p>
+                    <b>Character name:</b> @CampaignToDelete!.Player.Name
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="Close" id="modal-close">Close</button>
+                <button type="button" class="btn alert-danger" @onclick="Confirm" id="modal-confirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [CascadingParameter]
+    BlazoredModalInstance Modal { get; set; } = default!;
+
+    [Parameter]
+    [EditorRequired]
+    public Campaign? CampaignToDelete { get; set; }
+
+    [Inject]
+    private IPersisterService? PersistService { get; set; }
+
+    private async Task Confirm()
+    {
+        if (CampaignToDelete is null)
+        {
+            await Modal.CancelAsync();
+        }
+
+        await PersistService!.DeleteAsync(CampaignToDelete!);
+        await Modal.CloseAsync(ModalResult.Ok(true));
+    }
+
+    private async Task Close() => await Modal.CloseAsync(ModalResult.Ok(false));
+    private async Task Cancel() => await Modal.CancelAsync();
+
+}
