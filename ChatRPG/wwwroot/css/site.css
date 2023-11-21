@@ -390,3 +390,13 @@ a, .btn-link {
     border: none;
     background: #7d7d7d;
 }
+
+.prompt-selector {
+    /*--rz-selectbar-background-color: var(--rz-base-backgorund-color);*/
+    --rz-selectbar-color: rgb(230, 230, 230);
+    /*--rz-selectbar-border: var(--rz-border-base-300);*/
+    --rz-selectbar-selected-background-color: rgb(175, 175, 175);
+    --rz-selectbar-selected-color: rgb(20, 20, 20);
+    /*--rz-selectbar-selected-border: var(--rz-border-base-300);*/
+    /*--rz-selectbar-border-radius: var(--rz-border-radius);*/
+}
