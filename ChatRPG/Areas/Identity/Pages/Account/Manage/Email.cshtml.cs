@@ -2,13 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
-using System.Threading.Tasks;
 using ChatRPG.Data.Models;
-using ChatRPG.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -20,17 +17,17 @@ namespace ChatRPG.Areas.Identity.Pages.Account.Manage
     public class EmailModel : PageModel
     {
         private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
         private readonly IConfiguration _configuration;
+        private readonly IEmailSender _emailSender;
 
         public EmailModel(
             UserManager<User> userManager,
-            SignInManager<User> signInManager,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IEmailSender emailSender)
         {
             _userManager = userManager;
-            _signInManager = signInManager;
             _configuration = configuration;
+            _emailSender = emailSender;
         }
 
         /// <summary>
@@ -127,10 +124,8 @@ namespace ChatRPG.Areas.Identity.Pages.Account.Manage
                         pageHandler: null,
                         values: new { area = "Identity", userId = userId, email = Input.NewEmail, code = code },
                         protocol: Request.Scheme);
-                    Logger<EmailSender> emailSenderLogger = new Logger<EmailSender>(new LoggerFactory());
-                    EmailSender emailSender = new EmailSender(_configuration, emailSenderLogger);
 
-                    await emailSender.SendEmailAsync(
+                    await _emailSender.SendEmailAsync(
                         Input.NewEmail,
                         "Confirm your email",
                         $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
@@ -169,10 +164,8 @@ namespace ChatRPG.Areas.Identity.Pages.Account.Manage
                     pageHandler: null,
                     values: new { area = "Identity", userId = userId, code = code },
                     protocol: Request.Scheme);
-                Logger<EmailSender> emailSenderLogger = new Logger<EmailSender>(new LoggerFactory());
-                EmailSender emailSender = new EmailSender(_configuration, emailSenderLogger);
 
-                await emailSender.SendEmailAsync(
+                await _emailSender.SendEmailAsync(
                     email,
                     "Confirm your email",
                     $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
