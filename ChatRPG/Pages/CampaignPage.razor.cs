@@ -5,7 +5,6 @@ using ChatRPG.Services.Events;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.JSInterop;
 using OpenAI_API.Chat;
 using OpenAiGptMessage = ChatRPG.API.OpenAiGptMessage;
