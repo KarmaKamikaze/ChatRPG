@@ -1,3 +1,4 @@
+using System.Text;
 using ChatRPG.API;
 using ChatRPG.API.Response;
 using ChatRPG.Data.Models;

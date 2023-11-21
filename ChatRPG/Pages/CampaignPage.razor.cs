@@ -56,6 +56,22 @@ public partial class CampaignPage
         _shouldSave = Configuration!.GetValue<bool>("SaveConversationsToFile");
         GameInputHandler!.ChatCompletionReceived += OnChatCompletionReceived;
         GameInputHandler!.ChatCompletionChunkReceived += OnChatCompletionChunkReceived;
+        if (_conversation.Count == 0)
+        {
+            InitializeCampaign();
+        }
+    }
+
+    private void InitializeCampaign()
+    {
+        string content = $"The player is {_campaign!.Player.Name}, described as \"{_campaign.Player.Description}\".";
+        if (_campaign.StartScenario != null)
+        {
+            content += "\n" + _campaign.StartScenario;
+        }
+        OpenAiGptMessage message = new(ChatMessageRole.System, content);
+        _conversation.Add(message);
+        GameInputHandler?.HandleUserPrompt(_campaign, _conversation);
     }
 
     /// <summary>

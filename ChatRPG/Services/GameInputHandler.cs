@@ -21,7 +21,7 @@ public class GameInputHandler
         _streamChatCompletions = configuration.GetValue("StreamChatCompletions", true);
         if (configuration.GetValue("UseMocks", false))
         {
-            _streamChatCompletions = false; // Streaming does not work with mocking currently.
+            _streamChatCompletions = false;
         }
     }
 
