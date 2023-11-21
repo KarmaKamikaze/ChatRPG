@@ -6,13 +6,13 @@ using Org.BouncyCastle.Pqc.Crypto.Crystals.Dilithium;
 
 namespace ChatRPG.Services;
 
-public partial class GameInputHandler
+public class GameInputHandler
 {
     private readonly ILogger<GameInputHandler> _logger;
     private readonly IOpenAiLlmClient _llmClient;
     private readonly GameStateManager _gameStateManager;
     private readonly bool _streamChatCompletions;
-    private readonly Dictionary<SystemPromptType, string> systemPrompts = new Dictionary<SystemPromptType, string>();
+    private readonly Dictionary<SystemPromptType, string> _systemPrompts = new();
 
     public GameInputHandler(ILogger<GameInputHandler> logger, IOpenAiLlmClient llmClient, GameStateManager gameStateManager, IConfiguration configuration)
     {
@@ -24,6 +24,13 @@ public partial class GameInputHandler
         {
             _streamChatCompletions = false;
         }
+
+        IConfigurationSection sysPromptSec = configuration.GetRequiredSection("SystemPrompts");
+        _systemPrompts.Add(SystemPromptType.Default, sysPromptSec.GetValue("Default", "")!);
+        _systemPrompts.Add(SystemPromptType.CombatHitHit, sysPromptSec.GetValue("CombatHitHit", "")!);
+        _systemPrompts.Add(SystemPromptType.CombatHitMiss, sysPromptSec.GetValue("CombatHitMiss", "")!);
+        _systemPrompts.Add(SystemPromptType.CombatMissHit, sysPromptSec.GetValue("CombatMissHit", "")!);
+        _systemPrompts.Add(SystemPromptType.CombatMissMiss, sysPromptSec.GetValue("CombatMissMiss", "")!);
     }
 
     public event EventHandler<ChatCompletionReceivedEventArgs>? ChatCompletionReceived;
@@ -78,7 +85,7 @@ public partial class GameInputHandler
             OpenAiGptMessage message = new OpenAiGptMessage(ChatMessageRole.System, messageContent);
             conversation.Add(message);
         }
-        return systemPrompts[type];
+        return _systemPrompts[type];
     }
 
     private static SystemPromptType DetermineCombatOutcome()
@@ -121,7 +128,10 @@ public partial class GameInputHandler
 
     private async Task GetResponseAndUpdateState(Campaign campaign, IList<OpenAiGptMessage> conversation, string systemPrompt)
     {
-        _gameStateManager.UpdateStateFromMessage(campaign, conversation.Last(m => m.Role.Equals(ChatMessageRole.User)));
+        if (conversation.Any(m => m.Role.Equals(ChatMessageRole.User)))
+        {
+            _gameStateManager.UpdateStateFromMessage(campaign, conversation.Last(m => m.Role.Equals(ChatMessageRole.User)));
+        }
         if (_streamChatCompletions)
         {
             OpenAiGptMessage message = new(ChatMessageRole.Assistant, "");

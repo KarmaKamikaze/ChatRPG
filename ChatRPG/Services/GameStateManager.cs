@@ -1,4 +1,3 @@
-using System.Text;
 using ChatRPG.API;
 using ChatRPG.API.Response;
 using ChatRPG.Data.Models;
@@ -72,8 +71,10 @@ public class GameStateManager
                 }
             }
 
-            CombatMode = response.IsInCombat;
-
+            if (response.IsInCombat != null)
+            {
+                CombatMode = response.IsInCombat.GetValueOrDefault(false);
+            }
         }
         catch (Exception e)
         {
