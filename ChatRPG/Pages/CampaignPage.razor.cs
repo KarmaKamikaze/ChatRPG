@@ -26,6 +26,21 @@ public partial class CampaignPage
     private const string BottomId = "bottom-id";
     private Campaign? _campaign;
     private PromptType _activePromptType = PromptType.Do;
+    private string _userInputPlaceholder = InputPlaceholder[PromptType.Do];
+
+    private enum PromptType
+    {
+        Do,
+        Say,
+        Attack
+    }
+
+    private static readonly Dictionary<PromptType, string> InputPlaceholder = new()
+    {
+        { PromptType.Do, "What do you do?" },
+        { PromptType.Say, "What do you say?" },
+        { PromptType.Attack, "How do you attack?" }
+    };
 
     [Inject] private IConfiguration? Configuration { get; set; }
     [Inject] private IJSRuntime? JsRuntime { get; set; }
@@ -75,7 +90,8 @@ public partial class CampaignPage
         if (firstRender)
         {
             _scrollJsScript ??= await JsRuntime!.InvokeAsync<IJSObjectReference>("import", "./js/scroll.js");
-            _detectScrollBarJsScript ??= await JsRuntime!.InvokeAsync<IJSObjectReference>("import", "./js/detectScrollBar.js");
+            _detectScrollBarJsScript ??=
+                await JsRuntime!.InvokeAsync<IJSObjectReference>("import", "./js/detectScrollBar.js");
             await ScrollToElement(BottomId); // scroll down to latest message
         }
     }
@@ -87,6 +103,7 @@ public partial class CampaignPage
         {
             content += "\n" + _campaign.StartScenario;
         }
+
         OpenAiGptMessage message = new(ChatMessageRole.System, content);
         _conversation.Add(message);
         GameInputHandler?.HandleUserPrompt(_campaign, _conversation);
@@ -174,11 +191,25 @@ public partial class CampaignPage
         MessagePair messagePair = new MessagePair(_latestPlayerMessage?.Content ?? "", asstMessage);
         Task.Run(() => _fileUtil.UpdateSaveFileAsync(messagePair));
     }
-}
 
-public enum PromptType
-{
-    Do,
-    Say,
-    Attack
+    private void OnPromptTypeChange(PromptType type)
+    {
+        // TODO: Implement prompt change here!
+        switch (type)
+        {
+            case PromptType.Do:
+                _userInputPlaceholder = InputPlaceholder[PromptType.Do];
+                break;
+            case PromptType.Say:
+                _userInputPlaceholder = InputPlaceholder[PromptType.Say];
+                break;
+            case PromptType.Attack:
+                _userInputPlaceholder = InputPlaceholder[PromptType.Attack];
+                break;
+            default:
+                _userInputPlaceholder = InputPlaceholder[PromptType.Do];
+                break;
+        }
+        StateHasChanged();
+    }
 }

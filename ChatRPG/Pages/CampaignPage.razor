@@ -1,7 +1,6 @@
 ﻿@page "/Campaign"
 @using OpenAiGptMessage = ChatRPG.API.OpenAiGptMessage
 @using OpenAI_API.Chat
-@using Radzen
 
 <PageTitle>Campaign - @_campaign?.Title</PageTitle>
 
@@ -22,18 +21,19 @@
 
 <div class="container">
     <div class="col-1" style="margin-left: 10px;">
-        <RadzenSelectBar Size="ButtonSize.Small" @bind-Value=@_activePromptType TValue="PromptType" class="rz-shadow-6 prompt-selector">
+        <RadzenSelectBar Size="ButtonSize.Small" @bind-Value=@_activePromptType TValue="PromptType"
+                         Change="OnPromptTypeChange" class="rz-shadow-6 prompt-selector">
             <Items>
-                <RadzenSelectBarItem Text="Do" Value="PromptType.Do" class="rz-ripple" />
-                <RadzenSelectBarItem Text="Say" Value="PromptType.Say" class="rz-ripple" />
-                <RadzenSelectBarItem Text="Attack" Value="PromptType.Attack" class="rz-ripple" />
+                <RadzenSelectBarItem Text="Do" Value="PromptType.Do" class="rz-ripple"/>
+                <RadzenSelectBarItem Text="Say" Value="PromptType.Say" class="rz-ripple"/>
+                <RadzenSelectBarItem Text="Attack" Value="PromptType.Attack" class="rz-ripple"/>
             </Items>
         </RadzenSelectBar>
     </div>
 
     <div class="input-group mx-auto col-8 mt-2 mb-5 input-group-border">
         <input type="text" style="resize:vertical;" class="form-control user-prompt custom-text-field"
-               @bind="_userInput" placeholder="What do you do?" @onkeyup="@EnterKeyHandler" disabled="@_isWaitingForResponse"/>
+               @bind="_userInput" placeholder="@_userInputPlaceholder" @onkeyup="@EnterKeyHandler" disabled="@_isWaitingForResponse"/>
         <div class="input-group-append">
             <button class="btn btn-primary ml-2" type="button" @onclick="SendPrompt" disabled="@_isWaitingForResponse">
                 Send
