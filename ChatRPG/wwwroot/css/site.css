@@ -400,3 +400,7 @@ a, .btn-link {
     /*--rz-selectbar-selected-border: var(--rz-border-base-300);*/
     /*--rz-selectbar-border-radius: var(--rz-border-radius);*/
 }
+
+.floating-stats {
+    background-color: rgba(35, 35, 35, 0.8)
+}
