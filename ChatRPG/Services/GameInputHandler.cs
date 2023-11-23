@@ -69,7 +69,6 @@ public class GameInputHandler
         SystemPromptType type = SystemPromptType.Default;
         if (campaign.CombatMode)
         {
-            _logger.LogWarning("It is combat time, bitch");
             string middleComputationString = await _llmClient.GetChatCompletion(conversation, _systemPrompts[SystemPromptType.CombatMiddleComputation]);
             OpenAiGptMessage middleComputationMessage = new(ChatMessageRole.Assistant, middleComputationString);
             LlmResponse? middleComputationResponse = middleComputationMessage.TryParseFromJson();
