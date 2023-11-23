@@ -23,6 +23,7 @@ public partial class CampaignPage
     private OpenAiGptMessage? _latestPlayerMessage;
     private const string BottomId = "bottom-id";
     private Campaign? _campaign;
+    private bool _combatMode;
 
     [Inject] private IConfiguration? Configuration { get; set; }
     [Inject] private IJSRuntime? JsRuntime { get; set; }
@@ -114,6 +115,10 @@ public partial class CampaignPage
         _conversation.Add(userInput);
         _latestPlayerMessage = userInput;
         _userInput = string.Empty;
+        if (_combatMode)
+        {
+            _campaign.CombatMode = true;
+        }
         await GameInputHandler!.HandleUserPrompt(_campaign, _conversation);
     }
 
@@ -166,13 +171,5 @@ public partial class CampaignPage
         if (!_shouldSave || _fileUtil == null || string.IsNullOrEmpty(asstMessage)) return;
         MessagePair messagePair = new MessagePair(_latestPlayerMessage?.Content ?? "", asstMessage);
         Task.Run(() => _fileUtil.UpdateSaveFileAsync(messagePair));
-    }
-
-    private void OnCombatModeChanged(ChangeEventArgs eventArgs)
-    {
-        if (_campaign != null && eventArgs.Value is bool value)
-        {
-            _campaign.CombatMode = value;
-        }
     }
 }
