@@ -10,7 +10,6 @@ public class GameStateManager
 {
     private readonly ILogger<GameStateManager> _logger;
     private readonly IPersisterService _persisterService;
-    public bool CombatMode { get; private set; }
     
     public GameStateManager(ILogger<GameStateManager> logger, IPersisterService persisterService)
     {
@@ -73,7 +72,8 @@ public class GameStateManager
 
             if (response.IsInCombat != null)
             {
-                CombatMode = response.IsInCombat.GetValueOrDefault(false);
+                campaign.CombatMode = response.IsInCombat.GetValueOrDefault(false);
+                _logger.LogInformation("Combatmode: {CombatMode}", campaign.CombatMode);
             }
         }
         catch (Exception e)

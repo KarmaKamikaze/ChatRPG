@@ -56,18 +56,16 @@ public class GameInputHandler
 
     public async Task HandleUserPrompt(Campaign campaign, IList<OpenAiGptMessage> conversation)
     {
-        string systemPrompt = GetRelevantSystemPrompt(campaign, conversation);
+        string systemPrompt = await GetRelevantSystemPrompt(campaign, conversation);
         await GetResponseAndUpdateState(campaign, conversation, systemPrompt);
         _logger.LogInformation("Finished processing prompt.");
     }
 
-    private string GetRelevantSystemPrompt(Campaign campaign, IList<OpenAiGptMessage> conversation)
+    private async Task<string> GetRelevantSystemPrompt(Campaign campaign, IList<OpenAiGptMessage> conversation)
     {
         SystemPromptType type = SystemPromptType.Default;
-        if (_gameStateManager.CombatMode)
+        if (campaign.CombatMode)
         {
-            OpenAiGptMessage lastPlayerMsg = conversation.Last(m => m.Role.Equals(ChatMessageRole.User));
-            string playerMsg = lastPlayerMsg.Content.ToLower();
             Character? opponent = campaign.Characters.LastOrDefault();
             if (opponent == null)
             {
@@ -99,7 +97,7 @@ public class GameInputHandler
                 _logger.LogInformation("Combat: {Name} hits {Name} for {x} damage. Health: {CurrentHealth}/{MaxHealth}", opponent.Name, campaign.Player.Name, opponentDmg, campaign.Player.CurrentHealth, campaign.Player.MaxHealth);
                 if (campaign.Player.AdjustHealth(-opponentDmg))
                 {
-                    Task.Run(() => HandlePlayerDeath(campaign.Player, conversation));
+                    await HandlePlayerDeath(campaign.Player, conversation);
                 }
             }
             else
@@ -107,7 +105,7 @@ public class GameInputHandler
                 messageContent += "The opponent will miss their next attack, dealing no damage.";
             }
 
-            OpenAiGptMessage message = new (ChatMessageRole.System, messageContent);
+            OpenAiGptMessage message = new(ChatMessageRole.System, messageContent);
             conversation.Add(message);
         }
         return _systemPrompts[type];
