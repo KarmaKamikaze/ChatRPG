@@ -10,7 +10,7 @@ public class GameStateManager
 {
     private readonly ILogger<GameStateManager> _logger;
     private readonly IPersisterService _persisterService;
-    
+
     public GameStateManager(ILogger<GameStateManager> logger, IPersisterService persisterService)
     {
         _logger = logger;
