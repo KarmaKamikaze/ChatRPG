@@ -2,7 +2,6 @@ using ChatRPG.API;
 using ChatRPG.Data.Models;
 using ChatRPG.Services.Events;
 using OpenAI_API.Chat;
-using Org.BouncyCastle.Pqc.Crypto.Crystals.Dilithium;
 
 namespace ChatRPG.Services;
 
@@ -24,7 +23,6 @@ public class GameInputHandler
         {
             _streamChatCompletions = false;
         }
-
         IConfigurationSection sysPromptSec = configuration.GetRequiredSection("SystemPrompts");
         _systemPrompts.Add(SystemPromptType.Default, sysPromptSec.GetValue("Default", "")!);
         _systemPrompts.Add(SystemPromptType.CombatHitHit, sysPromptSec.GetValue("CombatHitHit", "")!);
@@ -49,24 +47,46 @@ public class GameInputHandler
         ChatCompletionChunkReceived?.Invoke(this, args);
     }
 
+    private async Task HandlePlayerDeath(Character player, IList<OpenAiGptMessage> conversation)
+    {
+        OpenAiGptMessage message = new(ChatMessageRole.System, "The player has died and the campaign is over.");
+        conversation.Add(message);
+        await GetResponseAndUpdateState(player.Campaign, conversation, _systemPrompts[SystemPromptType.Default]);
+    }
+
     public async Task HandleUserPrompt(Campaign campaign, IList<OpenAiGptMessage> conversation)
     {
-        string systemPrompt = GetRelevantSystemPrompt(conversation);
+        string systemPrompt = GetRelevantSystemPrompt(campaign, conversation);
         await GetResponseAndUpdateState(campaign, conversation, systemPrompt);
         _logger.LogInformation("Finished processing prompt.");
     }
 
-    private string GetRelevantSystemPrompt(ICollection<OpenAiGptMessage> conversation)
+    private string GetRelevantSystemPrompt(Campaign campaign, IList<OpenAiGptMessage> conversation)
     {
         SystemPromptType type = SystemPromptType.Default;
         if (_gameStateManager.CombatMode)
         {
+            OpenAiGptMessage lastPlayerMsg = conversation.Last(m => m.Role.Equals(ChatMessageRole.User));
+            string playerMsg = lastPlayerMsg.Content.ToLower();
+            Character? opponent = campaign.Characters.LastOrDefault();
+            if (opponent == null)
+            {
+                _logger.LogError("Could not find an opponent from Message with content: \"{Content}\"", lastPlayerMsg.Content);
+                // TODO: manually set CombatMode = false?
+                return _systemPrompts[SystemPromptType.Default];
+            }
             type = DetermineCombatOutcome();
             (int playerDmg, int opponentDmg) = ComputeCombatDamage(type);
             string messageContent = "";
             if (playerDmg != 0)
             {
                 messageContent += $"The player hits with their attack, dealing {playerDmg} damage.";
+                _logger.LogInformation("Combat: {Name} hits {Name} for {x} damage. Health: {CurrentHealth}/{MaxHealth}", campaign.Player.Name, opponent.Name, playerDmg, opponent.CurrentHealth, opponent.MaxHealth);
+                if (opponent.AdjustHealth(-playerDmg))
+                {
+                    messageContent +=
+                        $" With no health points remaining, {opponent.Name} dies and can no longer participate in the narrative.";
+                }
             }
             else
             {
@@ -76,13 +96,18 @@ public class GameInputHandler
             if (opponentDmg != 0)
             {
                 messageContent += $"The opponent will hit with their next attack, dealing {opponentDmg} damage.";
+                _logger.LogInformation("Combat: {Name} hits {Name} for {x} damage. Health: {CurrentHealth}/{MaxHealth}", opponent.Name, campaign.Player.Name, opponentDmg, campaign.Player.CurrentHealth, campaign.Player.MaxHealth);
+                if (campaign.Player.AdjustHealth(-opponentDmg))
+                {
+                    Task.Run(() => HandlePlayerDeath(campaign.Player, conversation));
+                }
             }
             else
             {
                 messageContent += "The opponent will miss their next attack, dealing no damage.";
             }
 
-            OpenAiGptMessage message = new OpenAiGptMessage(ChatMessageRole.System, messageContent);
+            OpenAiGptMessage message = new (ChatMessageRole.System, messageContent);
             conversation.Add(message);
         }
         return _systemPrompts[type];

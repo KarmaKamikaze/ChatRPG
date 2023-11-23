@@ -41,13 +41,10 @@ public class Character
     /// Adjust the current health of this character.
     /// </summary>
     /// <param name="value">The value to adjust the current health with.</param>
-    public void AdjustHealth(int value)
+    public bool AdjustHealth(int value)
     {
-        CurrentHealth = Math.Min(MaxHealth, CurrentHealth + value);
-        if (CurrentHealth <= 0)
-        {
-            // TODO: Handle character death
-        }
+        CurrentHealth = Math.Min(MaxHealth, Math.Min(0, CurrentHealth + value));
+        return CurrentHealth <= 0;
     }
 
     /// <summary>
