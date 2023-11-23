@@ -31,7 +31,7 @@ public class GameInputHandler
         _systemPrompts.Add(SystemPromptType.CombatHitMiss, sysPromptSec.GetValue("CombatHitMiss", "")!);
         _systemPrompts.Add(SystemPromptType.CombatMissHit, sysPromptSec.GetValue("CombatMissHit", "")!);
         _systemPrompts.Add(SystemPromptType.CombatMissMiss, sysPromptSec.GetValue("CombatMissMiss", "")!);
-        _systemPrompts.Add(SystemPromptType.CombatMiddleComputation, sysPromptSec.GetValue("CombatMiddleComputation", "")!);
+        _systemPrompts.Add(SystemPromptType.CombatOpponentDescription, sysPromptSec.GetValue("CombatOpponentDescription", "")!);
     }
 
     public event EventHandler<ChatCompletionReceivedEventArgs>? ChatCompletionReceived;
@@ -69,10 +69,10 @@ public class GameInputHandler
         SystemPromptType type = SystemPromptType.Default;
         if (campaign.CombatMode)
         {
-            string middleComputationString = await _llmClient.GetChatCompletion(conversation, _systemPrompts[SystemPromptType.CombatMiddleComputation]);
-            OpenAiGptMessage middleComputationMessage = new(ChatMessageRole.Assistant, middleComputationString);
-            LlmResponse? middleComputationResponse = middleComputationMessage.TryParseFromJson();
-            LlmResponseCharacter? resChar = middleComputationResponse?.Characters?.FirstOrDefault();
+            string opponentDescriptionString = await _llmClient.GetChatCompletion(conversation, _systemPrompts[SystemPromptType.CombatOpponentDescription]);
+            OpenAiGptMessage opponentDescriptionMessage = new(ChatMessageRole.Assistant, opponentDescriptionString);
+            LlmResponse? opponentDescriptionResponse = opponentDescriptionMessage.TryParseFromJson();
+            LlmResponseCharacter? resChar = opponentDescriptionResponse?.Characters?.FirstOrDefault();
             if (resChar != null)
             {
                 Environment environment = campaign.Environments.Last();
@@ -80,7 +80,7 @@ public class GameInputHandler
                     resChar.Name!, resChar.Description!, false, resChar.HealthPoints);
                 campaign.InsertOrUpdateCharacter(character);
             }
-            string? opponentName = middleComputationResponse?.Opponent?.ToLower();
+            string? opponentName = opponentDescriptionResponse?.Opponent?.ToLower();
             Character? opponent = campaign.Characters.LastOrDefault(c => !c.IsPlayer && c.Name.ToLower().Equals(opponentName));
             if (opponent == null)
             {
