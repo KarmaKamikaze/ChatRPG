@@ -69,7 +69,7 @@ public class GameInputHandler
             Character? opponent = campaign.Characters.LastOrDefault();
             if (opponent == null)
             {
-                _logger.LogError("Could not find an opponent from Message with content: \"{Content}\"", lastPlayerMsg.Content);
+                _logger.LogError("Opponent is unknown!");
                 // TODO: manually set CombatMode = false?
                 return _systemPrompts[SystemPromptType.Default];
             }

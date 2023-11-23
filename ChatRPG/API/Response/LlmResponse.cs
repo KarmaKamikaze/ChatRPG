@@ -7,4 +7,5 @@ public class LlmResponse
     public List<LlmResponseEvent>? Events { get; set; }
     public LlmResponseEnvironment? Environment { get; set; }
     public bool? IsInCombat { get; set; }
+    public string? Opponent { get; set; }
 }
