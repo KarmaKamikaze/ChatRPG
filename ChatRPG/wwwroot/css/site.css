@@ -111,11 +111,11 @@ a, .btn-link {
 }
 
 .message-container.message-container-player {
-    background-color: rgb(222, 222, 222);
+    background-color: rgb(180, 180, 180);
 }
 
 .message-container.message-container-assistant {
-    background-color: rgb(200, 200, 200);
+    background-color: rgb(222, 222, 222);
 }
 
 .message {
