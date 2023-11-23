@@ -21,6 +21,7 @@
 
 <div class="container">
     <div class="input-group mx-auto col-8 mt-2 mb-5 input-group-border">
+        <input type="checkbox" class="form-check" @onchange="OnCombatModeChanged" />
         <input type="text" style="resize:vertical;" class="form-control user-prompt custom-text-field"
                @bind="_userInput" placeholder="What do you do?" @onkeyup="@EnterKeyHandler" disabled="@(_isWaitingForResponse || _campaign?.Player.CurrentHealth <= 0)"/>
         <div class="input-group-append">

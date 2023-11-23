@@ -1,7 +1,9 @@
 using ChatRPG.API;
+using ChatRPG.API.Response;
 using ChatRPG.Data.Models;
 using ChatRPG.Services.Events;
 using OpenAI_API.Chat;
+using Environment = ChatRPG.Data.Models.Environment;
 
 namespace ChatRPG.Services;
 
@@ -29,6 +31,7 @@ public class GameInputHandler
         _systemPrompts.Add(SystemPromptType.CombatHitMiss, sysPromptSec.GetValue("CombatHitMiss", "")!);
         _systemPrompts.Add(SystemPromptType.CombatMissHit, sysPromptSec.GetValue("CombatMissHit", "")!);
         _systemPrompts.Add(SystemPromptType.CombatMissMiss, sysPromptSec.GetValue("CombatMissMiss", "")!);
+        _systemPrompts.Add(SystemPromptType.CombatMiddleComputation, sysPromptSec.GetValue("CombatMiddleComputation", "")!);
     }
 
     public event EventHandler<ChatCompletionReceivedEventArgs>? ChatCompletionReceived;
@@ -66,11 +69,23 @@ public class GameInputHandler
         SystemPromptType type = SystemPromptType.Default;
         if (campaign.CombatMode)
         {
-            Character? opponent = campaign.Characters.LastOrDefault();
+            string middleComputationString = await _llmClient.GetChatCompletion(conversation, _systemPrompts[SystemPromptType.CombatMiddleComputation]);
+            OpenAiGptMessage middleComputationMessage = new(ChatMessageRole.Assistant, middleComputationString);
+            LlmResponse? middleComputationResponse = middleComputationMessage.TryParseFromJson();
+            LlmResponseCharacter? resChar = middleComputationResponse?.Characters?.FirstOrDefault();
+            if (resChar != null)
+            {
+                Environment environment = campaign.Environments.Last();
+                Character character = new(campaign, environment, GameStateManager.ParseToEnum(resChar.Type!, CharacterType.Humanoid),
+                    resChar.Name!, resChar.Description!, false, resChar.HealthPoints);
+                campaign.InsertOrUpdateCharacter(character);
+            }
+            string? opponentName = middleComputationResponse?.Opponent?.ToLower();
+            Character? opponent = campaign.Characters.LastOrDefault(c => !c.IsPlayer && c.Name.ToLower().Equals(opponentName));
             if (opponent == null)
             {
-                _logger.LogError("Opponent is unknown!");
-                // TODO: manually set CombatMode = false?
+                _logger.LogError("Opponent is unknown! Leaving combat mode...");
+                campaign.CombatMode = false;
                 return _systemPrompts[SystemPromptType.Default];
             }
             type = DetermineCombatOutcome();
@@ -79,12 +94,12 @@ public class GameInputHandler
             if (playerDmg != 0)
             {
                 messageContent += $"The player hits with their attack, dealing {playerDmg} damage.";
-                _logger.LogInformation("Combat: {Name} hits {Name} for {x} damage. Health: {CurrentHealth}/{MaxHealth}", campaign.Player.Name, opponent.Name, playerDmg, opponent.CurrentHealth, opponent.MaxHealth);
                 if (opponent.AdjustHealth(-playerDmg))
                 {
                     messageContent +=
                         $" With no health points remaining, {opponent.Name} dies and can no longer participate in the narrative.";
                 }
+                _logger.LogInformation("Combat: {Name} hits {Name} for {x} damage. Health: {CurrentHealth}/{MaxHealth}", campaign.Player.Name, opponent.Name, playerDmg, opponent.CurrentHealth, opponent.MaxHealth);
             }
             else
             {
@@ -94,11 +109,11 @@ public class GameInputHandler
             if (opponentDmg != 0)
             {
                 messageContent += $"The opponent will hit with their next attack, dealing {opponentDmg} damage.";
-                _logger.LogInformation("Combat: {Name} hits {Name} for {x} damage. Health: {CurrentHealth}/{MaxHealth}", opponent.Name, campaign.Player.Name, opponentDmg, campaign.Player.CurrentHealth, campaign.Player.MaxHealth);
                 if (campaign.Player.AdjustHealth(-opponentDmg))
                 {
                     await HandlePlayerDeath(campaign.Player, conversation);
                 }
+                _logger.LogInformation("Combat: {Name} hits {Name} for {x} damage. Health: {CurrentHealth}/{MaxHealth}", opponent.Name, campaign.Player.Name, opponentDmg, campaign.Player.CurrentHealth, campaign.Player.MaxHealth);
             }
             else
             {

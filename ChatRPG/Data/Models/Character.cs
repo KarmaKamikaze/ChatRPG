@@ -32,7 +32,7 @@ public class Character
     public CharacterType Type { get; private set; }
     public bool IsPlayer { get; private set; }
     public string Name { get; private set; } = null!;
-    public string Description { get; private set; } = null!;
+    public string Description { get; set; } = null!;
     public int MaxHealth { get; private set; }
     public int CurrentHealth { get; private set; }
     public ICollection<CharacterAbility?> CharacterAbilities { get; } = new List<CharacterAbility?>();
@@ -43,7 +43,7 @@ public class Character
     /// <param name="value">The value to adjust the current health with.</param>
     public bool AdjustHealth(int value)
     {
-        CurrentHealth = Math.Min(MaxHealth, Math.Min(0, CurrentHealth + value));
+        CurrentHealth = Math.Min(MaxHealth, Math.Max(0, CurrentHealth + value));
         return CurrentHealth <= 0;
     }
 

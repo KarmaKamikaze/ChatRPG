@@ -2,5 +2,5 @@
 
 public enum SystemPromptType
 {
-    Default, CombatHitHit, CombatHitMiss, CombatMissHit, CombatMissMiss
+    Default, CombatHitHit, CombatHitMiss, CombatMissHit, CombatMissMiss, CombatMiddleComputation
 }

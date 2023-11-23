@@ -167,4 +167,12 @@ public partial class CampaignPage
         MessagePair messagePair = new MessagePair(_latestPlayerMessage?.Content ?? "", asstMessage);
         Task.Run(() => _fileUtil.UpdateSaveFileAsync(messagePair));
     }
+
+    private void OnCombatModeChanged(ChangeEventArgs eventArgs)
+    {
+        if (_campaign != null && eventArgs.Value is bool value)
+        {
+            _campaign.CombatMode = value;
+        }
+    }
 }
