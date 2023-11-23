@@ -70,6 +70,7 @@ public class GameInputHandler
         if (campaign.CombatMode)
         {
             string opponentDescriptionString = await _llmClient.GetChatCompletion(conversation, _systemPrompts[SystemPromptType.CombatOpponentDescription]);
+            _logger.LogInformation("Opponent description response: {opponentDescriptionString}", opponentDescriptionString);
             OpenAiGptMessage opponentDescriptionMessage = new(ChatMessageRole.Assistant, opponentDescriptionString);
             LlmResponse? opponentDescriptionResponse = opponentDescriptionMessage.TryParseFromJson();
             LlmResponseCharacter? resChar = opponentDescriptionResponse?.Characters?.FirstOrDefault();
@@ -132,13 +133,18 @@ public class GameInputHandler
         double playerRoll = rand.NextDouble();
         double opponentRoll = rand.NextDouble();
 
-        if (playerRoll >= 0.4)
+        if (playerRoll >= 0.3)
         {
             return opponentRoll >= 0.6 ? SystemPromptType.CombatHitHit : SystemPromptType.CombatHitMiss;
         }
 
-        return opponentRoll >= 0.6 ? SystemPromptType.CombatMissHit : SystemPromptType.CombatMissMiss;
+        return opponentRoll >= 0.5 ? SystemPromptType.CombatMissHit : SystemPromptType.CombatMissMiss;
     }
+
+    private const int PlayerDmgMin = 16;
+    private const int PlayerDmgMax = 38;
+    private const int OpponentDmgMin = 10;
+    private const int OpponentDmgMax = 35;
 
     private static (int, int) ComputeCombatDamage(SystemPromptType combatOutcome)
     {
@@ -149,14 +155,14 @@ public class GameInputHandler
         switch (combatOutcome)
         {
             case SystemPromptType.CombatHitHit:
-                playerDmg = rand.Next(5, 20);
-                opponentDmg = rand.Next(3, 15);
+                playerDmg = rand.Next(PlayerDmgMin, PlayerDmgMax);
+                opponentDmg = rand.Next(OpponentDmgMin, OpponentDmgMax);
                 break;
             case SystemPromptType.CombatHitMiss:
-                playerDmg = rand.Next(5, 20);
+                playerDmg = rand.Next(PlayerDmgMin, PlayerDmgMax);
                 break;
             case SystemPromptType.CombatMissHit:
-                opponentDmg = rand.Next(3, 15);
+                opponentDmg = rand.Next(OpponentDmgMin, OpponentDmgMax);
                 break;
             case SystemPromptType.CombatMissMiss:
                 break;

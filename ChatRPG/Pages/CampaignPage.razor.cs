@@ -50,7 +50,10 @@ public partial class CampaignPage
             CampaignMediatorService!.UserCampaignDict[_loggedInUsername!]);
         if (_campaign != null)
         {
-            _conversation = _campaign.Messages.Select(OpenAiGptMessage.FromMessage).ToList();
+            _combatMode = _campaign.CombatMode;
+            _conversation = _campaign.Messages.OrderBy(m => m.Timestamp)
+                .Select(OpenAiGptMessage.FromMessage)
+                .ToList();
         }
 
         if (_loggedInUsername != null) _fileUtil = new FileUtility(_loggedInUsername);
@@ -115,10 +118,7 @@ public partial class CampaignPage
         _conversation.Add(userInput);
         _latestPlayerMessage = userInput;
         _userInput = string.Empty;
-        if (_combatMode)
-        {
-            _campaign.CombatMode = true;
-        }
+        _campaign.CombatMode = _combatMode;
         await GameInputHandler!.HandleUserPrompt(_campaign, _conversation);
     }
 
