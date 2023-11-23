@@ -25,9 +25,9 @@
                     <h3 class="text-center mb-3">Location</h3>
                     <div class="card card-dim mb-2 text-black text-center scrollbar" style="max-height: 20vh; overflow-y: auto">
                         <div class="card-body col-12">
-                            <h5 class="card-title">@_campaign?.Environments.LastOrDefault()?.Name</h5>
+                            <h5 class="card-title">@_currentLocation?.Name</h5>
                             <hr/>
-                            <p class="card-text text-start">@_campaign?.Environments.LastOrDefault()?.Description</p>
+                            <p class="card-text text-start">@_currentLocation?.Description</p>
                         </div>
                     </div>
                 </div>
@@ -95,12 +95,12 @@
         <div class="col player-info floating-stats rounded text-white">
             <div class="sticky">
                 <div class="mx-4 mt-3">
-                    <h3 class="text-center mb-4">@_campaign?.Player.Name</h3>
+                    <h3 class="text-center mb-4">@_mainCharacter?.Name</h3>
                     <div class="card card-dim mb-2 text-black text-center scrollbar" style="max-height: 25vh; overflow-y: auto">
                         <div class="card-body col-12">
                             <h5 class="card-title">Description</h5>
                             <hr/>
-                            <p class="card-text text-start">@_campaign?.Player.Description</p>
+                            <p class="card-text text-start">@_mainCharacter?.Description</p>
                         </div>
                     </div>
                 </div>

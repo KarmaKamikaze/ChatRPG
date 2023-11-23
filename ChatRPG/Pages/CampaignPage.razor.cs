@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using OpenAI_API.Chat;
+using Environment = ChatRPG.Data.Models.Environment;
 using OpenAiGptMessage = ChatRPG.API.OpenAiGptMessage;
 
 namespace ChatRPG.Pages;
@@ -26,6 +27,8 @@ public partial class CampaignPage
     private const string BottomId = "bottom-id";
     private Campaign? _campaign;
     private List<Character> _npcList = new();
+    private Environment? _currentLocation;
+    private Character? _mainCharacter;
     private PromptType _activePromptType = PromptType.Do;
     private string _userInputPlaceholder = InputPlaceholder[PromptType.Do];
 
@@ -67,6 +70,8 @@ public partial class CampaignPage
         _campaign = await PersisterService!.LoadFromCampaignIdAsync(
             CampaignMediatorService!.UserCampaignDict[_loggedInUsername!]);
         _npcList = _campaign.Characters.ToList();
+        _currentLocation = _campaign.Environments.LastOrDefault();
+        _mainCharacter = _campaign.Player;
         if (_campaign != null)
         {
             _conversation = _campaign.Messages.Select(OpenAiGptMessage.FromMessage).ToList();
@@ -226,6 +231,8 @@ public partial class CampaignPage
     private void UpdateStatsUi()
     {
         _npcList = _campaign!.Characters.ToList();
+        _currentLocation = _campaign.Environments.LastOrDefault();
+        _mainCharacter = _campaign.Player;
         StateHasChanged();
     }
 }
