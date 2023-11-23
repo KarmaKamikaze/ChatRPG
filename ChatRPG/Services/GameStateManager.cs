@@ -72,8 +72,7 @@ public class GameStateManager
 
             if (response.IsInCombat != null)
             {
-                // TODO: this is not workings
-                // campaign.CombatMode = response.IsInCombat.GetValueOrDefault(false);
+                campaign.CombatMode = (bool)response.IsInCombat;
                 _logger.LogInformation("Combatmode: {CombatMode}", campaign.CombatMode);
             }
         }
