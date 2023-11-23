@@ -25,6 +25,7 @@ public partial class CampaignPage
     private OpenAiGptMessage? _latestPlayerMessage;
     private const string BottomId = "bottom-id";
     private Campaign? _campaign;
+    private List<Character> _npcList = new();
     private PromptType _activePromptType = PromptType.Do;
     private string _userInputPlaceholder = InputPlaceholder[PromptType.Do];
 
@@ -65,6 +66,7 @@ public partial class CampaignPage
 
         _campaign = await PersisterService!.LoadFromCampaignIdAsync(
             CampaignMediatorService!.UserCampaignDict[_loggedInUsername!]);
+        _npcList = _campaign.Characters.ToList();
         if (_campaign != null)
         {
             _conversation = _campaign.Messages.Select(OpenAiGptMessage.FromMessage).ToList();
@@ -137,6 +139,7 @@ public partial class CampaignPage
         _latestPlayerMessage = userInput;
         _userInput = string.Empty;
         await GameInputHandler!.HandleUserPrompt(_campaign, _conversation);
+        UpdateStatsUi();
     }
 
     /// <summary>
@@ -210,6 +213,19 @@ public partial class CampaignPage
                 _userInputPlaceholder = InputPlaceholder[PromptType.Do];
                 break;
         }
+
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// This method should be called whenever new information has been learned,
+    /// which should be shown in the UI. Examples of this are when new locations
+    /// and characters are discovered during a campaign. Likewise, this method
+    /// should be called when the main character's stats and HP change.
+    /// </summary>
+    private void UpdateStatsUi()
+    {
+        _npcList = _campaign!.Characters.ToList();
         StateHasChanged();
     }
 }

@@ -323,7 +323,6 @@ a, .btn-link {
 }
 
 .campaign-title {
-    padding-top: 80px;
     color: #ffffff;
 }
 
@@ -382,7 +381,7 @@ a, .btn-link {
     position: absolute;
     bottom: 50px;
     right: 0;
-    margin-right: 10px;
+    margin-right: 20px;
     width: 50px;
     height: 50px;
     outline:none;
@@ -402,5 +401,10 @@ a, .btn-link {
 }
 
 .floating-stats {
-    background-color: rgba(35, 35, 35, 0.8)
+    background-color: rgba(35, 35, 35, 0.8);
+}
+
+div.sticky {
+    position: sticky;
+    top: 20px;
 }

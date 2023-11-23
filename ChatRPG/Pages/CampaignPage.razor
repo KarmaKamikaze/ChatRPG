@@ -1,26 +1,49 @@
 ﻿@page "/Campaign"
 @using OpenAiGptMessage = ChatRPG.API.OpenAiGptMessage
 @using OpenAI_API.Chat
+@using ChatRPG.Data.Models
 
 <PageTitle>Campaign - @_campaign?.Title</PageTitle>
 
 <Navbar Username="@_loggedInUsername"/>
 
 <div class="mb-5 mt-4" style="margin-left: 30px; margin-right: 30px;">
-    <div class="row gap-4">
-        <div class="col game-stats floating-stats mx-auto rounded text-white">
-            <div>
-                <h3 class="text-center mb-4">Start Scenario</h3>
-                <div class="card card-dim mb-2 text-black">
-                    <div class="card-body col-12">
-                        <h5 class="card-title">@_campaign?.Title</h5>
-                        <hr/>
-                        <p class="card-text text-start">@_campaign?.StartScenario</p>
+    <div class="row gap-3">
+        <div class="col game-stats floating-stats rounded text-white">
+            <div class="sticky">
+                <div class="mx-4 mt-3">
+                    <h3 class="text-center mb-3">Start Scenario</h3>
+                    <div class="card card-dim mb-2 text-black text-center">
+                        <div class="card-body col-12">
+                            <h5 class="card-title">@_campaign?.Title</h5>
+                            <hr/>
+                            <p class="card-text text-start">@_campaign?.StartScenario</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div>
-                <h3 class="text-center mb-4">Location</h3>
+                <div class="mt-3 mx-4">
+                    <h3 class="text-center mb-3">Location</h3>
+                    <div class="card card-dim mb-2 text-black text-center">
+                        <div class="card-body col-12">
+                            <h5 class="card-title">@_campaign?.Environments.LastOrDefault()?.Name</h5>
+                            <hr/>
+                            <p class="card-text text-start">@_campaign?.Environments.LastOrDefault()?.Description</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 mx-4">
+                    <h3 class="text-center mb-3">Characters</h3>
+                    @foreach (Character character in _npcList)
+                    {
+                        <div class="card card-dim mb-2 text-black text-center">
+                            <div class="card-body col-12">
+                                <h5 class="card-title">@character.Name</h5>
+                                <hr/>
+                                <p class="card-text text-start">@character.Description</p>
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
 
@@ -67,9 +90,11 @@
             </div>
         </div>
 
-        <div class="col player-info floating-stats mx-auto rounded text-white">
-            <div>
-                <h3 class="text-center mb-4">Character</h3>
+        <div class="col player-info floating-stats rounded text-white">
+            <div class="sticky">
+                <div class="mx-4 mt-3">
+                    <h3 class="text-center mb-4">Character</h3>
+                </div>
             </div>
         </div>
     </div>
