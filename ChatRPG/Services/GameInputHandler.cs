@@ -51,15 +51,15 @@ public class GameInputHandler
 
     public async Task HandleUserPrompt(Campaign campaign, IList<OpenAiGptMessage> conversation)
     {
-        string systemPrompt = GetRelevantSystemPrompt(conversation);
+        string systemPrompt = GetRelevantSystemPrompt(campaign, conversation);
         await GetResponseAndUpdateState(campaign, conversation, systemPrompt);
         _logger.LogInformation("Finished processing prompt.");
     }
 
-    private string GetRelevantSystemPrompt(ICollection<OpenAiGptMessage> conversation)
+    private string GetRelevantSystemPrompt(Campaign campaign, ICollection<OpenAiGptMessage> conversation)
     {
         SystemPromptType type = SystemPromptType.Default;
-        if (_gameStateManager.CombatMode)
+        if (campaign.CombatMode)
         {
             type = DetermineCombatOutcome();
             (int playerDmg, int opponentDmg) = ComputeCombatDamage(type);
