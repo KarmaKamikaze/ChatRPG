@@ -74,7 +74,13 @@ public partial class CampaignPage
         _mainCharacter = _campaign.Player;
         if (_campaign != null)
         {
-            _conversation = _campaign.Messages.Select(OpenAiGptMessage.FromMessage).ToList();
+            if (_campaign.CombatMode)
+            {
+                _activePromptType = PromptType.Attack;
+            }
+            _conversation = _campaign.Messages.OrderBy(m => m.Timestamp)
+                .Select(OpenAiGptMessage.FromMessage)
+                .ToList();
         }
 
         if (_loggedInUsername != null) _fileUtil = new FileUtility(_loggedInUsername);
@@ -143,6 +149,10 @@ public partial class CampaignPage
         _conversation.Add(userInput);
         _latestPlayerMessage = userInput;
         _userInput = string.Empty;
+        if (_activePromptType == PromptType.Attack)
+        {
+            _campaign.CombatMode = true;
+        }
         await GameInputHandler!.HandleUserPrompt(_campaign, _conversation);
         UpdateStatsUi();
     }

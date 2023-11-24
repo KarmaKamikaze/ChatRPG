@@ -25,7 +25,31 @@ public class Campaign
     public DateTime StartedOn { get; private set; }
     public ICollection<Message> Messages { get; } = new List<Message>();
     public ICollection<Character> Characters { get; } = new List<Character>();
-    public ICollection<Event> Events { get; } = new List<Event>();
     public ICollection<Environment> Environments { get; } = new List<Environment>();
     public Character Player => Characters.First(c => c.IsPlayer);
+    public bool CombatMode { get; set; }
+
+    public Character InsertOrUpdateCharacter(Character character)
+    {
+        Character? existingChar = Characters.FirstOrDefault(c => c.Name.ToLower().Equals(character.Name.ToLower()));
+        if (existingChar != null)
+        {
+            existingChar.Description = character.Description;
+            return existingChar;
+        }
+        Characters.Add(character);
+        return character;
+    }
+
+    public Environment InsertOrUpdateEnvironment(Environment environment)
+    {
+        Environment? existing = Environments.FirstOrDefault(e => e.Name.ToLower().Equals(environment.Name.ToLower()));
+        if (existing != null)
+        {
+            existing.Description = environment.Description;
+            return existing;
+        }
+        Environments.Add(environment);
+        return environment;
+    }
 }

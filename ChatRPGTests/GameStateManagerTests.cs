@@ -24,7 +24,7 @@ public class GameStateManagerTests
         _user = new User("test");
         _campaign = new Campaign(_user, "Test");
         _environment = new Environment(_campaign, "Environment", "Test environment");
-        _player = new Character(_campaign, _environment, CharacterType.Humanoid, "Player", "The player", true, 100);
+        _player = new Character(_campaign, _environment, CharacterType.Humanoid, "Player", "The player", true);
         _campaign.Characters.Add(_player);
     }
 
@@ -42,7 +42,6 @@ public class GameStateManagerTests
                   "HealthPoints": 50
                 }
               ],
-              "events": [],
               "environment": {
                 "name": "Thundertop City",
                 "description": "A sprawling ancient city with towering architecture, bustling markets and whispered secrets."
@@ -55,6 +54,5 @@ public class GameStateManagerTests
         Assert.Equal(1, _campaign.Messages.Count);
         Assert.Contains(_campaign.Characters, c => c is { Name: "Sarmilan", Description: "A charming and attractive mage hailing from the mystical land of Eldoria.", Type: CharacterType.Humanoid });
         Assert.Equal("Thundertop City", _campaign.Environments.Last().Name);
-        Assert.Empty(_campaign.Events);
     }
 }
