@@ -408,3 +408,21 @@ div.sticky {
     position: sticky;
     top: 20px;
 }
+
+.health-bar {
+    height: 3vh;
+}
+
+.health-bar-text {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    text-align: center;
+    z-index: 2;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;
+    color: #ffffff;
+    font-size: 175%;
+}
