@@ -23,6 +23,7 @@ public partial class CampaignPage
     private OpenAiGptMessage? _latestPlayerMessage;
     private const string BottomId = "bottom-id";
     private Campaign? _campaign;
+    private bool _combatMode;
 
     [Inject] private IConfiguration? Configuration { get; set; }
     [Inject] private IJSRuntime? JsRuntime { get; set; }
@@ -49,7 +50,10 @@ public partial class CampaignPage
             CampaignMediatorService!.UserCampaignDict[_loggedInUsername!]);
         if (_campaign != null)
         {
-            _conversation = _campaign.Messages.Select(OpenAiGptMessage.FromMessage).ToList();
+            _combatMode = _campaign.CombatMode;
+            _conversation = _campaign.Messages.OrderBy(m => m.Timestamp)
+                .Select(OpenAiGptMessage.FromMessage)
+                .ToList();
         }
 
         if (_loggedInUsername != null) _fileUtil = new FileUtility(_loggedInUsername);
@@ -114,6 +118,7 @@ public partial class CampaignPage
         _conversation.Add(userInput);
         _latestPlayerMessage = userInput;
         _userInput = string.Empty;
+        _campaign.CombatMode = _combatMode;
         await GameInputHandler!.HandleUserPrompt(_campaign, _conversation);
     }
 

@@ -6,8 +6,7 @@ public class Character
     {
     }
 
-    public Character(Campaign campaign, Environment environment, CharacterType type, string name, string description, bool isPlayer,
-        int maxHealth)
+    public Character(Campaign campaign, Environment environment, CharacterType type, string name, string description, bool isPlayer)
     {
         Campaign = campaign;
         Environment = environment;
@@ -15,15 +14,17 @@ public class Character
         Name = name;
         Description = description;
         IsPlayer = isPlayer;
-        MaxHealth = maxHealth;
-        CurrentHealth = maxHealth;
-    }
-
-    public Character(Campaign campaign, Environment environment, CharacterType type, string name, string description, bool isPlayer,
-        int maxHealth, int currentHealth)
-        : this(campaign, environment, type, name, description, isPlayer, maxHealth)
-    {
-        CurrentHealth = currentHealth;
+        MaxHealth = type switch
+        {
+            CharacterType.Humanoid => 50,
+            CharacterType.SmallCreature => 30,
+            CharacterType.LargeCreature => 70,
+            CharacterType.Monster => 90,
+            _ => 50
+        };
+        if (isPlayer)
+            MaxHealth = 100;
+        CurrentHealth = MaxHealth;
     }
 
     public int Id { get; private set; }
@@ -32,7 +33,7 @@ public class Character
     public CharacterType Type { get; private set; }
     public bool IsPlayer { get; private set; }
     public string Name { get; private set; } = null!;
-    public string Description { get; private set; } = null!;
+    public string Description { get; set; } = null!;
     public int MaxHealth { get; private set; }
     public int CurrentHealth { get; private set; }
     public ICollection<CharacterAbility?> CharacterAbilities { get; } = new List<CharacterAbility?>();
@@ -41,13 +42,10 @@ public class Character
     /// Adjust the current health of this character.
     /// </summary>
     /// <param name="value">The value to adjust the current health with.</param>
-    public void AdjustHealth(int value)
+    public bool AdjustHealth(int value)
     {
-        CurrentHealth = Math.Min(MaxHealth, CurrentHealth + value);
-        if (CurrentHealth <= 0)
-        {
-            // TODO: Handle character death
-        }
+        CurrentHealth = Math.Min(MaxHealth, Math.Max(0, CurrentHealth + value));
+        return CurrentHealth <= 0;
     }
 
     /// <summary>

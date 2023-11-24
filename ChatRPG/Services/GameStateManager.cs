@@ -1,4 +1,3 @@
-using System.Text;
 using ChatRPG.API;
 using ChatRPG.API.Response;
 using ChatRPG.Data.Models;
@@ -43,7 +42,7 @@ public class GameStateManager
             if (response.Environment is { Name: not null, Description: not null })
             {
                 Environment environment = new(campaign, response.Environment.Name, response.Environment.Description);
-                campaign.Environments.Add(environment);
+                environment = campaign.InsertOrUpdateEnvironment(environment);
                 campaign.Player.Environment = environment;
                 _logger.LogInformation("Set environment: \"{Name}\"", environment.Name);
             }
@@ -54,10 +53,16 @@ public class GameStateManager
                 {
                     Environment environment = campaign.Environments.Last();
                     Character character = new(campaign, environment, ParseToEnum(resChar.Type!, CharacterType.Humanoid),
-                        resChar.Name!, resChar.Description!, false, resChar.HealthPoints);
-                    campaign.Characters.Add(character);
+                        resChar.Name!, resChar.Description!, false);
+                    campaign.InsertOrUpdateCharacter(character);
                     _logger.LogInformation("Created character: \"{Name}\"", character.Name);
                 }
+            }
+
+            if (response.IsInCombat != null)
+            {
+                campaign.CombatMode = (bool)response.IsInCombat;
+                _logger.LogInformation("Combatmode: {CombatMode}", campaign.CombatMode);
             }
         }
         catch (Exception e)
@@ -66,7 +71,7 @@ public class GameStateManager
         }
     }
 
-    private static T ParseToEnum<T>(string input, T defaultVal) where T : struct, Enum
+    public static T ParseToEnum<T>(string input, T defaultVal) where T : struct, Enum
     {
         return Enum.TryParse(input, true, out T type) ? type : defaultVal;
     }

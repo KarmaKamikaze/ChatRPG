@@ -16,6 +16,6 @@ public class Environment
     public int Id { get; private set; }
     public Campaign Campaign { get; private set; } = null!;
     public string Name { get; private set; } = null!;
-    public string Description { get; private set; } = null!;
+    public string Description { get; set; } = null!;
     public ICollection<Character> Characters { get; } = new List<Character>();
 }

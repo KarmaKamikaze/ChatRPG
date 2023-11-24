@@ -43,7 +43,7 @@ public partial class OpenAiGptMessage
 
     public void AddChunk(string chunk)
     {
-        Content += chunk;
+        Content += chunk.Replace("\\\"", "'");
         UpdateNarrativePart();
     }
 

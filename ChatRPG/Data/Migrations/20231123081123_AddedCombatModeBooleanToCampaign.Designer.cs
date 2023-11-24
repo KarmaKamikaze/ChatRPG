@@ -3,6 +3,7 @@ using System;
 using ChatRPG.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChatRPG.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231123081123_AddedCombatModeBooleanToCampaign")]
+    partial class AddedCombatModeBooleanToCampaign
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -163,6 +166,50 @@ namespace ChatRPG.Data.Migrations
                     b.HasIndex("CampaignId");
 
                     b.ToTable("Environments");
+                });
+
+            modelBuilder.Entity("ChatRPG.Data.Models.Event", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CampaignId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("CharacterId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("EnvironmentId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Ordering")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CampaignId");
+
+                    b.HasIndex("CharacterId");
+
+                    b.HasIndex("EnvironmentId");
+
+                    b.ToTable("Events");
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.Message", b =>
@@ -476,6 +523,31 @@ namespace ChatRPG.Data.Migrations
                     b.Navigation("Campaign");
                 });
 
+            modelBuilder.Entity("ChatRPG.Data.Models.Event", b =>
+                {
+                    b.HasOne("ChatRPG.Data.Models.Campaign", "Campaign")
+                        .WithMany("Events")
+                        .HasForeignKey("CampaignId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ChatRPG.Data.Models.Character", "Character")
+                        .WithMany()
+                        .HasForeignKey("CharacterId");
+
+                    b.HasOne("ChatRPG.Data.Models.Environment", "Environment")
+                        .WithMany()
+                        .HasForeignKey("EnvironmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Campaign");
+
+                    b.Navigation("Character");
+
+                    b.Navigation("Environment");
+                });
+
             modelBuilder.Entity("ChatRPG.Data.Models.Message", b =>
                 {
                     b.HasOne("ChatRPG.Data.Models.Campaign", "Campaign")
@@ -548,6 +620,8 @@ namespace ChatRPG.Data.Migrations
                     b.Navigation("Characters");
 
                     b.Navigation("Environments");
+
+                    b.Navigation("Events");
 
                     b.Navigation("Messages");
                 });
