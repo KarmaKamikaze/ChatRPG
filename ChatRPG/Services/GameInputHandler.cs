@@ -104,22 +104,22 @@ public class GameInputHandler
             string messageContent = "";
             if (playerDmg != 0)
             {
-                messageContent += $"The player hits with their attack, dealing {playerDmg} damage.";
                 if (opponent.AdjustHealth(-playerDmg))
                 {
                     messageContent +=
                         $" With no health points remaining, {opponent.Name} dies and can no longer participate in the narrative.";
                 }
+                messageContent += $"The player hits with their attack, dealing {playerDmg} damage. The opponent has {opponent.CurrentHealth} health remaining.";
                 _logger.LogInformation("Combat: {Name} hits {Name} for {x} damage. Health: {CurrentHealth}/{MaxHealth}", campaign.Player.Name, opponent.Name, playerDmg, opponent.CurrentHealth, opponent.MaxHealth);
             }
             else
             {
-                messageContent += "The player misses with their attack, dealing no damage.";
+                messageContent += $"The player misses with their attack, dealing no damage. The opponent has {opponent.CurrentHealth} health remaining.";
             }
 
             if (opponentDmg != 0)
             {
-                messageContent += $"The opponent will hit with their next attack, dealing {opponentDmg} damage.";
+                messageContent += $"The opponent will hit with their next attack, dealing {opponentDmg} damage. The player has {campaign.Player.CurrentHealth} health remaining.";
                 if (campaign.Player.AdjustHealth(-opponentDmg))
                 {
                     await HandlePlayerDeath(campaign.Player, conversation);
@@ -128,7 +128,7 @@ public class GameInputHandler
             }
             else
             {
-                messageContent += "The opponent will miss their next attack, dealing no damage.";
+                messageContent += $"The opponent will miss their next attack, dealing no damage. The player has {campaign.Player.CurrentHealth} health remaining.";
             }
 
             OpenAiGptMessage message = new(ChatMessageRole.System, messageContent);
