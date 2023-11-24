@@ -59,17 +59,6 @@ public class GameStateManager
                 }
             }
 
-            if (response.Events is not null)
-            {
-                foreach (LlmResponseEvent rEvent in response.Events.Where(e => e is { Name: not null, Description: not null, Type: not null }))
-                {
-                    Event @event = new(campaign, campaign.Environments.Last(), ParseToEnum(rEvent.Type!, EventType.Other),
-                        rEvent.Name!, rEvent.Description!);
-                    campaign.Events.Add(@event);
-                    _logger.LogInformation("Created event: \"{Name}\"", @event.Name);
-                }
-            }
-
             if (response.IsInCombat != null)
             {
                 campaign.CombatMode = (bool)response.IsInCombat;
