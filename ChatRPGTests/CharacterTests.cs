@@ -14,8 +14,8 @@ public class CharacterTests
     public void AdjustHealth_VariousInput_StaysWithinValidRange(int adjustByAmount, int expectedCurrentHealth)
     {
         Campaign campaign = new Campaign(new User(), "");
-        Character character = new Character(campaign, new Environment(campaign, "", ""), CharacterType.Humanoid, "", "",
-            true);
+        Character character = new Character(campaign, new Environment(campaign, "", ""),
+            CharacterType.Humanoid, "", "", true);
 
         character.AdjustHealth(adjustByAmount);
 

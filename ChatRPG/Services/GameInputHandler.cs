@@ -14,6 +14,16 @@ public class GameInputHandler
     private readonly GameStateManager _gameStateManager;
     private readonly bool _streamChatCompletions;
     private readonly Dictionary<SystemPromptType, string> _systemPrompts = new();
+    private const int PlayerDmgMin = 10;
+    private const int PlayerDmgMax = 25;
+
+    private static readonly Dictionary<CharacterType, (int, int)> CharacterTypeDamageDict = new()
+    {
+        { CharacterType.Humanoid, (10, 20) },
+        { CharacterType.SmallCreature, (5, 10) },
+        { CharacterType.LargeCreature, (15, 25) },
+        { CharacterType.Monster, (20, 30) }
+    };
 
     public GameInputHandler(ILogger<GameInputHandler> logger, IOpenAiLlmClient llmClient, GameStateManager gameStateManager, IConfiguration configuration)
     {
@@ -66,7 +76,7 @@ public class GameInputHandler
 
     private async Task<string> GetRelevantSystemPrompt(Campaign campaign, IList<OpenAiGptMessage> conversation)
     {
-        SystemPromptType type = SystemPromptType.Default;
+        SystemPromptType combatOutcome = SystemPromptType.Default;
         if (campaign.CombatMode)
         {
             string opponentDescriptionString = await _llmClient.GetChatCompletion(conversation, _systemPrompts[SystemPromptType.CombatOpponentDescription]);
@@ -89,8 +99,8 @@ public class GameInputHandler
                 campaign.CombatMode = false;
                 return _systemPrompts[SystemPromptType.Default];
             }
-            type = DetermineCombatOutcome();
-            (int playerDmg, int opponentDmg) = ComputeCombatDamage(type);
+            combatOutcome = DetermineCombatOutcome();
+            (int playerDmg, int opponentDmg) = ComputeCombatDamage(combatOutcome, opponent.Type);
             string messageContent = "";
             if (playerDmg != 0)
             {
@@ -124,7 +134,7 @@ public class GameInputHandler
             OpenAiGptMessage message = new(ChatMessageRole.System, messageContent);
             conversation.Add(message);
         }
-        return _systemPrompts[type];
+        return _systemPrompts[combatOutcome];
     }
 
     private static SystemPromptType DetermineCombatOutcome()
@@ -141,28 +151,23 @@ public class GameInputHandler
         return opponentRoll >= 0.5 ? SystemPromptType.CombatMissHit : SystemPromptType.CombatMissMiss;
     }
 
-    private const int PlayerDmgMin = 16;
-    private const int PlayerDmgMax = 38;
-    private const int OpponentDmgMin = 10;
-    private const int OpponentDmgMax = 35;
-
-    private static (int, int) ComputeCombatDamage(SystemPromptType combatOutcome)
+    private static (int, int) ComputeCombatDamage(SystemPromptType combatOutcome, CharacterType opponentType)
     {
         Random rand = new Random();
         int playerDmg = 0;
         int opponentDmg = 0;
-
+        (int opponentMin, int opponentMax) = CharacterTypeDamageDict[opponentType];
         switch (combatOutcome)
         {
             case SystemPromptType.CombatHitHit:
                 playerDmg = rand.Next(PlayerDmgMin, PlayerDmgMax);
-                opponentDmg = rand.Next(OpponentDmgMin, OpponentDmgMax);
+                opponentDmg = rand.Next(opponentMin, opponentMax);
                 break;
             case SystemPromptType.CombatHitMiss:
                 playerDmg = rand.Next(PlayerDmgMin, PlayerDmgMax);
                 break;
             case SystemPromptType.CombatMissHit:
-                opponentDmg = rand.Next(OpponentDmgMin, OpponentDmgMax);
+                opponentDmg = rand.Next(opponentMin, opponentMax);
                 break;
             case SystemPromptType.CombatMissMiss:
                 break;
