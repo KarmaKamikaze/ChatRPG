@@ -155,6 +155,7 @@ public partial class CampaignPage
             _campaign.CombatMode = true;
         }
         await GameInputHandler!.HandleUserPrompt(_campaign, _conversation);
+        _conversation.RemoveAll(m => m.Role.Equals(ChatMessageRole.System));
         UpdateStatsUi();
     }
 
@@ -164,9 +165,12 @@ public partial class CampaignPage
     /// <param name="elementId">The ID of the element to scroll to.</param>
     private async Task ScrollToElement(string elementId)
     {
-        await _scrollJsScript!.InvokeVoidAsync("ScrollToId", elementId);
-        _hasScrollBar = await _detectScrollBarJsScript!.InvokeAsync<bool>("DetectScrollBar");
-        StateHasChanged();
+        if (_scrollJsScript != null)
+        {
+            await _scrollJsScript.InvokeVoidAsync("ScrollToId", elementId);
+            _hasScrollBar = await _detectScrollBarJsScript!.InvokeAsync<bool>("DetectScrollBar");
+            StateHasChanged();
+        }
     }
 
     /// <summary>
@@ -179,7 +183,10 @@ public partial class CampaignPage
         _conversation.Add(eventArgs.Message);
         UpdateSaveFile(eventArgs.Message.Content);
         Task.Run(() => ScrollToElement(BottomId));
-        _isWaitingForResponse = false;
+        if (eventArgs.Message.Content != string.Empty)
+        {
+            _isWaitingForResponse = false;
+        }
     }
 
     /// <summary>
