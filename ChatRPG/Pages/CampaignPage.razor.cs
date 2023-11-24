@@ -72,7 +72,8 @@ public partial class CampaignPage
 
         if (_campaign != null)
         {
-            _npcList = _campaign.Characters.ToList();
+            _npcList = _campaign!.Characters.Where(c => !c.IsPlayer).ToList();
+            _npcList.Reverse();
             _currentLocation = _campaign.Environments.LastOrDefault();
             _mainCharacter = _campaign.Player;
             if (_campaign.CombatMode)
@@ -249,6 +250,7 @@ public partial class CampaignPage
     private void UpdateStatsUi()
     {
         _npcList = _campaign!.Characters.Where(c => !c.IsPlayer).ToList();
+        _npcList.Reverse(); // Show the most newly encountered npc first
         _currentLocation = _campaign!.Environments.LastOrDefault();
         _mainCharacter = _campaign!.Player;
         StateHasChanged();
