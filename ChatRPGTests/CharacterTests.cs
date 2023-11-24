@@ -11,11 +11,11 @@ public class CharacterTests
     [InlineData(-100, 0)]
     [InlineData(10, 100)]
     [InlineData(-5, 95)]
-    public void AdjustHealth_VariousInput_StaysWithinValidRange0To100(int adjustByAmount, int expectedCurrentHealth)
+    public void AdjustHealth_VariousInput_StaysWithinValidRange(int adjustByAmount, int expectedCurrentHealth)
     {
         Campaign campaign = new Campaign(new User(), "");
         Character character = new Character(campaign, new Environment(campaign, "", ""), CharacterType.Humanoid, "", "",
-            true, 100);
+            true);
 
         character.AdjustHealth(adjustByAmount);
 

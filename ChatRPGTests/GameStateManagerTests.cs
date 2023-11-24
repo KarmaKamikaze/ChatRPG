@@ -24,7 +24,7 @@ public class GameStateManagerTests
         _user = new User("test");
         _campaign = new Campaign(_user, "Test");
         _environment = new Environment(_campaign, "Environment", "Test environment");
-        _player = new Character(_campaign, _environment, CharacterType.Humanoid, "Player", "The player", true, 100);
+        _player = new Character(_campaign, _environment, CharacterType.Humanoid, "Player", "The player", true);
         _campaign.Characters.Add(_player);
     }
 
