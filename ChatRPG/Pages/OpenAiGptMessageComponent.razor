@@ -4,7 +4,7 @@
 @inherits ComponentBase
 
 <div class="message-container message-container-@($"{MessagePrefix.ToLower()}")">
-    <p class="message message-@($"{MessagePrefix.ToLower()}")">@(MessagePrefix): @(Message.Role.Equals(Assistant) ? Message.NarrativePart : Message.Content)</p>
+    <p class="message message-@($"{MessagePrefix.ToLower()}")"><span class="fw-bold">@(MessagePrefix):</span> @(Message.Role.Equals(Assistant) ? Message.NarrativePart : Message.Content)</p>
 </div>
 
 @code {
