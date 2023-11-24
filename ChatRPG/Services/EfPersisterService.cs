@@ -75,7 +75,6 @@ public class EfPersisterService : IPersisterService
             .Where(campaign => campaign.Id == campaignId)
             .Include(campaign => campaign.Messages)
             .Include(campaign => campaign.Environments)
-            .Include(campaign => campaign.Events)
             .Include(campaign => campaign.Characters)
             .ThenInclude(character => character.CharacterAbilities)
             .ThenInclude(characterAbility => characterAbility!.Ability)
