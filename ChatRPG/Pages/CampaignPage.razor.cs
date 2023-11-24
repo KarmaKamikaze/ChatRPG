@@ -69,11 +69,12 @@ public partial class CampaignPage
 
         _campaign = await PersisterService!.LoadFromCampaignIdAsync(
             CampaignMediatorService!.UserCampaignDict[_loggedInUsername!]);
-        _npcList = _campaign.Characters.ToList();
-        _currentLocation = _campaign.Environments.LastOrDefault();
-        _mainCharacter = _campaign.Player;
+
         if (_campaign != null)
         {
+            _npcList = _campaign.Characters.ToList();
+            _currentLocation = _campaign.Environments.LastOrDefault();
+            _mainCharacter = _campaign.Player;
             if (_campaign.CombatMode)
             {
                 _activePromptType = PromptType.Attack;
