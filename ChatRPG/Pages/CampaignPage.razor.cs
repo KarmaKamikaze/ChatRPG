@@ -248,9 +248,9 @@ public partial class CampaignPage
     /// </summary>
     private void UpdateStatsUi()
     {
-        _npcList = _campaign!.Characters.ToList();
-        _currentLocation = _campaign.Environments.LastOrDefault();
-        _mainCharacter = _campaign.Player;
+        _npcList = _campaign!.Characters.Where(c => !c.IsPlayer).ToList();
+        _currentLocation = _campaign!.Environments.LastOrDefault();
+        _mainCharacter = _campaign!.Player;
         StateHasChanged();
     }
 }
