@@ -573,6 +573,7 @@ public class AuthorizedIndexE2ETests : IDisposable
 
         // Assert
         Assert.Equal(expectedAmountOfCampaigns, actualAmountOfCampaigns);
+        E2ETestUtility.RemoveTestCampaign(_driver, _wait);
     }
 
     public void Dispose()

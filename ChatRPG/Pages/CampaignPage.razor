@@ -1,39 +1,125 @@
 ﻿@page "/Campaign"
 @using OpenAiGptMessage = ChatRPG.API.OpenAiGptMessage
 @using OpenAI_API.Chat
+@using ChatRPG.Data.Models
 
 <PageTitle>Campaign - @_campaign?.Title</PageTitle>
 
 <Navbar Username="@_loggedInUsername"/>
 
-<div class="text-center campaign-title">
-    <h1>@_campaign?.Title</h1>
-</div>
+<div class="mb-5 mt-4" style="margin-left: 30px; margin-right: 30px;">
+    <div class="row gap-3">
+        <div class="col game-stats floating-stats rounded scrollbar text-white">
+            <div class="sticky">
+                <div class="mx-4 mt-3">
+                    <h3 class="text-center mb-3">Start Scenario</h3>
+                    <div class="card card-dim mb-2 text-black text-center scrollbar" style="max-height: 20vh; overflow-y: auto">
+                        <div class="card-body col-12">
+                            <h5 class="card-title">@_campaign?.Title</h5>
+                            <hr/>
+                            <p class="card-text text-start">@_campaign?.StartScenario</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 mx-4">
+                    <h3 class="text-center mb-3">Location</h3>
+                    <div class="card card-dim mb-2 text-black text-center scrollbar" style="max-height: 20vh; overflow-y: auto">
+                        <div class="card-body col-12">
+                            <h5 class="card-title">@_currentLocation?.Name</h5>
+                            <hr/>
+                            <p class="card-text text-start">@_currentLocation?.Description</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 mx-4 mb-3">
+                    <h3 class="text-center mb-3">Characters</h3>
+                    <div class="scrollbar" style="max-height: 25vh; overflow-y: auto">
+                        @foreach (Character character in _npcList)
+                        {
+                            <div class="card card-dim mb-2 text-black text-center">
+                                <div class="card-body col-12">
+                                    <h5 class="card-title">@character.Name</h5>
+                                    <hr/>
+                                    <p class="card-text text-start">@character.Description</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<div class="conversation mx-auto col-8 mt-4 rounded p-5 text-black">
-    <div class="conversation-text">
-        @foreach (OpenAiGptMessage message in _conversation.Where(m => !m.Role.Equals(ChatMessageRole.System)))
-        {
-            <OpenAiGptMessageComponent Message="@message"/>
-        }
-    </div>
-</div>
+        <div class="col-6 conversation mx-auto rounded p-5 text-black" style="background-color: rgba(35, 35, 35, 0.8)">
+            <div class="text-center campaign-title mb-5" id="campaign-title">
+                <h1>@_campaign?.Title</h1>
+            </div>
 
-<div class="container">
-    <div class="input-group mx-auto col-8 mt-2 mb-5 input-group-border">
-        <input type="checkbox" class="form-check" @bind="_combatMode" />
-        <input type="text" style="resize:vertical;" class="form-control user-prompt custom-text-field"
-               @bind="_userInput" placeholder="What do you do?" @onkeyup="@EnterKeyHandler" disabled="@(_isWaitingForResponse || _campaign?.Player.CurrentHealth <= 0)"/>
-        <div class="input-group-append">
-            <button class="btn btn-send ml-2" type="button" @onclick="SendPrompt" disabled="@(_isWaitingForResponse || _campaign?.Player.CurrentHealth <= 0)">
-                Send
-            </button>
+            <div class="conversation-text">
+                @foreach (OpenAiGptMessage message in _conversation.Where(m => !m.Role.Equals(ChatMessageRole.System)))
+                {
+                    <OpenAiGptMessageComponent Message="@message"/>
+                }
+                @if (_isWaitingForResponse)
+                {
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Wrap="FlexWrap.Wrap" Class="rz-m-12" Gap="2rem">
+                        <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Light" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+                    </RadzenStack>
+                }
+            </div>
+
+            <div class="mt-4">
+                <div class="col-1" style="margin-left: 10px;">
+                    <RadzenSelectBar Size="ButtonSize.Small" @bind-Value=@_activePromptType TValue="PromptType"
+                                     Change="OnPromptTypeChange" class="rz-shadow-6 prompt-selector">
+                        <Items>
+                            <RadzenSelectBarItem Text="Do" Value="PromptType.Do" class="rz-ripple"/>
+                            <RadzenSelectBarItem Text="Say" Value="PromptType.Say" class="rz-ripple"/>
+                            <RadzenSelectBarItem Text="Attack" Value="PromptType.Attack" class="rz-ripple"/>
+                        </Items>
+                    </RadzenSelectBar>
+                </div>
+
+                <div class="input-group mx-auto col-10 mt-2 input-group-border">
+                    <input type="text" style="resize:vertical;" class="form-control user-prompt custom-text-field"
+                           @bind="_userInput" placeholder="@_userInputPlaceholder" @onkeyup="@EnterKeyHandler" disabled="@(_isWaitingForResponse || _campaign?.Player.CurrentHealth <= 0)"/>
+                    <div class="input-group-append">
+                        <button class="btn btn-primary ml-2" type="button" @onclick="SendPrompt" disabled="@(_isWaitingForResponse || _campaign?.Player.CurrentHealth <= 0)">
+                            Send
+                        </button>
+                    </div>
+                </div>
+
+                @if (_hasScrollBar)
+                {
+                    <button class="btn-scroll-to-top text-xl-center rounded" @onclick='() => ScrollToElement("campaign-title")'>
+                        <i class="bi bi-arrow-bar-up fs-3"></i>
+                    </button>
+                }
+            </div>
+        </div>
+
+        <div class="col player-info floating-stats rounded text-white">
+            <div class="sticky">
+                <div class="mx-4 mt-3">
+                    <h3 class="text-center mb-4">@_mainCharacter?.Name</h3>
+                    <div class="card card-dim mb-2 text-black text-center scrollbar" style="max-height: 25vh; overflow-y: auto">
+                        <div class="card-body col-12">
+                            <h5 class="card-title">Description</h5>
+                            <hr/>
+                            <p class="card-text text-start">@_mainCharacter?.Description</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mx-4 mt-3">
+                    <h4 class="text-center mb-4">Health Points</h4>
+                    <HealthBar MaxHealth="_mainCharacter?.MaxHealth" CurrentHealth="_mainCharacter?.CurrentHealth"></HealthBar>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="bg-light"></div>
 </div>
 
-<span id="bottom-id"></span>
+<span id="bottom-id" style="margin-bottom: 50px;"></span>
 
 <footer class="footer pl-3 text-muted footer-formatting fixed-bottom custom-gray-container">
     <div class="container">

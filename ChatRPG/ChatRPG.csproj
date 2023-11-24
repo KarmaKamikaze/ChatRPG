@@ -28,6 +28,7 @@
     <PackageReference Include="MimeKit" Version="4.2.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.11" />
     <PackageReference Include="OpenAI" Version="1.7.2" />
+    <PackageReference Include="Radzen.Blazor" Version="4.21.3" />
     <PackageReference Include="RichardSzalay.MockHttp" Version="7.0.0" />
   </ItemGroup>
 

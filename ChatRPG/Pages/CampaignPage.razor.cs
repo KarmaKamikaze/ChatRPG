@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using OpenAI_API.Chat;
+using Environment = ChatRPG.Data.Models.Environment;
 using OpenAiGptMessage = ChatRPG.API.OpenAiGptMessage;
 
 namespace ChatRPG.Pages;
@@ -16,6 +17,8 @@ public partial class CampaignPage
     private string? _loggedInUsername;
     private bool _shouldSave;
     private IJSObjectReference? _scrollJsScript;
+    private IJSObjectReference? _detectScrollBarJsScript;
+    private bool _hasScrollBar = false;
     private FileUtility? _fileUtil;
     private List<OpenAiGptMessage> _conversation = new();
     private string _userInput = "";
@@ -23,7 +26,25 @@ public partial class CampaignPage
     private OpenAiGptMessage? _latestPlayerMessage;
     private const string BottomId = "bottom-id";
     private Campaign? _campaign;
-    private bool _combatMode;
+    private List<Character> _npcList = new();
+    private Environment? _currentLocation;
+    private Character? _mainCharacter;
+    private PromptType _activePromptType = PromptType.Do;
+    private string _userInputPlaceholder = InputPlaceholder[PromptType.Do];
+
+    private enum PromptType
+    {
+        Do,
+        Say,
+        Attack
+    }
+
+    private static readonly Dictionary<PromptType, string> InputPlaceholder = new()
+    {
+        { PromptType.Do, "What do you do?" },
+        { PromptType.Say, "What do you say?" },
+        { PromptType.Attack, "How do you attack?" }
+    };
 
     [Inject] private IConfiguration? Configuration { get; set; }
     [Inject] private IJSRuntime? JsRuntime { get; set; }
@@ -48,9 +69,16 @@ public partial class CampaignPage
 
         _campaign = await PersisterService!.LoadFromCampaignIdAsync(
             CampaignMediatorService!.UserCampaignDict[_loggedInUsername!]);
+
         if (_campaign != null)
         {
-            _combatMode = _campaign.CombatMode;
+            _npcList = _campaign.Characters.ToList();
+            _currentLocation = _campaign.Environments.LastOrDefault();
+            _mainCharacter = _campaign.Player;
+            if (_campaign.CombatMode)
+            {
+                _activePromptType = PromptType.Attack;
+            }
             _conversation = _campaign.Messages.OrderBy(m => m.Timestamp)
                 .Select(OpenAiGptMessage.FromMessage)
                 .ToList();
@@ -66,18 +94,6 @@ public partial class CampaignPage
         }
     }
 
-    private void InitializeCampaign()
-    {
-        string content = $"The player is {_campaign!.Player.Name}, described as \"{_campaign.Player.Description}\".";
-        if (_campaign.StartScenario != null)
-        {
-            content += "\n" + _campaign.StartScenario;
-        }
-        OpenAiGptMessage message = new(ChatMessageRole.System, content);
-        _conversation.Add(message);
-        GameInputHandler?.HandleUserPrompt(_campaign, _conversation);
-    }
-
     /// <summary>
     /// Executes after the component has rendered and initializes JavaScript interop for scrolling.
     /// </summary>
@@ -88,7 +104,23 @@ public partial class CampaignPage
         if (firstRender)
         {
             _scrollJsScript ??= await JsRuntime!.InvokeAsync<IJSObjectReference>("import", "./js/scroll.js");
+            _detectScrollBarJsScript ??=
+                await JsRuntime!.InvokeAsync<IJSObjectReference>("import", "./js/detectScrollBar.js");
+            await ScrollToElement(BottomId); // scroll down to latest message
         }
+    }
+
+    private void InitializeCampaign()
+    {
+        string content = $"The player is {_campaign!.Player.Name}, described as \"{_campaign.Player.Description}\".";
+        if (_campaign.StartScenario != null)
+        {
+            content += "\n" + _campaign.StartScenario;
+        }
+
+        OpenAiGptMessage message = new(ChatMessageRole.System, content);
+        _conversation.Add(message);
+        GameInputHandler?.HandleUserPrompt(_campaign, _conversation);
     }
 
     /// <summary>
@@ -118,9 +150,13 @@ public partial class CampaignPage
         _conversation.Add(userInput);
         _latestPlayerMessage = userInput;
         _userInput = string.Empty;
-        _campaign.CombatMode = _combatMode;
+        if (_activePromptType == PromptType.Attack)
+        {
+            _campaign.CombatMode = true;
+        }
         await GameInputHandler!.HandleUserPrompt(_campaign, _conversation);
         _conversation.RemoveAll(m => m.Role.Equals(ChatMessageRole.System));
+        UpdateStatsUi();
     }
 
     /// <summary>
@@ -132,6 +168,8 @@ public partial class CampaignPage
         if (_scrollJsScript != null)
         {
             await _scrollJsScript.InvokeVoidAsync("ScrollToId", elementId);
+            _hasScrollBar = await _detectScrollBarJsScript!.InvokeAsync<bool>("DetectScrollBar");
+            StateHasChanged();
         }
     }
 
@@ -178,5 +216,41 @@ public partial class CampaignPage
         if (!_shouldSave || _fileUtil == null || string.IsNullOrEmpty(asstMessage)) return;
         MessagePair messagePair = new MessagePair(_latestPlayerMessage?.Content ?? "", asstMessage);
         Task.Run(() => _fileUtil.UpdateSaveFileAsync(messagePair));
+    }
+
+    private void OnPromptTypeChange(PromptType type)
+    {
+        // TODO: Implement prompt change here!
+        switch (type)
+        {
+            case PromptType.Do:
+                _userInputPlaceholder = InputPlaceholder[PromptType.Do];
+                break;
+            case PromptType.Say:
+                _userInputPlaceholder = InputPlaceholder[PromptType.Say];
+                break;
+            case PromptType.Attack:
+                _userInputPlaceholder = InputPlaceholder[PromptType.Attack];
+                break;
+            default:
+                _userInputPlaceholder = InputPlaceholder[PromptType.Do];
+                break;
+        }
+
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// This method should be called whenever new information has been learned,
+    /// which should be shown in the UI. Examples of this are when new locations
+    /// and characters are discovered during a campaign. Likewise, this method
+    /// should be called when the main character's stats and HP change.
+    /// </summary>
+    private void UpdateStatsUi()
+    {
+        _npcList = _campaign!.Characters.Where(c => !c.IsPlayer).ToList();
+        _currentLocation = _campaign!.Environments.LastOrDefault();
+        _mainCharacter = _campaign!.Player;
+        StateHasChanged();
     }
 }
