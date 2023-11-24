@@ -78,7 +78,7 @@ public class GameInputHandler
             {
                 Environment environment = campaign.Environments.Last();
                 Character character = new(campaign, environment, GameStateManager.ParseToEnum(resChar.Type!, CharacterType.Humanoid),
-                    resChar.Name!, resChar.Description!, false, resChar.HealthPoints);
+                    resChar.Name!, resChar.Description!, false);
                 campaign.InsertOrUpdateCharacter(character);
             }
             string? opponentName = opponentDescriptionResponse?.Opponent?.ToLower();

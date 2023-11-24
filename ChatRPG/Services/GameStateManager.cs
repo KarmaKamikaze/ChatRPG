@@ -53,7 +53,7 @@ public class GameStateManager
                 {
                     Environment environment = campaign.Environments.Last();
                     Character character = new(campaign, environment, ParseToEnum(resChar.Type!, CharacterType.Humanoid),
-                        resChar.Name!, resChar.Description!, false, resChar.HealthPoints);
+                        resChar.Name!, resChar.Description!, false);
                     campaign.InsertOrUpdateCharacter(character);
                     _logger.LogInformation("Created character: \"{Name}\"", character.Name);
                 }

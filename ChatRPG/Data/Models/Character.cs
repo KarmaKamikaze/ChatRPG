@@ -6,8 +6,7 @@ public class Character
     {
     }
 
-    public Character(Campaign campaign, Environment environment, CharacterType type, string name, string description, bool isPlayer,
-        int maxHealth)
+    public Character(Campaign campaign, Environment environment, CharacterType type, string name, string description, bool isPlayer)
     {
         Campaign = campaign;
         Environment = environment;
@@ -15,15 +14,17 @@ public class Character
         Name = name;
         Description = description;
         IsPlayer = isPlayer;
-        MaxHealth = maxHealth;
-        CurrentHealth = maxHealth;
-    }
-
-    public Character(Campaign campaign, Environment environment, CharacterType type, string name, string description, bool isPlayer,
-        int maxHealth, int currentHealth)
-        : this(campaign, environment, type, name, description, isPlayer, maxHealth)
-    {
-        CurrentHealth = currentHealth;
+        MaxHealth = type switch
+        {
+            CharacterType.Humanoid => 50,
+            CharacterType.SmallCreature => 30,
+            CharacterType.LargeCreature => 70,
+            CharacterType.Monster => 90,
+            _ => 50
+        };
+        if (isPlayer)
+            MaxHealth = 100;
+        CurrentHealth = MaxHealth;
     }
 
     public int Id { get; private set; }
