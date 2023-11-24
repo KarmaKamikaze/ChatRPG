@@ -17,5 +17,5 @@
     [EditorRequired]
     public int? CurrentHealth { get; set; }
 
-    private double? Percentage => (double?) 50 / MaxHealth * 100;
+    private double? Percentage => (double?) CurrentHealth / MaxHealth * 100;
 }
