@@ -48,7 +48,7 @@ public partial class CampaignPage
 
     private string SpinnerContainerStyle => _isWaitingForResponse
         ? "margin-top: -25px; margin-bottom: -60px;"
-        : "margin-top: 20px; margin-bottom: 50px;";
+        : "margin-top: 20px; margin-bottom: 60px;";
 
     [Inject] private IConfiguration? Configuration { get; set; }
     [Inject] private IJSRuntime? JsRuntime { get; set; }
@@ -195,6 +195,7 @@ public partial class CampaignPage
         if (eventArgs.Message.Content != string.Empty)
         {
             _isWaitingForResponse = false;
+            StateHasChanged();
         }
     }
 
