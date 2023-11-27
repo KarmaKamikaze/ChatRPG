@@ -46,7 +46,9 @@ public partial class CampaignPage
         { PromptType.Attack, "How do you attack?" }
     };
 
-    private string SpinnerContainerStyle => _isWaitingForResponse ? "margin-top: -25px; margin-bottom: -60px;" : "margin-top: 20px; margin-bottom: 50px;";
+    private string SpinnerContainerStyle => _isWaitingForResponse
+        ? "margin-top: -25px; margin-bottom: -60px;"
+        : "margin-top: 20px; margin-bottom: 50px;";
 
     [Inject] private IConfiguration? Configuration { get; set; }
     [Inject] private IJSRuntime? JsRuntime { get; set; }
@@ -82,6 +84,7 @@ public partial class CampaignPage
             {
                 _activePromptType = PromptType.Attack;
             }
+
             _conversation = _campaign.Messages.OrderBy(m => m.Timestamp)
                 .Select(OpenAiGptMessage.FromMessage)
                 .ToList();
@@ -159,6 +162,7 @@ public partial class CampaignPage
         {
             _campaign.CombatMode = true;
         }
+
         await GameInputHandler!.HandleUserPrompt(_campaign, _conversation);
         _conversation.RemoveAll(m => m.Role.Equals(ChatMessageRole.System));
         UpdateStatsUi();
