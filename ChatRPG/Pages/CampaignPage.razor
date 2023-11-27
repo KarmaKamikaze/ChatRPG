@@ -59,12 +59,14 @@
                 {
                     <OpenAiGptMessageComponent Message="@message"/>
                 }
-                @if (_isWaitingForResponse)
-                {
-                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Wrap="FlexWrap.Wrap" Class="rz-m-12" Gap="2rem">
-                        <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Light" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
-                    </RadzenStack>
-                }
+                <div style="@SpinnerContainerStyle">
+                    @if (_isWaitingForResponse)
+                    {
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Wrap="FlexWrap.Wrap" Class="rz-m-12" Gap="2rem">
+                            <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Light" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate"/>
+                        </RadzenStack>
+                    }
+                </div>
             </div>
 
             <div class="mt-4">
