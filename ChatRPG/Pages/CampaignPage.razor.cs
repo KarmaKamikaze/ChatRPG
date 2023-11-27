@@ -46,6 +46,8 @@ public partial class CampaignPage
         { PromptType.Attack, "How do you attack?" }
     };
 
+    private string SpinnerContainerStyle => _isWaitingForResponse ? "margin-top: -25px; margin-bottom: -60px;" : "margin-top: 20px; margin-bottom: 50px;";
+
     [Inject] private IConfiguration? Configuration { get; set; }
     [Inject] private IJSRuntime? JsRuntime { get; set; }
     [Inject] private AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
@@ -152,6 +154,7 @@ public partial class CampaignPage
         _conversation.Add(userInput);
         _latestPlayerMessage = userInput;
         _userInput = string.Empty;
+        await ScrollToElement(BottomId);
         if (_activePromptType == PromptType.Attack)
         {
             _campaign.CombatMode = true;
