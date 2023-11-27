@@ -7,4 +7,6 @@ public class LlmResponse
     public LlmResponseEnvironment? Environment { get; set; }
     public bool? IsInCombat { get; set; }
     public string? Opponent { get; set; }
+    public bool? Hurt { get; set; }
+    public bool? Heal { get; set; }
 }
