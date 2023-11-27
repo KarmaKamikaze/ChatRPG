@@ -67,7 +67,8 @@ public static class E2ETestUtility
         Thread.Sleep(500); // Wait for page to load
         IWebElement? yourCampaignsContainer =
             wait.Until(webDriver => webDriver.FindElement(By.Id("your-campaigns")));
-        ReadOnlyCollection<IWebElement>? removeButtons = yourCampaignsContainer.FindElements(By.ClassName("delete-campaign-button"));
+        ReadOnlyCollection<IWebElement>? removeButtons =
+            yourCampaignsContainer.FindElements(By.ClassName("delete-campaign-button"));
         removeButtons[0].Click(); // Remove latest campaign
         wait.Until(webDriver => webDriver.FindElement(By.Id("modal-confirm"))).Click();
         Thread.Sleep(200);
