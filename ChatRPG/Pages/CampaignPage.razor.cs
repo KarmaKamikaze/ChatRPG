@@ -39,6 +39,10 @@ public partial class CampaignPage
         { UserPromptType.Attack, "How do you attack?" }
     };
 
+    private string SpinnerContainerStyle => _isWaitingForResponse
+        ? "margin-top: -25px; margin-bottom: -60px;"
+        : "margin-top: 20px; margin-bottom: 60px;";
+
     [Inject] private IConfiguration? Configuration { get; set; }
     [Inject] private IJSRuntime? JsRuntime { get; set; }
     [Inject] private AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
@@ -65,13 +69,15 @@ public partial class CampaignPage
 
         if (_campaign != null)
         {
-            _npcList = _campaign.Characters.ToList();
+            _npcList = _campaign!.Characters.Where(c => !c.IsPlayer).ToList();
+            _npcList.Reverse();
             _currentLocation = _campaign.Environments.LastOrDefault();
             _mainCharacter = _campaign.Player;
             if (_campaign.CombatMode)
             {
                 _activeUserPromptType = UserPromptType.Attack;
             }
+
             _conversation = _campaign.Messages.OrderBy(m => m.Timestamp)
                 .Select(OpenAiGptMessage.FromMessage)
                 .ToList();
@@ -114,6 +120,7 @@ public partial class CampaignPage
         OpenAiGptMessage message = new(ChatMessageRole.System, content);
         _conversation.Add(message);
         GameInputHandler?.HandleUserPrompt(_campaign, _conversation);
+        UpdateStatsUi();
     }
 
     /// <summary>
@@ -143,11 +150,13 @@ public partial class CampaignPage
         _conversation.Add(userInput);
         _latestPlayerMessage = userInput;
         _userInput = string.Empty;
+        await ScrollToElement(BottomId);
         //#TODO: Maybe remove this
         if (_activeUserPromptType == UserPromptType.Attack)
         {
             _campaign.CombatMode = true;
         }
+
         await GameInputHandler!.HandleUserPrompt(_campaign, _conversation);
         _conversation.RemoveAll(m => m.Role.Equals(ChatMessageRole.System));
         UpdateStatsUi();
@@ -180,6 +189,7 @@ public partial class CampaignPage
         if (eventArgs.Message.Content != string.Empty)
         {
             _isWaitingForResponse = false;
+            StateHasChanged();
         }
     }
 
@@ -195,6 +205,7 @@ public partial class CampaignPage
         {
             _isWaitingForResponse = false;
             UpdateSaveFile(message.Content);
+            StateHasChanged();
         }
         else if (eventArgs.Chunk is not null)
         {
@@ -243,6 +254,7 @@ public partial class CampaignPage
     private void UpdateStatsUi()
     {
         _npcList = _campaign!.Characters.Where(c => !c.IsPlayer).ToList();
+        _npcList.Reverse(); // Show the most newly encountered npc first
         _currentLocation = _campaign!.Environments.LastOrDefault();
         _mainCharacter = _campaign!.Player;
         StateHasChanged();
