@@ -211,6 +211,7 @@ public partial class CampaignPage
         {
             _isWaitingForResponse = false;
             UpdateSaveFile(message.Content);
+            StateHasChanged();
         }
         else if (eventArgs.Chunk is not null)
         {
