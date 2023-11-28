@@ -115,7 +115,7 @@ public partial class CampaignPage
 
         OpenAiGptMessage message = new(ChatMessageRole.System, content);
         _conversation.Add(message);
-        GameInputHandler?.HandleUserPrompt(_campaign, _conversation);
+        GameInputHandler?.HandleInitialPrompt(_campaign, _conversation);
         UpdateStatsUi();
     }
 

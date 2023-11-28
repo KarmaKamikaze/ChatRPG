@@ -39,7 +39,7 @@ public class GameInputHandler
             _streamChatCompletions = false;
         }
         IConfigurationSection sysPromptSec = configuration.GetRequiredSection("SystemPrompts");
-        _systemPrompts.Add(SystemPromptType.Default, sysPromptSec.GetValue("Default", "")!);
+        _systemPrompts.Add(SystemPromptType.Initial, sysPromptSec.GetValue("Initial", "")!);
         _systemPrompts.Add(SystemPromptType.CombatHitHit, sysPromptSec.GetValue("CombatHitHit", "")!);
         _systemPrompts.Add(SystemPromptType.CombatHitMiss, sysPromptSec.GetValue("CombatHitMiss", "")!);
         _systemPrompts.Add(SystemPromptType.CombatMissHit, sysPromptSec.GetValue("CombatMissHit", "")!);
@@ -73,22 +73,20 @@ public class GameInputHandler
         _logger.LogInformation("Finished processing prompt.");
     }
 
+    public async Task HandleInitialPrompt(Campaign campaign, IList<OpenAiGptMessage> conversation)
+    {
+        await GetResponseAndUpdateState(campaign, conversation, _systemPrompts[SystemPromptType.Initial]);
+        _logger.LogInformation("Finished processing prompt.");
+    }
+    
     private async Task<string> GetRelevantSystemPrompt(Campaign campaign, IList<OpenAiGptMessage> conversation)
     {
-        if (!conversation.Any(m => m.Role.Equals(ChatMessageRole.User)))
-        {
-            return _systemPrompts[SystemPromptType.Default];
-        }
-
         UserPromptType userPromptType = conversation.Last(m => m.Role.Equals(ChatMessageRole.User)).UserPromptType;
-
-        SystemPromptType systemPromptType = SystemPromptType.Default;
-
+        
         switch (userPromptType)
         {
             case UserPromptType.Say:
-                systemPromptType = SystemPromptType.SayAction;
-                break;
+                return _systemPrompts[SystemPromptType.SayAction];
             case UserPromptType.Do:
                 OpenAiGptMessage lastUserMessage = conversation.Last(m => m.Role.Equals(ChatMessageRole.User));
                 string hurtOrHealString = await _llmClient.GetChatCompletion(new List<OpenAiGptMessage>() { lastUserMessage }, _systemPrompts[SystemPromptType.HurtOrHeal]);
@@ -116,8 +114,7 @@ public class GameInputHandler
                 }
                 OpenAiGptMessage hurtOrHealSystemMessage = new(ChatMessageRole.System, hurtOrHealMessageContent);
                 conversation.Add(hurtOrHealSystemMessage);
-                systemPromptType = SystemPromptType.DoAction;
-                break;
+                return _systemPrompts[SystemPromptType.DoAction];
             case UserPromptType.Attack:
                 string opponentDescriptionString = await _llmClient.GetChatCompletion(conversation, _systemPrompts[SystemPromptType.CombatOpponentDescription]);
                 _logger.LogInformation("Opponent description response: {opponentDescriptionString}", opponentDescriptionString);
@@ -136,9 +133,9 @@ public class GameInputHandler
                 if (opponent == null)
                 {
                     _logger.LogError("Opponent is unknown!");
-                    return _systemPrompts[SystemPromptType.Default];
+                    return _systemPrompts[SystemPromptType.DoAction];
                 }
-                systemPromptType = DetermineCombatOutcome();
+                SystemPromptType systemPromptType = DetermineCombatOutcome();
                 (int playerDmg, int opponentDmg) = ComputeCombatDamage(systemPromptType, opponent.Type);
                 string combatMessageContent = "";
                 if (playerDmg != 0)
@@ -172,10 +169,10 @@ public class GameInputHandler
 
                 OpenAiGptMessage combatSystemMessage = new(ChatMessageRole.System, combatMessageContent);
                 conversation.Add(combatSystemMessage);
-                break;
+                return _systemPrompts[systemPromptType];
+            default:
+                throw new ArgumentOutOfRangeException();
         }
-
-        return _systemPrompts[systemPromptType];
     }
 
     private static SystemPromptType DetermineCombatOutcome()
