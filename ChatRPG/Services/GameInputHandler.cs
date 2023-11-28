@@ -135,8 +135,7 @@ public class GameInputHandler
                 Character? opponent = campaign.Characters.LastOrDefault(c => !c.IsPlayer && c.Name.ToLower().Equals(opponentName));
                 if (opponent == null)
                 {
-                    _logger.LogError("Opponent is unknown! Leaving combat mode...");
-                    campaign.CombatMode = false;
+                    _logger.LogError("Opponent is unknown!");
                     return _systemPrompts[SystemPromptType.Default];
                 }
                 systemPromptType = DetermineCombatOutcome();

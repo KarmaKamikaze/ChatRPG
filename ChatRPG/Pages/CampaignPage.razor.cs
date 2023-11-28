@@ -73,10 +73,6 @@ public partial class CampaignPage
             _npcList.Reverse();
             _currentLocation = _campaign.Environments.LastOrDefault();
             _mainCharacter = _campaign.Player;
-            if (_campaign.CombatMode)
-            {
-                _activeUserPromptType = UserPromptType.Attack;
-            }
 
             _conversation = _campaign.Messages.OrderBy(m => m.Timestamp)
                 .Select(OpenAiGptMessage.FromMessage)
@@ -151,12 +147,6 @@ public partial class CampaignPage
         _latestPlayerMessage = userInput;
         _userInput = string.Empty;
         await ScrollToElement(BottomId);
-        //#TODO: Maybe remove this
-        if (_activeUserPromptType == UserPromptType.Attack)
-        {
-            _campaign.CombatMode = true;
-        }
-
         await GameInputHandler!.HandleUserPrompt(_campaign, _conversation);
         _conversation.RemoveAll(m => m.Role.Equals(ChatMessageRole.System));
         UpdateStatsUi();

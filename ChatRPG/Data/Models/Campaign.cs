@@ -27,7 +27,6 @@ public class Campaign
     public ICollection<Character> Characters { get; } = new List<Character>();
     public ICollection<Environment> Environments { get; } = new List<Environment>();
     public Character Player => Characters.First(c => c.IsPlayer);
-    public bool CombatMode { get; set; }
 
     public Character InsertOrUpdateCharacter(Character character)
     {
