@@ -53,7 +53,7 @@ public static class E2ETestUtility
         wait.Until(webDriver => webDriver.FindElement(By.Id("inputCharacterDescription"))).SendKeys("Test Description");
         wait.Until(webDriver => webDriver.FindElement(By.Id("inputCustomStartScenario"))).SendKeys("Test Scenario");
         wait.Until(webDriver => webDriver.FindElement(By.Id("create-campaign-button"))).Click();
-        Thread.Sleep(200); // Wait for page to load
+        Thread.Sleep(300); // Wait for page to load
         if (!goToCampaign)
         {
             driver.Navigate().GoToUrl("http://localhost:5111/");

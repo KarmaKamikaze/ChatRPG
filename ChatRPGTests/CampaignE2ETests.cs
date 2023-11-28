@@ -270,7 +270,8 @@ public class CampaignE2ETests : IDisposable
     [InlineData("do-prompt", true)]
     [InlineData("say-prompt", false)]
     [InlineData("attack-prompt", false)]
-    public void CampaignPage_Conversation_DoUserPromptTypeChosenAsDefaultOnCampaignStart(string userPromptTypeId, bool expectedActive)
+    public void CampaignPage_Conversation_DoUserPromptTypeChosenAsDefaultOnCampaignStart(string userPromptTypeId,
+        bool expectedActive)
     {
         // Arrange
         IWebElement? conversationContainer =
@@ -289,7 +290,8 @@ public class CampaignE2ETests : IDisposable
     [InlineData("do-prompt", true)]
     [InlineData("say-prompt", false)]
     [InlineData("attack-prompt", false)]
-    public void CampaignPage_Conversation_DoUserPromptTypeSelectedWhenClicked(string userPromptTypeId, bool expectedActive)
+    public void CampaignPage_Conversation_DoUserPromptTypeSelectedWhenClicked(string userPromptTypeId,
+        bool expectedActive)
     {
         // Arrange
         IWebElement? conversationContainer =
@@ -310,7 +312,8 @@ public class CampaignE2ETests : IDisposable
     [InlineData("do-prompt", false)]
     [InlineData("say-prompt", true)]
     [InlineData("attack-prompt", false)]
-    public void CampaignPage_Conversation_SayUserPromptTypeSelectedWhenClicked(string userPromptTypeId, bool expectedActive)
+    public void CampaignPage_Conversation_SayUserPromptTypeSelectedWhenClicked(string userPromptTypeId,
+        bool expectedActive)
     {
         // Arrange
         IWebElement? conversationContainer =
@@ -331,7 +334,8 @@ public class CampaignE2ETests : IDisposable
     [InlineData("do-prompt", false)]
     [InlineData("say-prompt", false)]
     [InlineData("attack-prompt", true)]
-    public void CampaignPage_Conversation_AttackUserPromptTypeSelectedWhenClicked(string userPromptTypeId, bool expectedActive)
+    public void CampaignPage_Conversation_AttackUserPromptTypeSelectedWhenClicked(string userPromptTypeId,
+        bool expectedActive)
     {
         // Arrange
         IWebElement? conversationContainer =
@@ -352,7 +356,8 @@ public class CampaignE2ETests : IDisposable
     [InlineData("do-prompt", "What do you do?")]
     [InlineData("say-prompt", "What do you say?")]
     [InlineData("attack-prompt", "How do you attack?")]
-    public void CampaignPage_Conversation_UserPromptTypeDisplaysCorrectPromptTypePlaceholderInInputField(string userPromptTypeId, string expectedPromptPlaceholder)
+    public void CampaignPage_Conversation_UserPromptTypeDisplaysCorrectPromptTypePlaceholderInInputField(
+        string userPromptTypeId, string expectedPromptPlaceholder)
     {
         // Arrange
         IWebElement? conversationContainer =
@@ -385,26 +390,10 @@ public class CampaignE2ETests : IDisposable
     }
 
     [Fact]
-    public void CampaignPage_Conversation_InitialGameMessageAppearInConversationOnCampaignStart()
-    {
-        // Arrange
-        string expectedInitialGameMessage = "Assistant:"; // Mocked message
-
-        // Act
-        Thread.Sleep(500); // Wait for message to appear
-        IWebElement? conversation = _wait.Until(webDriver => webDriver.FindElement(By.ClassName("conversation-text")));
-        ReadOnlyCollection<IWebElement>? conversationMessages = conversation.FindElements(By.Id("conversation-message"));
-
-        // Assert
-        Assert.Equal(expectedInitialGameMessage, conversationMessages[0].Text);
-    }
-
-    [Fact]
     public void CampaignPage_Conversation_UserMessageAppearInConversationIfSubmitted()
     {
         // Arrange
-        int initialGameMessageCount = 1;
-        int expectedNumberOfMessages = 1 + initialGameMessageCount;
+        int expectedNumberOfMessages = 1;
         IWebElement? inputField =
             _wait.Until(webDriver => webDriver.FindElement(By.ClassName("user-prompt")));
         inputField.SendKeys("Test Message");
@@ -414,7 +403,8 @@ public class CampaignE2ETests : IDisposable
         _wait.Until(webDriver => webDriver.FindElement(By.Id("input-sent-button"))).Click();
         Thread.Sleep(500); // Wait for message to appear
         IWebElement? conversation = _wait.Until(webDriver => webDriver.FindElement(By.ClassName("conversation-text")));
-        ReadOnlyCollection<IWebElement>? conversationMessages = conversation.FindElements(By.Id("conversation-message"));
+        ReadOnlyCollection<IWebElement>?
+            conversationMessages = conversation.FindElements(By.Id("conversation-message"));
         int actualNumberOfMessages = conversationMessages.Count;
 
         // Assert
@@ -435,10 +425,102 @@ public class CampaignE2ETests : IDisposable
         _wait.Until(webDriver => webDriver.FindElement(By.Id("input-sent-button"))).Click();
         Thread.Sleep(500); // Wait for message to appear
         IWebElement? conversation = _wait.Until(webDriver => webDriver.FindElement(By.ClassName("conversation-text")));
-        ReadOnlyCollection<IWebElement>? conversationMessages = conversation.FindElements(By.Id("conversation-message"));
+        ReadOnlyCollection<IWebElement>?
+            conversationMessages = conversation.FindElements(By.Id("conversation-message"));
 
         // Assert
-        Assert.Equal(expectedInitialGameMessage, conversationMessages[1].Text);
+        Assert.Equal(expectedInitialGameMessage, conversationMessages[0].Text);
+    }
+
+    [Fact]
+    public void CampaignPage_PlayerStats_MainCharacterNameTitleIsDisplayed()
+    {
+        // Arrange
+        IWebElement? playerStatsContainer =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("player-info")));
+        ReadOnlyCollection<IWebElement>? playerStatsTitles = playerStatsContainer.FindElements(By.TagName("h3"));
+
+        // Act
+        IWebElement mainCharacterTitle = playerStatsTitles[0];
+
+        // Assert
+        Assert.True(mainCharacterTitle.Displayed);
+    }
+
+    [Fact]
+    public void CampaignPage_PlayerStats_MainCharacterNameTitleDisplaysCorrectTitle()
+    {
+        // Arrange
+        string expectedTitle = "Test Name";
+        IWebElement? playerStatsContainer =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("player-info")));
+        ReadOnlyCollection<IWebElement>? playerStatsTitles = playerStatsContainer.FindElements(By.TagName("h3"));
+
+        // Act
+        IWebElement mainCharacterTitle = playerStatsTitles[0];
+
+        // Assert
+        Assert.Equal(expectedTitle, mainCharacterTitle.Text);
+    }
+
+    [Fact]
+    public void CampaignPage_PlayerStats_MainCharacterDescriptionDisplaysCorrectDescription()
+    {
+        // Arrange
+        string expectedMainCharacterDescription = "Test Description";
+        IWebElement? playerStatsContainer =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("player-info")));
+
+        // Act
+        IWebElement? actualMainCharacterDescription =
+            playerStatsContainer.FindElement(By.Id("main-character-description"));
+
+        // Assert
+        Assert.Equal(expectedMainCharacterDescription, actualMainCharacterDescription.Text);
+    }
+
+    [Fact]
+    public void CampaignPage_PlayerStats_HealthPointsTitleIsDisplayed()
+    {
+        // Arrange
+        IWebElement? playerStatsContainer =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("player-info")));
+
+        // Act
+        IWebElement? healthPointsTitle = playerStatsContainer.FindElement(By.TagName("h4"));
+
+        // Assert
+        Assert.True(healthPointsTitle.Displayed);
+    }
+
+    [Fact]
+    public void CampaignPage_PlayerStats_HealthPointsTitleDisplaysCorrectTitle()
+    {
+        // Arrange
+        string expectedTitle = "Health Points";
+        IWebElement? playerStatsContainer =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("player-info")));
+
+        // Act
+        IWebElement? healthPointsTitle = playerStatsContainer.FindElement(By.TagName("h4"));
+
+        // Assert
+        Assert.Equal(expectedTitle, healthPointsTitle.Text);
+    }
+
+    [Fact]
+    public void CampaignPage_PlayerStats_HealthPointsAmountDisplaysCorrectInitialHealthPoints()
+    {
+        // Arrange
+        string expectedHealthPointsText = "100/100";
+        IWebElement? playerStatsContainer =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("player-info")));
+
+        // Act
+        IWebElement? actualHealthPointsText = playerStatsContainer.FindElement(By.ClassName("health-bar-text"));
+
+        // Assert
+        Assert.Equal(expectedHealthPointsText, actualHealthPointsText.Text);
     }
 
     public void Dispose()

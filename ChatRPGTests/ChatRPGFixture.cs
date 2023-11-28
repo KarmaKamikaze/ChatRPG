@@ -12,9 +12,7 @@ public class ChatRPGFixture : IAsyncLifetime
         {
             FileName = "dotnet",
             Arguments = "run --project ../../../../ChatRPG/ChatRPG.csproj " +
-                        "--property:ASPNETCORE_URLS=http://localhost:5111 " +
-                        "--property:ASPNETCORE_ENVIRONMENT=Development " +
-                        "--property:UseMocks=true",
+                        "--launch-profile \"http mocked\"",
             RedirectStandardOutput = false,
             RedirectStandardError = false,
             UseShellExecute = false,
