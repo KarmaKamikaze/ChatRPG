@@ -85,7 +85,7 @@
                     <input type="text" style="resize:vertical;" class="form-control user-prompt custom-text-field"
                            @bind="_userInput" placeholder="@_userInputPlaceholder" @onkeyup="@EnterKeyHandler" disabled="@(_isWaitingForResponse || _campaign?.Player.CurrentHealth <= 0)"/>
                     <div class="input-group-append">
-                        <button class="btn btn-primary ml-2" type="button" @onclick="SendPrompt" disabled="@(_isWaitingForResponse || _campaign?.Player.CurrentHealth <= 0)">
+                        <button class="btn btn-primary ml-2" id="input-sent-button" type="button" @onclick="SendPrompt" disabled="@(_isWaitingForResponse || _campaign?.Player.CurrentHealth <= 0)">
                             Send
                         </button>
                     </div>

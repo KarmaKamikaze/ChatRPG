@@ -369,6 +369,78 @@ public class CampaignE2ETests : IDisposable
         Assert.Equal(expectedPromptPlaceholder, expectedPromptTypePlaceholder);
     }
 
+    [Fact]
+    public void CampaignPage_Conversation_UserInputFieldIsEmptyOnInitialization()
+    {
+        // Arrange
+        string expectedUserInputFieldText = string.Empty;
+
+        // Act
+        IWebElement? inputField =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("user-prompt")));
+        string actualUserInputFieldText = inputField.GetAttribute("value");
+
+        // Assert
+        Assert.Equal(expectedUserInputFieldText, actualUserInputFieldText);
+    }
+
+    [Fact]
+    public void CampaignPage_Conversation_InitialGameMessageAppearInConversationOnCampaignStart()
+    {
+        // Arrange
+        string expectedInitialGameMessage = "Assistant:"; // Mocked message
+
+        // Act
+        Thread.Sleep(500); // Wait for message to appear
+        IWebElement? conversation = _wait.Until(webDriver => webDriver.FindElement(By.ClassName("conversation-text")));
+        ReadOnlyCollection<IWebElement>? conversationMessages = conversation.FindElements(By.Id("conversation-message"));
+
+        // Assert
+        Assert.Equal(expectedInitialGameMessage, conversationMessages[0].Text);
+    }
+
+    [Fact]
+    public void CampaignPage_Conversation_UserMessageAppearInConversationIfSubmitted()
+    {
+        // Arrange
+        int initialGameMessageCount = 1;
+        int expectedNumberOfMessages = 1 + initialGameMessageCount;
+        IWebElement? inputField =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("user-prompt")));
+        inputField.SendKeys("Test Message");
+
+        // Act
+        Thread.Sleep(200); // Wait for message to be written
+        _wait.Until(webDriver => webDriver.FindElement(By.Id("input-sent-button"))).Click();
+        Thread.Sleep(500); // Wait for message to appear
+        IWebElement? conversation = _wait.Until(webDriver => webDriver.FindElement(By.ClassName("conversation-text")));
+        ReadOnlyCollection<IWebElement>? conversationMessages = conversation.FindElements(By.Id("conversation-message"));
+        int actualNumberOfMessages = conversationMessages.Count;
+
+        // Assert
+        Assert.Equal(expectedNumberOfMessages, actualNumberOfMessages);
+    }
+
+    [Fact]
+    public void CampaignPage_Conversation_CorrectUserMessageAppearInConversationIfSubmitted()
+    {
+        // Arrange
+        string expectedInitialGameMessage = "Player: Test Message";
+        IWebElement? inputField =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("user-prompt")));
+        inputField.SendKeys("Test Message");
+
+        // Act
+        Thread.Sleep(200); // Wait for message to be written
+        _wait.Until(webDriver => webDriver.FindElement(By.Id("input-sent-button"))).Click();
+        Thread.Sleep(500); // Wait for message to appear
+        IWebElement? conversation = _wait.Until(webDriver => webDriver.FindElement(By.ClassName("conversation-text")));
+        ReadOnlyCollection<IWebElement>? conversationMessages = conversation.FindElements(By.Id("conversation-message"));
+
+        // Assert
+        Assert.Equal(expectedInitialGameMessage, conversationMessages[1].Text);
+    }
+
     public void Dispose()
     {
         E2ETestUtility.RemoveTestCampaign(_driver, _wait);

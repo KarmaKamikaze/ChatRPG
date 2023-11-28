@@ -524,7 +524,7 @@ public class AuthorizedIndexE2ETests : IDisposable
     {
         // Arrange
         E2ETestUtility.CreateTestCampaign(_driver, _wait);
-        Thread.Sleep(200);
+        Thread.Sleep(500);
         _wait.Until(webDriver => webDriver.FindElements(By.ClassName("delete-campaign-button")))[0].Click();
         Thread.Sleep(200); // wait for modal to load
         string expectedCharacterName = "Character name: Test Name";
