@@ -154,7 +154,7 @@ public class GameInputHandler
         string? opponentName = opponentDescriptionResponse?.Opponent?.ToLower();
         return campaign.Characters.LastOrDefault(c => !c.IsPlayer && c.Name.ToLower().Equals(opponentName));
     }
-    
+
     private static SystemPromptType DetermineCombatOutcome()
     {
         Random rand = new Random();
@@ -229,8 +229,7 @@ public class GameInputHandler
         OpenAiGptMessage combatSystemMessage = new(ChatMessageRole.System, combatMessageContent);
         conversation.Add(combatSystemMessage);
     }
-    
-    
+
     private async Task GetResponseAndUpdateState(Campaign campaign, IList<OpenAiGptMessage> conversation, string systemPrompt)
     {
         if (conversation.Any(m => m.Role.Equals(ChatMessageRole.User)))
