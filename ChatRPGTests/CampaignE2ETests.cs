@@ -266,6 +266,109 @@ public class CampaignE2ETests : IDisposable
         Assert.Equal(expectedDashboardTitle, actualDashboardTitle.Text);
     }
 
+    [Theory]
+    [InlineData("do-prompt", true)]
+    [InlineData("say-prompt", false)]
+    [InlineData("attack-prompt", false)]
+    public void CampaignPage_Conversation_DoUserPromptTypeChosenAsDefaultOnCampaignStart(string userPromptTypeId, bool expectedActive)
+    {
+        // Arrange
+        IWebElement? conversationContainer =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("conversation")));
+        IWebElement prompt = conversationContainer.FindElement(By.Id(userPromptTypeId));
+        string? promptClasses = prompt.GetAttribute("class");
+
+        // Act
+        bool actuallyActive = promptClasses.Contains("rz-state-active");
+
+        // Assert
+        Assert.Equal(expectedActive, actuallyActive);
+    }
+
+    [Theory]
+    [InlineData("do-prompt", true)]
+    [InlineData("say-prompt", false)]
+    [InlineData("attack-prompt", false)]
+    public void CampaignPage_Conversation_DoUserPromptTypeSelectedWhenClicked(string userPromptTypeId, bool expectedActive)
+    {
+        // Arrange
+        IWebElement? conversationContainer =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("conversation")));
+        IWebElement doPrompt = conversationContainer.FindElement(By.Id("do-prompt"));
+        IWebElement prompt = conversationContainer.FindElement(By.Id(userPromptTypeId));
+
+        // Act
+        doPrompt.Click();
+        string? promptClasses = prompt.GetAttribute("class");
+        bool actuallyActive = promptClasses.Contains("rz-state-active");
+
+        // Assert
+        Assert.Equal(expectedActive, actuallyActive);
+    }
+
+    [Theory]
+    [InlineData("do-prompt", false)]
+    [InlineData("say-prompt", true)]
+    [InlineData("attack-prompt", false)]
+    public void CampaignPage_Conversation_SayUserPromptTypeSelectedWhenClicked(string userPromptTypeId, bool expectedActive)
+    {
+        // Arrange
+        IWebElement? conversationContainer =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("conversation")));
+        IWebElement sayPrompt = conversationContainer.FindElement(By.Id("say-prompt"));
+        IWebElement prompt = conversationContainer.FindElement(By.Id(userPromptTypeId));
+
+        // Act
+        sayPrompt.Click();
+        string? promptClasses = prompt.GetAttribute("class");
+        bool actuallyActive = promptClasses.Contains("rz-state-active");
+
+        // Assert
+        Assert.Equal(expectedActive, actuallyActive);
+    }
+
+    [Theory]
+    [InlineData("do-prompt", false)]
+    [InlineData("say-prompt", false)]
+    [InlineData("attack-prompt", true)]
+    public void CampaignPage_Conversation_AttackUserPromptTypeSelectedWhenClicked(string userPromptTypeId, bool expectedActive)
+    {
+        // Arrange
+        IWebElement? conversationContainer =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("conversation")));
+        IWebElement attackPrompt = conversationContainer.FindElement(By.Id("attack-prompt"));
+        IWebElement prompt = conversationContainer.FindElement(By.Id(userPromptTypeId));
+
+        // Act
+        attackPrompt.Click();
+        string? promptClasses = prompt.GetAttribute("class");
+        bool actuallyActive = promptClasses.Contains("rz-state-active");
+
+        // Assert
+        Assert.Equal(expectedActive, actuallyActive);
+    }
+
+    [Theory]
+    [InlineData("do-prompt", "What do you do?")]
+    [InlineData("say-prompt", "What do you say?")]
+    [InlineData("attack-prompt", "How do you attack?")]
+    public void CampaignPage_Conversation_UserPromptTypeDisplaysCorrectPromptTypePlaceholderInInputField(string userPromptTypeId, string expectedPromptPlaceholder)
+    {
+        // Arrange
+        IWebElement? conversationContainer =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("conversation")));
+        IWebElement prompt = conversationContainer.FindElement(By.Id(userPromptTypeId));
+
+        // Act
+        prompt.Click();
+        IWebElement? inputField =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("user-prompt")));
+        string expectedPromptTypePlaceholder = inputField.GetAttribute("placeholder");
+
+        // Assert
+        Assert.Equal(expectedPromptPlaceholder, expectedPromptTypePlaceholder);
+    }
+
     public void Dispose()
     {
         E2ETestUtility.RemoveTestCampaign(_driver, _wait);

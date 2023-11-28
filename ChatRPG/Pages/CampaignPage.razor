@@ -38,9 +38,9 @@
                         {
                             <div class="card card-dim mb-2 text-black text-center">
                                 <div class="card-body col-12">
-                                    <h5 class="card-title">@character.Name</h5>
+                                    <h5 class="card-title" id="character-list-name">@character.Name</h5>
                                     <hr/>
-                                    <p class="card-text text-start">@character.Description</p>
+                                    <p class="card-text text-start" id="character-list-description">@character.Description</p>
                                 </div>
                             </div>
                         }
@@ -74,9 +74,9 @@
                     <RadzenSelectBar Size="ButtonSize.Small" @bind-Value=@_activePromptType TValue="PromptType"
                                      Change="OnPromptTypeChange" class="rz-shadow-6 prompt-selector">
                         <Items>
-                            <RadzenSelectBarItem Text="Do" Value="PromptType.Do" class="rz-ripple"/>
-                            <RadzenSelectBarItem Text="Say" Value="PromptType.Say" class="rz-ripple"/>
-                            <RadzenSelectBarItem Text="Attack" Value="PromptType.Attack" class="rz-ripple"/>
+                            <RadzenSelectBarItem Text="Do" Value="PromptType.Do" class="rz-ripple" id="do-prompt"/>
+                            <RadzenSelectBarItem Text="Say" Value="PromptType.Say" class="rz-ripple" id="say-prompt"/>
+                            <RadzenSelectBarItem Text="Attack" Value="PromptType.Attack" class="rz-ripple" id="attack-prompt"/>
                         </Items>
                     </RadzenSelectBar>
                 </div>
