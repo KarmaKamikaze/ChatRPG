@@ -88,32 +88,7 @@ public class GameInputHandler
             case UserPromptType.Say:
                 return _systemPrompts[SystemPromptType.SayAction];
             case UserPromptType.Do:
-                OpenAiGptMessage lastUserMessage = conversation.Last(m => m.Role.Equals(ChatMessageRole.User));
-                string hurtOrHealString = await _llmClient.GetChatCompletion(new List<OpenAiGptMessage>() { lastUserMessage }, _systemPrompts[SystemPromptType.HurtOrHeal]);
-                _logger.LogInformation("Hurt or heal response: {hurtOrHealString}", hurtOrHealString);
-                OpenAiGptMessage hurtOrHealMessage = new(ChatMessageRole.Assistant, hurtOrHealString);
-                LlmResponse? hurtOrHealResponse = hurtOrHealMessage.TryParseFromJson();
-                string hurtOrHealMessageContent = "";
-                Random rand = new Random();
-                if (hurtOrHealResponse?.Heal == true)
-                {
-                    int healAmount = rand.Next(PlayerHealMin, PlayerHealMax);
-                    campaign.Player.AdjustHealth(healAmount);
-                    hurtOrHealMessageContent +=
-                        $"The player heals {healAmount} health points, setting them at {campaign.Player.CurrentHealth} health points. Mention these numbers in your response.";
-                }
-
-                if (hurtOrHealResponse?.Hurt == true)
-                {
-                    int dmgAmount = rand.Next(PlayerDmgMin, PlayerDmgMax);
-                    hurtOrHealMessageContent += $"The player hurts themselves for {dmgAmount} damage. The player has {(campaign.Player.CurrentHealth - dmgAmount < 0 ? 0 : campaign.Player.CurrentHealth - dmgAmount)} health remaining. Mention these numbers in your response.";
-                    if (campaign.Player.AdjustHealth(-dmgAmount))
-                    {
-                        hurtOrHealMessageContent += "The player has died and their adventure ends.";
-                    }
-                }
-                OpenAiGptMessage hurtOrHealSystemMessage = new(ChatMessageRole.System, hurtOrHealMessageContent);
-                conversation.Add(hurtOrHealSystemMessage);
+                DetermineAndPerformHurtOrHeal(campaign, conversation);
                 return _systemPrompts[SystemPromptType.DoAction];
             case UserPromptType.Attack:
                 string opponentDescriptionString = await _llmClient.GetChatCompletion(conversation, _systemPrompts[SystemPromptType.CombatOpponentDescription]);
@@ -175,6 +150,36 @@ public class GameInputHandler
         }
     }
 
+    private async void DetermineAndPerformHurtOrHeal(Campaign campaign, ICollection<OpenAiGptMessage> conversation)
+    {
+        OpenAiGptMessage lastUserMessage = conversation.Last(m => m.Role.Equals(ChatMessageRole.User));
+        string hurtOrHealString = await _llmClient.GetChatCompletion(new List<OpenAiGptMessage>() { lastUserMessage }, _systemPrompts[SystemPromptType.HurtOrHeal]);
+        _logger.LogInformation("Hurt or heal response: {hurtOrHealString}", hurtOrHealString);
+        OpenAiGptMessage hurtOrHealMessage = new(ChatMessageRole.Assistant, hurtOrHealString);
+        LlmResponse? hurtOrHealResponse = hurtOrHealMessage.TryParseFromJson();
+        string hurtOrHealMessageContent = "";
+        Random rand = new Random();
+        if (hurtOrHealResponse?.Heal == true)
+        {
+            int healAmount = rand.Next(PlayerHealMin, PlayerHealMax);
+            campaign.Player.AdjustHealth(healAmount);
+            hurtOrHealMessageContent +=
+                $"The player heals {healAmount} health points, setting them at {campaign.Player.CurrentHealth} health points. Mention these numbers in your response.";
+        }
+
+        if (hurtOrHealResponse?.Hurt == true)
+        {
+            int dmgAmount = rand.Next(PlayerDmgMin, PlayerDmgMax);
+            hurtOrHealMessageContent += $"The player hurts themselves for {dmgAmount} damage. The player has {(campaign.Player.CurrentHealth - dmgAmount < 0 ? 0 : campaign.Player.CurrentHealth - dmgAmount)} health remaining. Mention these numbers in your response.";
+            if (campaign.Player.AdjustHealth(-dmgAmount))
+            {
+                hurtOrHealMessageContent += "The player has died and their adventure ends.";
+            }
+        }
+        OpenAiGptMessage hurtOrHealSystemMessage = new(ChatMessageRole.System, hurtOrHealMessageContent);
+        conversation.Add(hurtOrHealSystemMessage);
+    }
+    
     private static SystemPromptType DetermineCombatOutcome()
     {
         Random rand = new Random();
