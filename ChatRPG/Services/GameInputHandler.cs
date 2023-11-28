@@ -91,7 +91,7 @@ public class GameInputHandler
                 break;
             case UserPromptType.Do:
                 OpenAiGptMessage lastUserMessage = conversation.Last(m => m.Role.Equals(ChatMessageRole.User));
-                string hurtOrHealString = await _llmClient.GetChatCompletion(new List<OpenAiGptMessage>(){lastUserMessage}, _systemPrompts[SystemPromptType.HurtOrHeal]);
+                string hurtOrHealString = await _llmClient.GetChatCompletion(new List<OpenAiGptMessage>() { lastUserMessage }, _systemPrompts[SystemPromptType.HurtOrHeal]);
                 _logger.LogInformation("Hurt or heal response: {hurtOrHealString}", hurtOrHealString);
                 OpenAiGptMessage hurtOrHealMessage = new(ChatMessageRole.Assistant, hurtOrHealString);
                 LlmResponse? hurtOrHealResponse = hurtOrHealMessage.TryParseFromJson();
