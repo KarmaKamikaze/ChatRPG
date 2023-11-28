@@ -124,10 +124,10 @@ public class CampaignE2ETests : IDisposable
         ReadOnlyCollection<IWebElement>? gameStatsTitles = gameStatsContainer.FindElements(By.TagName("h3"));
 
         // Act
-        IWebElement startScenarioTitle = gameStatsTitles[0];
+        IWebElement actualStartScenarioTitle = gameStatsTitles[0];
 
         // Assert
-        Assert.Equal(expectedTitle, startScenarioTitle.Text);
+        Assert.Equal(expectedTitle, actualStartScenarioTitle.Text);
     }
 
     [Fact]
@@ -155,10 +155,10 @@ public class CampaignE2ETests : IDisposable
         ReadOnlyCollection<IWebElement>? gameStatsTitles = gameStatsContainer.FindElements(By.TagName("h3"));
 
         // Act
-        IWebElement locationTitle = gameStatsTitles[1];
+        IWebElement actualLocationTitle = gameStatsTitles[1];
 
         // Assert
-        Assert.Equal(expectedTitle, locationTitle.Text);
+        Assert.Equal(expectedTitle, actualLocationTitle.Text);
     }
 
     [Fact]
@@ -186,10 +186,10 @@ public class CampaignE2ETests : IDisposable
         ReadOnlyCollection<IWebElement>? gameStatsTitles = gameStatsContainer.FindElements(By.TagName("h3"));
 
         // Act
-        IWebElement charactersTitle = gameStatsTitles[2];
+        IWebElement actualCharactersTitle = gameStatsTitles[2];
 
         // Assert
-        Assert.Equal(expectedTitle, charactersTitle.Text);
+        Assert.Equal(expectedTitle, actualCharactersTitle.Text);
     }
 
     [Fact]
@@ -201,10 +201,10 @@ public class CampaignE2ETests : IDisposable
             _wait.Until(webDriver => webDriver.FindElement(By.ClassName("game-stats")));
 
         // Act
-        IWebElement scenarioTitle = gameStatsContainer.FindElement(By.Id("scenario-title"));
+        IWebElement actualScenarioTitle = gameStatsContainer.FindElement(By.Id("scenario-title"));
 
         // Assert
-        Assert.Equal(expectedScenarioTitle, scenarioTitle.Text);
+        Assert.Equal(expectedScenarioTitle, actualScenarioTitle.Text);
     }
 
     [Fact]
@@ -216,10 +216,40 @@ public class CampaignE2ETests : IDisposable
             _wait.Until(webDriver => webDriver.FindElement(By.ClassName("game-stats")));
 
         // Act
-        IWebElement scenarioDescription = gameStatsContainer.FindElement(By.Id("scenario-description"));
+        IWebElement actualScenarioDescription = gameStatsContainer.FindElement(By.Id("scenario-description"));
 
         // Assert
-        Assert.Equal(expectedScenarioDescription, scenarioDescription.Text);
+        Assert.Equal(expectedScenarioDescription, actualScenarioDescription.Text);
+    }
+
+    [Fact]
+    public void CampaignPage_GameStats_LocationHasCorrectLocationName()
+    {
+        // Arrange
+        string expectedLocationName = "Start location";
+        IWebElement? gameStatsContainer =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("game-stats")));
+
+        // Act
+        IWebElement actualLocationName = gameStatsContainer.FindElement(By.Id("location-name"));
+
+        // Assert
+        Assert.Equal(expectedLocationName, actualLocationName.Text);
+    }
+
+    [Fact]
+    public void CampaignPage_GameStats_LocationHasCorrectLocationDescription()
+    {
+        // Arrange
+        string expectedLocationDescription = "The place where it all began";
+        IWebElement? gameStatsContainer =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("game-stats")));
+
+        // Act
+        IWebElement actualLocationDescription = gameStatsContainer.FindElement(By.Id("location-description"));
+
+        // Assert
+        Assert.Equal(expectedLocationDescription, actualLocationDescription.Text);
     }
 
     [Fact]
