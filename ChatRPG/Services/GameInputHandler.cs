@@ -127,7 +127,7 @@ public class GameInputHandler
         {
             int dmgAmount = rand.Next(PlayerDmgMin, PlayerDmgMax);
             bool playerDied = campaign.Player.AdjustHealth(-dmgAmount);
-            hurtOrHealMessageContent += $"The player hurts themselves for {dmgAmount} damage. The player has {campaign.Player.CurrentHealth } health remaining. Mention these numbers in your response.";
+            hurtOrHealMessageContent += $"The player hurts themselves for {dmgAmount} damage. The player has {campaign.Player.CurrentHealth} health remaining. Mention these numbers in your response.";
             if (playerDied)
             {
                 hurtOrHealMessageContent += "The player has died and their adventure ends.";
