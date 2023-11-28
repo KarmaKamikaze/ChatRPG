@@ -91,20 +91,7 @@ public class GameInputHandler
                 DetermineAndPerformHurtOrHeal(campaign, conversation);
                 return _systemPrompts[SystemPromptType.DoAction];
             case UserPromptType.Attack:
-                string opponentDescriptionString = await _llmClient.GetChatCompletion(conversation, _systemPrompts[SystemPromptType.CombatOpponentDescription]);
-                _logger.LogInformation("Opponent description response: {opponentDescriptionString}", opponentDescriptionString);
-                OpenAiGptMessage opponentDescriptionMessage = new(ChatMessageRole.Assistant, opponentDescriptionString);
-                LlmResponse? opponentDescriptionResponse = opponentDescriptionMessage.TryParseFromJson();
-                LlmResponseCharacter? resChar = opponentDescriptionResponse?.Characters?.FirstOrDefault();
-                if (resChar != null)
-                {
-                    Environment environment = campaign.Environments.Last();
-                    Character character = new(campaign, environment, GameStateManager.ParseToEnum(resChar.Type!, CharacterType.Humanoid),
-                        resChar.Name!, resChar.Description!, false);
-                    campaign.InsertOrUpdateCharacter(character);
-                }
-                string? opponentName = opponentDescriptionResponse?.Opponent?.ToLower();
-                Character? opponent = campaign.Characters.LastOrDefault(c => !c.IsPlayer && c.Name.ToLower().Equals(opponentName));
+                Character? opponent = await DetermineOpponent(campaign, conversation);
                 if (opponent == null)
                 {
                     _logger.LogError("Opponent is unknown!");
@@ -112,38 +99,7 @@ public class GameInputHandler
                 }
                 SystemPromptType systemPromptType = DetermineCombatOutcome();
                 (int playerDmg, int opponentDmg) = ComputeCombatDamage(systemPromptType, opponent.Type);
-                string combatMessageContent = "";
-                if (playerDmg != 0)
-                {
-                    if (opponent.AdjustHealth(-playerDmg))
-                    {
-                        combatMessageContent +=
-                            $" With no health points remaining, {opponent.Name} dies and can no longer participate in the narrative.";
-                    }
-                    combatMessageContent += $"The player hits with their attack, dealing {playerDmg} damage. The opponent has {opponent.CurrentHealth} health remaining.";
-                    _logger.LogInformation("Combat: {Name} hits {Name} for {x} damage. Health: {CurrentHealth}/{MaxHealth}", campaign.Player.Name, opponent.Name, playerDmg, opponent.CurrentHealth, opponent.MaxHealth);
-                }
-                else
-                {
-                    combatMessageContent += $"The player misses with their attack, dealing no damage. The opponent has {opponent.CurrentHealth} health remaining.";
-                }
-
-                if (opponentDmg != 0)
-                {
-                    combatMessageContent += $"The opponent will hit with their next attack, dealing {opponentDmg} damage. The player has {(campaign.Player.CurrentHealth - opponentDmg < 0 ? 0 : campaign.Player.CurrentHealth - opponentDmg)} health remaining.";
-                    if (campaign.Player.AdjustHealth(-opponentDmg))
-                    {
-                        combatMessageContent += "The player has died and their adventure ends.";
-                    }
-                    _logger.LogInformation("Combat: {Name} hits {Name} for {x} damage. Health: {CurrentHealth}/{MaxHealth}", opponent.Name, campaign.Player.Name, opponentDmg, campaign.Player.CurrentHealth, campaign.Player.MaxHealth);
-                }
-                else
-                {
-                    combatMessageContent += $"The opponent will miss their next attack, dealing no damage. The player has {campaign.Player.CurrentHealth} health remaining.";
-                }
-
-                OpenAiGptMessage combatSystemMessage = new(ChatMessageRole.System, combatMessageContent);
-                conversation.Add(combatSystemMessage);
+                ConstructCombatSystemMessage(campaign, playerDmg, opponentDmg, opponent, conversation);
                 return _systemPrompts[systemPromptType];
             default:
                 throw new ArgumentOutOfRangeException();
@@ -180,6 +136,24 @@ public class GameInputHandler
         conversation.Add(hurtOrHealSystemMessage);
     }
 
+    private async Task<Character?> DetermineOpponent(Campaign campaign, IList<OpenAiGptMessage> conversation)
+    {
+        string opponentDescriptionString = await _llmClient.GetChatCompletion(conversation, _systemPrompts[SystemPromptType.CombatOpponentDescription]);
+        _logger.LogInformation("Opponent description response: {opponentDescriptionString}", opponentDescriptionString);
+        OpenAiGptMessage opponentDescriptionMessage = new(ChatMessageRole.Assistant, opponentDescriptionString);
+        LlmResponse? opponentDescriptionResponse = opponentDescriptionMessage.TryParseFromJson();
+        LlmResponseCharacter? resChar = opponentDescriptionResponse?.Characters?.FirstOrDefault();
+        if (resChar != null)
+        {
+            Environment environment = campaign.Environments.Last();
+            Character character = new(campaign, environment, GameStateManager.ParseToEnum(resChar.Type!, CharacterType.Humanoid),
+                resChar.Name!, resChar.Description!, false);
+            campaign.InsertOrUpdateCharacter(character);
+        }
+        string? opponentName = opponentDescriptionResponse?.Opponent?.ToLower();
+        return campaign.Characters.LastOrDefault(c => !c.IsPlayer && c.Name.ToLower().Equals(opponentName));
+    }
+    
     private static SystemPromptType DetermineCombatOutcome()
     {
         Random rand = new Random();
@@ -218,6 +192,43 @@ public class GameInputHandler
         return (playerDmg, opponentDmg);
     }
 
+    private void ConstructCombatSystemMessage(Campaign campaign, int playerDmg, int opponentDmg, Character opponent, IList<OpenAiGptMessage> conversation)
+    {
+        string combatMessageContent = "";
+        if (playerDmg != 0)
+        {
+            if (opponent.AdjustHealth(-playerDmg))
+            {
+                combatMessageContent +=
+                    $" With no health points remaining, {opponent.Name} dies and can no longer participate in the narrative.";
+            }
+            combatMessageContent += $"The player hits with their attack, dealing {playerDmg} damage. The opponent has {opponent.CurrentHealth} health remaining.";
+            _logger.LogInformation("Combat: {Name} hits {Name} for {x} damage. Health: {CurrentHealth}/{MaxHealth}", campaign.Player.Name, opponent.Name, playerDmg, opponent.CurrentHealth, opponent.MaxHealth);
+        }
+        else
+        {
+            combatMessageContent += $"The player misses with their attack, dealing no damage. The opponent has {opponent.CurrentHealth} health remaining.";
+        }
+
+        if (opponentDmg != 0)
+        {
+            combatMessageContent += $"The opponent will hit with their next attack, dealing {opponentDmg} damage. The player has {(campaign.Player.CurrentHealth - opponentDmg < 0 ? 0 : campaign.Player.CurrentHealth - opponentDmg)} health remaining.";
+            if (campaign.Player.AdjustHealth(-opponentDmg))
+            {
+                combatMessageContent += "The player has died and their adventure ends.";
+            }
+            _logger.LogInformation("Combat: {Name} hits {Name} for {x} damage. Health: {CurrentHealth}/{MaxHealth}", opponent.Name, campaign.Player.Name, opponentDmg, campaign.Player.CurrentHealth, campaign.Player.MaxHealth);
+        }
+        else
+        {
+            combatMessageContent += $"The opponent will miss their next attack, dealing no damage. The player has {campaign.Player.CurrentHealth} health remaining.";
+        }
+
+        OpenAiGptMessage combatSystemMessage = new(ChatMessageRole.System, combatMessageContent);
+        conversation.Add(combatSystemMessage);
+    }
+    
+    
     private async Task GetResponseAndUpdateState(Campaign campaign, IList<OpenAiGptMessage> conversation, string systemPrompt)
     {
         if (conversation.Any(m => m.Role.Equals(ChatMessageRole.User)))
