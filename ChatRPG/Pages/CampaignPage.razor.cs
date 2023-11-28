@@ -225,7 +225,6 @@ public partial class CampaignPage
 
     private void OnPromptTypeChange(UserPromptType type)
     {
-        // TODO: Implement prompt change here!
         switch (type)
         {
             case UserPromptType.Do:

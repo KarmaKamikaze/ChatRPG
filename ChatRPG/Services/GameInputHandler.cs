@@ -46,6 +46,8 @@ public class GameInputHandler
         _systemPrompts.Add(SystemPromptType.CombatMissMiss, sysPromptSec.GetValue("CombatMissMiss", "")!);
         _systemPrompts.Add(SystemPromptType.CombatOpponentDescription, sysPromptSec.GetValue("CombatOpponentDescription", "")!);
         _systemPrompts.Add(SystemPromptType.HurtOrHeal, sysPromptSec.GetValue("DoActionHurtOrHeal", "")!);
+        _systemPrompts.Add(SystemPromptType.DoAction, sysPromptSec.GetValue("DoAction", "")!);
+        _systemPrompts.Add(SystemPromptType.SayAction, sysPromptSec.GetValue("SayAction", "")!);
     }
 
     public event EventHandler<ChatCompletionReceivedEventArgs>? ChatCompletionReceived;
@@ -85,9 +87,11 @@ public class GameInputHandler
         switch (userPromptType)
         {
             case UserPromptType.Say:
+                systemPromptType = SystemPromptType.SayAction;
                 break;
             case UserPromptType.Do:
-                string hurtOrHealString = await _llmClient.GetChatCompletion(conversation, _systemPrompts[SystemPromptType.HurtOrHeal]);
+                OpenAiGptMessage lastUserMessage = conversation.Last(m => m.Role.Equals(ChatMessageRole.User));
+                string hurtOrHealString = await _llmClient.GetChatCompletion(new List<OpenAiGptMessage>(){lastUserMessage}, _systemPrompts[SystemPromptType.HurtOrHeal]);
                 _logger.LogInformation("Hurt or heal response: {hurtOrHealString}", hurtOrHealString);
                 OpenAiGptMessage hurtOrHealMessage = new(ChatMessageRole.Assistant, hurtOrHealString);
                 LlmResponse? hurtOrHealResponse = hurtOrHealMessage.TryParseFromJson();
@@ -112,7 +116,7 @@ public class GameInputHandler
                 }
                 OpenAiGptMessage hurtOrHealSystemMessage = new(ChatMessageRole.System, hurtOrHealMessageContent);
                 conversation.Add(hurtOrHealSystemMessage);
-
+                systemPromptType = SystemPromptType.DoAction;
                 break;
             case UserPromptType.Attack:
                 string opponentDescriptionString = await _llmClient.GetChatCompletion(conversation, _systemPrompts[SystemPromptType.CombatOpponentDescription]);
