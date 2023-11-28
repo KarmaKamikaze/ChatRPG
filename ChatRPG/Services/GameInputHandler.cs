@@ -78,11 +78,11 @@ public class GameInputHandler
         await GetResponseAndUpdateState(campaign, conversation, _systemPrompts[SystemPromptType.Initial]);
         _logger.LogInformation("Finished processing prompt.");
     }
-    
+
     private async Task<string> GetRelevantSystemPrompt(Campaign campaign, IList<OpenAiGptMessage> conversation)
     {
         UserPromptType userPromptType = conversation.Last(m => m.Role.Equals(ChatMessageRole.User)).UserPromptType;
-        
+
         switch (userPromptType)
         {
             case UserPromptType.Say:
