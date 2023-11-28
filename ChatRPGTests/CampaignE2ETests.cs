@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 
@@ -84,7 +85,7 @@ public class CampaignE2ETests : IDisposable
     [Fact]
     public void CampaignPage_ClickingLogoutButton_ShouldRedirectToUnauthorizedIndexPageWithSlogan()
     {
-        // Arranged
+        // Arrange
         string expectedSlogan = "Immerse yourself in the ultimate AI-powered adventure!";
 
         // Act
@@ -99,9 +100,102 @@ public class CampaignE2ETests : IDisposable
     }
 
     [Fact]
+    public void CampaignPage_GameStats_StartScenarioTitleIsDisplayed()
+    {
+        // Arrange
+        IWebElement? gameStatsContainer =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("game-stats")));
+        ReadOnlyCollection<IWebElement>? gameStatsTitles = gameStatsContainer.FindElements(By.TagName("h3"));
+
+        // Act
+        IWebElement startScenarioTitle = gameStatsTitles[0];
+
+        // Assert
+        Assert.True(startScenarioTitle.Displayed);
+    }
+
+    [Fact]
+    public void CampaignPage_GameStats_StartScenarioTitleDisplaysCorrectTitle()
+    {
+        // Arrange
+        string expectedTitle = "Start Scenario";
+        IWebElement? gameStatsContainer =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("game-stats")));
+        ReadOnlyCollection<IWebElement>? gameStatsTitles = gameStatsContainer.FindElements(By.TagName("h3"));
+
+        // Act
+        IWebElement startScenarioTitle = gameStatsTitles[0];
+
+        // Assert
+        Assert.Equal(expectedTitle, startScenarioTitle.Text);
+    }
+
+    [Fact]
+    public void CampaignPage_GameStats_LocationTitleIsDisplayed()
+    {
+        // Arrange
+        IWebElement? gameStatsContainer =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("game-stats")));
+        ReadOnlyCollection<IWebElement>? gameStatsTitles = gameStatsContainer.FindElements(By.TagName("h3"));
+
+        // Act
+        IWebElement locationTitle = gameStatsTitles[1];
+
+        // Assert
+        Assert.True(locationTitle.Displayed);
+    }
+
+    [Fact]
+    public void CampaignPage_GameStats_LocationTitleDisplaysCorrectTitle()
+    {
+        // Arrange
+        string expectedTitle = "Location";
+        IWebElement? gameStatsContainer =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("game-stats")));
+        ReadOnlyCollection<IWebElement>? gameStatsTitles = gameStatsContainer.FindElements(By.TagName("h3"));
+
+        // Act
+        IWebElement locationTitle = gameStatsTitles[1];
+
+        // Assert
+        Assert.Equal(expectedTitle, locationTitle.Text);
+    }
+
+    [Fact]
+    public void CampaignPage_GameStats_CharactersTitleIsDisplayed()
+    {
+        // Arrange
+        IWebElement? gameStatsContainer =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("game-stats")));
+        ReadOnlyCollection<IWebElement>? gameStatsTitles = gameStatsContainer.FindElements(By.TagName("h3"));
+
+        // Act
+        IWebElement charactersTitle = gameStatsTitles[2];
+
+        // Assert
+        Assert.True(charactersTitle.Displayed);
+    }
+
+    [Fact]
+    public void CampaignPage_GameStats_CharactersTitleDisplaysCorrectTitle()
+    {
+        // Arrange
+        string expectedTitle = "Characters";
+        IWebElement? gameStatsContainer =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("game-stats")));
+        ReadOnlyCollection<IWebElement>? gameStatsTitles = gameStatsContainer.FindElements(By.TagName("h3"));
+
+        // Act
+        IWebElement charactersTitle = gameStatsTitles[2];
+
+        // Assert
+        Assert.Equal(expectedTitle, charactersTitle.Text);
+    }
+
+    [Fact]
     public void CampaignPage_Conversation_ContainsCorrectCampaignTitle()
     {
-        // Arranged
+        // Arrange
         string expectedDashboardTitle = "Test Title";
 
         // Act

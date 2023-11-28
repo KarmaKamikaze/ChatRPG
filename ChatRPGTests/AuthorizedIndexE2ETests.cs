@@ -84,7 +84,7 @@ public class AuthorizedIndexE2ETests : IDisposable
     [Fact]
     public void AuthorizedIndexPage_ClickingLogoutButton_ShouldRedirectToUnauthorizedIndexPageWithSlogan()
     {
-        // Arranged
+        // Arrange
         string expectedSlogan = "Immerse yourself in the ultimate AI-powered adventure!";
 
         // Act
@@ -99,7 +99,7 @@ public class AuthorizedIndexE2ETests : IDisposable
     [Fact]
     public void AuthorizedIndexPage_Dashboard_ContainsCorrectDashboardTitle()
     {
-        // Arranged
+        // Arrange
         string expectedDashboardTitle = "Dashboard";
 
         // Act
@@ -113,7 +113,7 @@ public class AuthorizedIndexE2ETests : IDisposable
     [Fact]
     public void AuthorizedIndexPage_YourCampaigns_ContainsSameAmountOfCampaignsAsDisplayed()
     {
-        // Arranged
+        // Arrange
         IWebElement? campaignsContainer = _wait.Until(webDriver => webDriver.FindElement(By.Id("your-campaigns")));
         ReadOnlyCollection<IWebElement>? campaigns = campaignsContainer.FindElements(By.ClassName("card"));
         string expectedAmountOfCampaigns = campaigns.Count.ToString();
