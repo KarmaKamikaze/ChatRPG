@@ -62,7 +62,7 @@ public partial class OpenAiGptMessage
             NarrativePart = match.Groups[1].ToString();
         }
     }
-    
+
     [GeneratedRegex("^\\s*{\\s*\"narrative\":\\s*\"([^\"]*)", RegexOptions.IgnoreCase)]
     private static partial Regex NarrativeRegex();
 
