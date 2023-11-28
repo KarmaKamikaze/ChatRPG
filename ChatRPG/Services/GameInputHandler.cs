@@ -126,8 +126,9 @@ public class GameInputHandler
         if (hurtOrHealResponse?.Hurt == true)
         {
             int dmgAmount = rand.Next(PlayerDmgMin, PlayerDmgMax);
-            hurtOrHealMessageContent += $"The player hurts themselves for {dmgAmount} damage. The player has {(campaign.Player.CurrentHealth - dmgAmount < 0 ? 0 : campaign.Player.CurrentHealth - dmgAmount)} health remaining. Mention these numbers in your response.";
-            if (campaign.Player.AdjustHealth(-dmgAmount))
+            bool playerDied = campaign.Player.AdjustHealth(-dmgAmount);
+            hurtOrHealMessageContent += $"The player hurts themselves for {dmgAmount} damage. The player has {campaign.Player.CurrentHealth } health remaining. Mention these numbers in your response.";
+            if (playerDied)
             {
                 hurtOrHealMessageContent += "The player has died and their adventure ends.";
             }
@@ -212,8 +213,9 @@ public class GameInputHandler
 
         if (opponentDmg != 0)
         {
-            combatMessageContent += $"The opponent will hit with their next attack, dealing {opponentDmg} damage. The player has {(campaign.Player.CurrentHealth - opponentDmg < 0 ? 0 : campaign.Player.CurrentHealth - opponentDmg)} health remaining.";
-            if (campaign.Player.AdjustHealth(-opponentDmg))
+            bool playerDied = campaign.Player.AdjustHealth(-opponentDmg);
+            combatMessageContent += $"The opponent will hit with their next attack, dealing {opponentDmg} damage. The player has {campaign.Player.CurrentHealth} health remaining.";
+            if (playerDied)
             {
                 combatMessageContent += "The player has died and their adventure ends.";
             }
