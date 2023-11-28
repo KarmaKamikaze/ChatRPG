@@ -77,9 +77,9 @@ public class GameInputHandler
         {
             return _systemPrompts[SystemPromptType.Default];
         }
-        
+
         UserPromptType userPromptType = conversation.Last(m => m.Role.Equals(ChatMessageRole.User)).UserPromptType;
-        
+
         SystemPromptType systemPromptType = SystemPromptType.Default;
 
         switch (userPromptType)
@@ -112,7 +112,7 @@ public class GameInputHandler
                 }
                 OpenAiGptMessage hurtOrHealSystemMessage = new(ChatMessageRole.System, hurtOrHealMessageContent);
                 conversation.Add(hurtOrHealSystemMessage);
-                
+
                 break;
             case UserPromptType.Attack:
                 string opponentDescriptionString = await _llmClient.GetChatCompletion(conversation, _systemPrompts[SystemPromptType.CombatOpponentDescription]);
@@ -171,7 +171,7 @@ public class GameInputHandler
                 conversation.Add(combatSystemMessage);
                 break;
         }
-        
+
         return _systemPrompts[systemPromptType];
     }
 

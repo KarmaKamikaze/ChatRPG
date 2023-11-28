@@ -26,7 +26,7 @@ public partial class OpenAiGptMessage
     {
         UserPromptType = userPromptType;
     }
-    
+
     public ChatMessageRole Role { get; }
     public string Content { get; private set; }
     public string NarrativePart { get; private set; }
