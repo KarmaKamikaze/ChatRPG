@@ -193,6 +193,36 @@ public class CampaignE2ETests : IDisposable
     }
 
     [Fact]
+    public void CampaignPage_GameStats_StartScenarioHasCorrectScenarioTitle()
+    {
+        // Arrange
+        string expectedScenarioTitle = "Test Title";
+        IWebElement? gameStatsContainer =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("game-stats")));
+
+        // Act
+        IWebElement scenarioTitle = gameStatsContainer.FindElement(By.Id("scenario-title"));
+
+        // Assert
+        Assert.Equal(expectedScenarioTitle, scenarioTitle.Text);
+    }
+
+    [Fact]
+    public void CampaignPage_GameStats_StartScenarioHasCorrectScenarioDescription()
+    {
+        // Arrange
+        string expectedScenarioDescription = "Test Scenario";
+        IWebElement? gameStatsContainer =
+            _wait.Until(webDriver => webDriver.FindElement(By.ClassName("game-stats")));
+
+        // Act
+        IWebElement scenarioDescription = gameStatsContainer.FindElement(By.Id("scenario-description"));
+
+        // Assert
+        Assert.Equal(expectedScenarioDescription, scenarioDescription.Text);
+    }
+
+    [Fact]
     public void CampaignPage_Conversation_ContainsCorrectCampaignTitle()
     {
         // Arrange
