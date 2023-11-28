@@ -179,7 +179,7 @@ public class GameInputHandler
         OpenAiGptMessage hurtOrHealSystemMessage = new(ChatMessageRole.System, hurtOrHealMessageContent);
         conversation.Add(hurtOrHealSystemMessage);
     }
-    
+
     private static SystemPromptType DetermineCombatOutcome()
     {
         Random rand = new Random();
