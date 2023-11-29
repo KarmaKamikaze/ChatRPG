@@ -11,7 +11,8 @@ public class ChatRPGFixture : IAsyncLifetime
         ProcessStartInfo startInfo = new ProcessStartInfo
         {
             FileName = "dotnet",
-            Arguments = "run --project ../../../../ChatRPG/ChatRPG.csproj",
+            Arguments = "run --project ../../../../ChatRPG/ChatRPG.csproj " +
+                        "--launch-profile \"http mocked\"",
             RedirectStandardOutput = false,
             RedirectStandardError = false,
             UseShellExecute = false,

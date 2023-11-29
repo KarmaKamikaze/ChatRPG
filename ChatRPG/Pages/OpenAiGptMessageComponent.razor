@@ -3,7 +3,7 @@
 @using static OpenAI_API.Chat.ChatMessageRole
 @inherits ComponentBase
 
-<div class="message-container message-container-@($"{MessagePrefix.ToLower()}")">
+<div class="message-container message-container-@($"{MessagePrefix.ToLower()}")" id="conversation-message">
     <p class="message message-@($"{MessagePrefix.ToLower()}")"><span class="fw-bold">@(MessagePrefix):</span> @(Message.Role.Equals(Assistant) ? Message.NarrativePart : Message.Content)</p>
 </div>
 

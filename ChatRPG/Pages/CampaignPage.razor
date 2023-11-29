@@ -15,9 +15,9 @@
                     <h3 class="text-center mb-3">Start Scenario</h3>
                     <div class="card card-dim mb-2 text-black text-center scrollbar" style="max-height: 20vh; overflow-y: auto">
                         <div class="card-body col-12">
-                            <h5 class="card-title">@_campaign?.Title</h5>
+                            <h5 class="card-title" id="scenario-title">@_campaign?.Title</h5>
                             <hr/>
-                            <p class="card-text text-start">@_campaign?.StartScenario</p>
+                            <p class="card-text text-start" id="scenario-description">@_campaign?.StartScenario</p>
                         </div>
                     </div>
                 </div>
@@ -25,9 +25,9 @@
                     <h3 class="text-center mb-3">Location</h3>
                     <div class="card card-dim mb-2 text-black text-center scrollbar" style="max-height: 20vh; overflow-y: auto">
                         <div class="card-body col-12">
-                            <h5 class="card-title">@_currentLocation?.Name</h5>
+                            <h5 class="card-title" id="location-name">@_currentLocation?.Name</h5>
                             <hr/>
-                            <p class="card-text text-start">@_currentLocation?.Description</p>
+                            <p class="card-text text-start" id="location-description">@_currentLocation?.Description</p>
                         </div>
                     </div>
                 </div>
@@ -38,9 +38,9 @@
                         {
                             <div class="card card-dim mb-2 text-black text-center">
                                 <div class="card-body col-12">
-                                    <h5 class="card-title">@character.Name</h5>
+                                    <h5 class="card-title" id="character-list-name">@character.Name</h5>
                                     <hr/>
-                                    <p class="card-text text-start">@character.Description</p>
+                                    <p class="card-text text-start" id="character-list-description">@character.Description</p>
                                 </div>
                             </div>
                         }
@@ -74,9 +74,9 @@
                     <RadzenSelectBar Size="ButtonSize.Small" @bind-Value=@_activeUserPromptType TValue="UserPromptType"
                                      Change="OnPromptTypeChange" class="rz-shadow-6 prompt-selector">
                         <Items>
-                            <RadzenSelectBarItem Text="Do" Value="UserPromptType.Do" class="rz-ripple"/>
-                            <RadzenSelectBarItem Text="Say" Value="UserPromptType.Say" class="rz-ripple"/>
-                            <RadzenSelectBarItem Text="Attack" Value="UserPromptType.Attack" class="rz-ripple"/>
+                            <RadzenSelectBarItem Text="Do" Value="UserPromptType.Do" class="rz-ripple" id="do-prompt"/>
+                            <RadzenSelectBarItem Text="Say" Value="UserPromptType.Say" class="rz-ripple" id="say-prompt"/>
+                            <RadzenSelectBarItem Text="Attack" Value="UserPromptType.Attack" class="rz-ripple" id="attack-prompt"/>
                         </Items>
                     </RadzenSelectBar>
                 </div>
@@ -85,7 +85,7 @@
                     <input type="text" style="resize:vertical;" class="form-control user-prompt custom-text-field"
                            @bind="_userInput" placeholder="@_userInputPlaceholder" @onkeyup="@EnterKeyHandler" disabled="@(_isWaitingForResponse || _campaign?.Player.CurrentHealth <= 0)"/>
                     <div class="input-group-append">
-                        <button class="btn btn-primary ml-2" type="button" @onclick="SendPrompt" disabled="@(_isWaitingForResponse || _campaign?.Player.CurrentHealth <= 0)">
+                        <button class="btn btn-primary ml-2" id="input-sent-button" type="button" @onclick="SendPrompt" disabled="@(_isWaitingForResponse || _campaign?.Player.CurrentHealth <= 0)">
                             Send
                         </button>
                     </div>
@@ -108,7 +108,7 @@
                         <div class="card-body col-12">
                             <h5 class="card-title">Description</h5>
                             <hr/>
-                            <p class="card-text text-start">@_mainCharacter?.Description</p>
+                            <p class="card-text text-start" id="main-character-description">@_mainCharacter?.Description</p>
                         </div>
                     </div>
                 </div>

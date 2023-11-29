@@ -84,7 +84,7 @@ public class AuthorizedIndexE2ETests : IDisposable
     [Fact]
     public void AuthorizedIndexPage_ClickingLogoutButton_ShouldRedirectToUnauthorizedIndexPageWithSlogan()
     {
-        // Arranged
+        // Arrange
         string expectedSlogan = "Immerse yourself in the ultimate AI-powered adventure!";
 
         // Act
@@ -99,7 +99,7 @@ public class AuthorizedIndexE2ETests : IDisposable
     [Fact]
     public void AuthorizedIndexPage_Dashboard_ContainsCorrectDashboardTitle()
     {
-        // Arranged
+        // Arrange
         string expectedDashboardTitle = "Dashboard";
 
         // Act
@@ -113,7 +113,7 @@ public class AuthorizedIndexE2ETests : IDisposable
     [Fact]
     public void AuthorizedIndexPage_YourCampaigns_ContainsSameAmountOfCampaignsAsDisplayed()
     {
-        // Arranged
+        // Arrange
         IWebElement? campaignsContainer = _wait.Until(webDriver => webDriver.FindElement(By.Id("your-campaigns")));
         ReadOnlyCollection<IWebElement>? campaigns = campaignsContainer.FindElements(By.ClassName("card"));
         string expectedAmountOfCampaigns = campaigns.Count.ToString();
@@ -446,7 +446,8 @@ public class AuthorizedIndexE2ETests : IDisposable
         E2ETestUtility.CreateTestCampaign(_driver, _wait);
 
         // Act
-        IWebElement? firstRemoveCampaignButton = _wait.Until(webDriver => webDriver.FindElements(By.ClassName("delete-campaign-button")))[0];
+        IWebElement? firstRemoveCampaignButton =
+            _wait.Until(webDriver => webDriver.FindElements(By.ClassName("delete-campaign-button")))[0];
 
         // Assert
         Assert.True(firstRemoveCampaignButton.Displayed);
@@ -506,6 +507,7 @@ public class AuthorizedIndexE2ETests : IDisposable
     {
         // Arrange
         E2ETestUtility.CreateTestCampaign(_driver, _wait);
+        Thread.Sleep(500);
         _wait.Until(webDriver => webDriver.FindElements(By.ClassName("delete-campaign-button")))[0].Click();
         Thread.Sleep(200); // wait for modal to load
         string expectedCampaignTitleString = "Campaign title: Test Title";
@@ -523,6 +525,7 @@ public class AuthorizedIndexE2ETests : IDisposable
     {
         // Arrange
         E2ETestUtility.CreateTestCampaign(_driver, _wait);
+        Thread.Sleep(500);
         _wait.Until(webDriver => webDriver.FindElements(By.ClassName("delete-campaign-button")))[0].Click();
         Thread.Sleep(200); // wait for modal to load
         string expectedCharacterName = "Character name: Test Name";
@@ -536,10 +539,12 @@ public class AuthorizedIndexE2ETests : IDisposable
     }
 
     [Fact]
-    public void AuthorizedIndexPage_DeleteCampaignModal_CampaignIsDeletedAndRemovedFromCampaignListWhenModalIsConfirmed()
+    public void
+        AuthorizedIndexPage_DeleteCampaignModal_CampaignIsDeletedAndRemovedFromCampaignListWhenModalIsConfirmed()
     {
         // Arrange
         E2ETestUtility.CreateTestCampaign(_driver, _wait);
+        Thread.Sleep(500);
         IWebElement? campaignsCounterBefore = _wait.Until(webDriver => webDriver.FindElement(By.Id("campaigns-count")));
         int expectedAmountOfCampaigns = int.Parse(Regex.Match(campaignsCounterBefore.Text, @"\d+").Value) - 1;
         _wait.Until(webDriver => webDriver.FindElements(By.ClassName("delete-campaign-button")))[0].Click();

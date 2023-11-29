@@ -53,7 +53,7 @@ public static class E2ETestUtility
         wait.Until(webDriver => webDriver.FindElement(By.Id("inputCharacterDescription"))).SendKeys("Test Description");
         wait.Until(webDriver => webDriver.FindElement(By.Id("inputCustomStartScenario"))).SendKeys("Test Scenario");
         wait.Until(webDriver => webDriver.FindElement(By.Id("create-campaign-button"))).Click();
-        Thread.Sleep(200); // Wait for page to load
+        Thread.Sleep(300); // Wait for page to load
         if (!goToCampaign)
         {
             driver.Navigate().GoToUrl("http://localhost:5111/");
@@ -67,7 +67,8 @@ public static class E2ETestUtility
         Thread.Sleep(500); // Wait for page to load
         IWebElement? yourCampaignsContainer =
             wait.Until(webDriver => webDriver.FindElement(By.Id("your-campaigns")));
-        ReadOnlyCollection<IWebElement>? removeButtons = yourCampaignsContainer.FindElements(By.ClassName("delete-campaign-button"));
+        ReadOnlyCollection<IWebElement>? removeButtons =
+            yourCampaignsContainer.FindElements(By.ClassName("delete-campaign-button"));
         removeButtons[0].Click(); // Remove latest campaign
         wait.Until(webDriver => webDriver.FindElement(By.Id("modal-confirm"))).Click();
         Thread.Sleep(200);

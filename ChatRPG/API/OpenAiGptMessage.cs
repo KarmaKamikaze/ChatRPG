@@ -8,7 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace ChatRPG.API;
 
-public partial class OpenAiGptMessage
+public class OpenAiGptMessage
 {
     public OpenAiGptMessage(ChatMessageRole role, string content)
     {
@@ -31,6 +31,8 @@ public partial class OpenAiGptMessage
     public string Content { get; private set; }
     public string NarrativePart { get; private set; }
     public readonly UserPromptType UserPromptType = UserPromptType.Do;
+    private static readonly Regex NarrativeRegex =
+        new(pattern: "^\\s*{\\s*\"narrative\":\\s*\"([^\"]*)", RegexOptions.IgnoreCase);
 
     public LlmResponse? TryParseFromJson()
     {
@@ -56,15 +58,12 @@ public partial class OpenAiGptMessage
 
     private void UpdateNarrativePart()
     {
-        Match match = NarrativeRegex().Match(Content);
+        Match match = NarrativeRegex.Match(Content);
         if (match is { Success: true, Groups.Count: 2 })
         {
             NarrativePart = match.Groups[1].ToString();
         }
     }
-
-    [GeneratedRegex("^\\s*{\\s*\"narrative\":\\s*\"([^\"]*)", RegexOptions.IgnoreCase)]
-    private static partial Regex NarrativeRegex();
 
     public static OpenAiGptMessage FromMessage(Message message)
     {
