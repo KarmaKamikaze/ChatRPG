@@ -60,11 +60,9 @@ cd ChatRPG/ChatRPG
 ```
 Add your ChatGPT API key to the configuration file:
 ```json
-[...]
 "ApiKeys": {
 "OpenAI": "INSERT API KEY HERE"
 },
-[...]
 ```
 
 3. Build the project
