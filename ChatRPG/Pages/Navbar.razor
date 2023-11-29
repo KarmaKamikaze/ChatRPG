@@ -1,0 +1,36 @@
+@namespace ChatRPG.Pages
+@inherits ComponentBase
+@inject NavigationManager NavMan
+
+<header>
+    <nav class="navbar navbar-dark custom-gray-container border-bottom box-shadow">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <div class="logo-name-group">
+                    <img class="site-icon" src="favicon.png" asp-append-version="true"
+                         alt="Adventure game logo">
+                    <div class="logo-name-group-text">
+                        ChatRPG
+                    </div>
+                </div>
+            </a>
+            <div class="d-sm-inline-flex flex-sm-row-reverse">
+                <div class="hstack">
+                    <button @onclick='() => NavMan.NavigateTo("Manage", forceLoad: true)' class="btn btn-in" id="manage-button">
+                        <span class="btn-in-span"></span>@Username
+                    </button>
+                    <button @onclick='() => NavMan.NavigateTo("Logout", forceLoad: true)' class="btn btn-in" id="logout-button">
+                        <span class="btn-in-span"></span>Log Out
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public string Username { get; set; } = null!;
+
+}

@@ -1,0 +1,32 @@
+﻿@page "/"
+
+<AuthorizeView>
+    <NotAuthorized>
+        <PageTitle>ChatRPG</PageTitle>
+
+        <div class="container-front">
+            <h1 class="title text-readable title-front">
+                @_titleDisplayText<span class="cursor" style="visibility: @(_cursorVisible ? "visible" : "hidden")">|</span>
+            </h1>
+            <p class="slogan-front text-readable">Immerse yourself in the ultimate AI-powered adventure!</p>
+            <LoginDisplay/>
+        </div>
+    </NotAuthorized>
+    <Authorized>
+        <PageTitle>Dashboard - ChatRPG</PageTitle>
+
+        <div class="dashboard-wrapper">
+            <Navbar Username="@context.User.Identity!.Name"/>
+
+            <div class="dashboard-container">
+                <UserCampaignOverview/>
+            </div>
+
+            <footer class="footer pl-3 text-muted footer-formatting fixed-bottom custom-gray-container">
+                <div class="container">
+                    &copy; 2023 - ChatRPG
+                </div>
+            </footer>
+        </div>
+    </Authorized>
+</AuthorizeView>

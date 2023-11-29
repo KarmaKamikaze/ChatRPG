@@ -1,0 +1,22 @@
+﻿@inherits LayoutComponentBase
+
+<PageTitle>ChatRPG</PageTitle>
+
+<AuthorizeView>
+    <NotAuthorized>
+        <div class="page main-container">
+            <main>
+                <article class="px-4">
+                    @Body
+                </article>
+            </main>
+        </div>
+    </NotAuthorized>
+    <Authorized>
+        <div class="page custom-gray-bg">
+            <main>
+                @Body
+            </main>
+        </div>
+    </Authorized>
+</AuthorizeView>

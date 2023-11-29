@@ -1,0 +1,22 @@
+﻿@using ChatRPG.Data.Models
+@using Microsoft.AspNetCore.Identity
+@inject NavigationManager NavMan
+
+<AuthorizeView>
+    <Authorized>
+        <a href="Identity/Account/Manage">Hello, @context.User.Identity?.Name!</a>
+        <button @onclick='() => NavMan.NavigateTo("Logout", forceLoad: true)' class="btn btn-in">
+            <span class="btn-in-span"></span>Log Out
+        </button>
+    </Authorized>
+    <NotAuthorized>
+        <div class="btn-group">
+            <button @onclick='() => NavMan.NavigateTo("Register", forceLoad: true)' id="register-button" class="btn btn-front">
+                <span class="btn-front-span"></span>Register
+            </button>
+            <button @onclick='() => NavMan.NavigateTo("Login", forceLoad: true)' id="login-button" class="btn btn-front">
+                <span class="btn-front-span"></span>Log in
+            </button>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
