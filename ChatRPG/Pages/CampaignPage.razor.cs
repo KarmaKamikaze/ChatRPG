@@ -29,21 +29,14 @@ public partial class CampaignPage
     private List<Character> _npcList = new();
     private Environment? _currentLocation;
     private Character? _mainCharacter;
-    private PromptType _activePromptType = PromptType.Do;
-    private string _userInputPlaceholder = InputPlaceholder[PromptType.Do];
+    private UserPromptType _activeUserPromptType = UserPromptType.Do;
+    private string _userInputPlaceholder = InputPlaceholder[UserPromptType.Do];
 
-    private enum PromptType
+    private static readonly Dictionary<UserPromptType, string> InputPlaceholder = new()
     {
-        Do,
-        Say,
-        Attack
-    }
-
-    private static readonly Dictionary<PromptType, string> InputPlaceholder = new()
-    {
-        { PromptType.Do, "What do you do?" },
-        { PromptType.Say, "What do you say?" },
-        { PromptType.Attack, "How do you attack?" }
+        { UserPromptType.Do, "What do you do?" },
+        { UserPromptType.Say, "What do you say?" },
+        { UserPromptType.Attack, "How do you attack?" }
     };
 
     private string SpinnerContainerStyle => _isWaitingForResponse
@@ -80,10 +73,6 @@ public partial class CampaignPage
             _npcList.Reverse();
             _currentLocation = _campaign.Environments.LastOrDefault();
             _mainCharacter = _campaign.Player;
-            if (_campaign.CombatMode)
-            {
-                _activePromptType = PromptType.Attack;
-            }
 
             _conversation = _campaign.Messages.OrderBy(m => m.Timestamp)
                 .Select(OpenAiGptMessage.FromMessage)
@@ -126,7 +115,7 @@ public partial class CampaignPage
 
         OpenAiGptMessage message = new(ChatMessageRole.System, content);
         _conversation.Add(message);
-        GameInputHandler?.HandleUserPrompt(_campaign, _conversation);
+        GameInputHandler?.HandleInitialPrompt(_campaign, _conversation);
         UpdateStatsUi();
     }
 
@@ -153,16 +142,11 @@ public partial class CampaignPage
         }
 
         _isWaitingForResponse = true;
-        OpenAiGptMessage userInput = new(ChatMessageRole.User, _userInput);
+        OpenAiGptMessage userInput = new(ChatMessageRole.User, _userInput, _activeUserPromptType);
         _conversation.Add(userInput);
         _latestPlayerMessage = userInput;
         _userInput = string.Empty;
         await ScrollToElement(BottomId);
-        if (_activePromptType == PromptType.Attack)
-        {
-            _campaign.CombatMode = true;
-        }
-
         await GameInputHandler!.HandleUserPrompt(_campaign, _conversation);
         _conversation.RemoveAll(m => m.Role.Equals(ChatMessageRole.System));
         UpdateStatsUi();
@@ -229,22 +213,21 @@ public partial class CampaignPage
         Task.Run(() => _fileUtil.UpdateSaveFileAsync(messagePair));
     }
 
-    private void OnPromptTypeChange(PromptType type)
+    private void OnPromptTypeChange(UserPromptType type)
     {
-        // TODO: Implement prompt change here!
         switch (type)
         {
-            case PromptType.Do:
-                _userInputPlaceholder = InputPlaceholder[PromptType.Do];
+            case UserPromptType.Do:
+                _userInputPlaceholder = InputPlaceholder[UserPromptType.Do];
                 break;
-            case PromptType.Say:
-                _userInputPlaceholder = InputPlaceholder[PromptType.Say];
+            case UserPromptType.Say:
+                _userInputPlaceholder = InputPlaceholder[UserPromptType.Say];
                 break;
-            case PromptType.Attack:
-                _userInputPlaceholder = InputPlaceholder[PromptType.Attack];
+            case UserPromptType.Attack:
+                _userInputPlaceholder = InputPlaceholder[UserPromptType.Attack];
                 break;
             default:
-                _userInputPlaceholder = InputPlaceholder[PromptType.Do];
+                _userInputPlaceholder = InputPlaceholder[UserPromptType.Do];
                 break;
         }
 

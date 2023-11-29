@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using ChatRPG.API.Response;
 using ChatRPG.Data.Models;
+using ChatRPG.Pages;
 using Microsoft.IdentityModel.Tokens;
 
 namespace ChatRPG.API;
@@ -21,9 +22,15 @@ public class OpenAiGptMessage
         }
     }
 
+    public OpenAiGptMessage(ChatMessageRole role, string content, UserPromptType userPromptType) : this(role, content)
+    {
+        UserPromptType = userPromptType;
+    }
+
     public ChatMessageRole Role { get; }
     public string Content { get; private set; }
     public string NarrativePart { get; private set; }
+    public readonly UserPromptType UserPromptType = UserPromptType.Do;
     private static readonly Regex NarrativeRegex =
         new(pattern: "^\\s*{\\s*\"narrative\":\\s*\"([^\"]*)", RegexOptions.IgnoreCase);
 

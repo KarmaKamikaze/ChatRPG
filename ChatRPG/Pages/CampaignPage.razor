@@ -71,12 +71,12 @@
 
             <div class="mt-4">
                 <div class="col-1" style="margin-left: 10px;">
-                    <RadzenSelectBar Size="ButtonSize.Small" @bind-Value=@_activePromptType TValue="PromptType"
+                    <RadzenSelectBar Size="ButtonSize.Small" @bind-Value=@_activeUserPromptType TValue="UserPromptType"
                                      Change="OnPromptTypeChange" class="rz-shadow-6 prompt-selector">
                         <Items>
-                            <RadzenSelectBarItem Text="Do" Value="PromptType.Do" class="rz-ripple" id="do-prompt"/>
-                            <RadzenSelectBarItem Text="Say" Value="PromptType.Say" class="rz-ripple" id="say-prompt"/>
-                            <RadzenSelectBarItem Text="Attack" Value="PromptType.Attack" class="rz-ripple" id="attack-prompt"/>
+                            <RadzenSelectBarItem Text="Do" Value="UserPromptType.Do" class="rz-ripple" id="do-prompt"/>
+                            <RadzenSelectBarItem Text="Say" Value="UserPromptType.Say" class="rz-ripple" id="say-prompt"/>
+                            <RadzenSelectBarItem Text="Attack" Value="UserPromptType.Attack" class="rz-ripple" id="attack-prompt"/>
                         </Items>
                     </RadzenSelectBar>
                 </div>
