@@ -58,12 +58,6 @@ public class GameStateManager
                     _logger.LogInformation("Created character: \"{Name}\"", character.Name);
                 }
             }
-
-            if (response.IsInCombat != null)
-            {
-                campaign.CombatMode = (bool)response.IsInCombat;
-                _logger.LogInformation("Combatmode: {CombatMode}", campaign.CombatMode);
-            }
         }
         catch (Exception e)
         {
