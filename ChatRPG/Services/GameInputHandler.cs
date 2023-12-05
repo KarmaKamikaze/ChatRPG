@@ -133,8 +133,12 @@ public class GameInputHandler
                 hurtOrHealMessageContent += "The player has died and their adventure ends.";
             }
         }
-        OpenAiGptMessage hurtOrHealSystemMessage = new(ChatMessageRole.System, hurtOrHealMessageContent);
-        conversation.Add(hurtOrHealSystemMessage);
+
+        if (hurtOrHealMessageContent != "")
+        {
+            OpenAiGptMessage hurtOrHealSystemMessage = new(ChatMessageRole.System, hurtOrHealMessageContent);
+            conversation.Add(hurtOrHealSystemMessage);
+        }
     }
 
     private async Task<Character?> DetermineOpponent(Campaign campaign, IList<OpenAiGptMessage> conversation)
