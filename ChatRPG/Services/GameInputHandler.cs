@@ -88,7 +88,7 @@ public class GameInputHandler
             case UserPromptType.Say:
                 return _systemPrompts[SystemPromptType.SayAction];
             case UserPromptType.Do:
-                DetermineAndPerformHurtOrHeal(campaign, conversation);
+                await DetermineAndPerformHurtOrHeal(campaign, conversation);
                 return _systemPrompts[SystemPromptType.DoAction];
             case UserPromptType.Attack:
                 Character? opponent = await DetermineOpponent(campaign, conversation);
@@ -106,7 +106,7 @@ public class GameInputHandler
         }
     }
 
-    private async void DetermineAndPerformHurtOrHeal(Campaign campaign, ICollection<OpenAiGptMessage> conversation)
+    private async Task DetermineAndPerformHurtOrHeal(Campaign campaign, ICollection<OpenAiGptMessage> conversation)
     {
         OpenAiGptMessage lastUserMessage = conversation.Last(m => m.Role.Equals(ChatMessageRole.User));
         string hurtOrHealString = await _llmClient.GetChatCompletion(new List<OpenAiGptMessage>() { lastUserMessage }, _systemPrompts[SystemPromptType.HurtOrHeal]);
