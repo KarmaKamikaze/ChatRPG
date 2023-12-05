@@ -378,7 +378,7 @@ a, .btn-link {
 }
 
 .btn-scroll-to-top {
-    position: absolute;
+    position: fixed;
     bottom: 50px;
     right: 0;
     margin-right: 20px;
