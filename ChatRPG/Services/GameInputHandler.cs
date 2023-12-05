@@ -65,7 +65,7 @@ public class GameInputHandler
             : new ChatCompletionChunkReceivedEventArgs(isStreamingDone, chunk);
         ChatCompletionChunkReceived?.Invoke(this, args);
     }
-
+    
     public async Task HandleUserPrompt(Campaign campaign, IList<OpenAiGptMessage> conversation)
     {
         string systemPrompt = await GetRelevantSystemPrompt(campaign, conversation);
@@ -88,7 +88,7 @@ public class GameInputHandler
             case UserPromptType.Say:
                 return _systemPrompts[SystemPromptType.SayAction];
             case UserPromptType.Do:
-                DetermineAndPerformHurtOrHeal(campaign, conversation);
+                await DetermineAndPerformHurtOrHeal(campaign, conversation);
                 return _systemPrompts[SystemPromptType.DoAction];
             case UserPromptType.Attack:
                 Character? opponent = await DetermineOpponent(campaign, conversation);
@@ -106,11 +106,12 @@ public class GameInputHandler
         }
     }
 
-    private async void DetermineAndPerformHurtOrHeal(Campaign campaign, ICollection<OpenAiGptMessage> conversation)
+    private async Task DetermineAndPerformHurtOrHeal(Campaign campaign, ICollection<OpenAiGptMessage> conversation)
     {
         OpenAiGptMessage lastUserMessage = conversation.Last(m => m.Role.Equals(ChatMessageRole.User));
         string hurtOrHealString = await _llmClient.GetChatCompletion(new List<OpenAiGptMessage>() { lastUserMessage }, _systemPrompts[SystemPromptType.HurtOrHeal]);
         _logger.LogInformation("Hurt or heal response: {hurtOrHealString}", hurtOrHealString);
+        _logger.LogInformation("Conversation count: {Count}", conversation.Count);
         OpenAiGptMessage hurtOrHealMessage = new(ChatMessageRole.Assistant, hurtOrHealString);
         LlmResponse? hurtOrHealResponse = hurtOrHealMessage.TryParseFromJson();
         string hurtOrHealMessageContent = "";
