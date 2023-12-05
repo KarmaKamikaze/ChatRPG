@@ -113,6 +113,7 @@ public partial class CampaignPage
             content += "\n" + _campaign.StartScenario;
         }
 
+        _isWaitingForResponse = true;
         OpenAiGptMessage message = new(ChatMessageRole.System, content);
         _conversation.Add(message);
         GameInputHandler?.HandleInitialPrompt(_campaign, _conversation);
