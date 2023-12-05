@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using ChatRPG.Data;
 using ChatRPG.Services;
 using ChatRPG.Data.Models;
@@ -50,6 +51,7 @@ public partial class CampaignPage
     [Inject] private ICampaignMediatorService? CampaignMediatorService { get; set; }
     [Inject] private GameInputHandler? GameInputHandler { get; set; }
     [Inject] private NavigationManager? NavMan { get; set; }
+    [Inject] private ILogger<CampaignPage>? Logger { get; set; }
 
     /// <summary>
     /// Initializes the Campaign page component by setting up configuration parameters.
@@ -137,6 +139,7 @@ public partial class CampaignPage
     /// </summary>
     private async Task SendPrompt()
     {
+        Stopwatch stopwatch = Stopwatch.StartNew();
         if (string.IsNullOrWhiteSpace(_userInput) || _campaign is null)
         {
             return;
@@ -151,6 +154,8 @@ public partial class CampaignPage
         await GameInputHandler!.HandleUserPrompt(_campaign, _conversation);
         _conversation.RemoveAll(m => m.Role.Equals(ChatMessageRole.System));
         UpdateStatsUi();
+        stopwatch.Stop();
+        Logger?.LogWarning("Time elapsed since user input: {ElapsedMilliseconds} ms", stopwatch.ElapsedMilliseconds);
     }
 
     /// <summary>
