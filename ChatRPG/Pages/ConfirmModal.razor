@@ -39,7 +39,7 @@
     public Campaign? CampaignToDelete { get; set; }
 
     [Inject]
-    private IPersisterService? PersistService { get; set; }
+    private IPersistenceService? PersistenceService { get; set; }
 
     private async Task Confirm()
     {
@@ -48,7 +48,7 @@
             await Modal.CancelAsync();
         }
 
-        await PersistService!.DeleteAsync(CampaignToDelete!);
+        await PersistenceService!.DeleteAsync(CampaignToDelete!);
         await Modal.CloseAsync(ModalResult.Ok(true));
     }
 

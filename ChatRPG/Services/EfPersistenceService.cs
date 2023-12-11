@@ -8,12 +8,12 @@ namespace ChatRPG.Services;
 /// <summary>
 /// Service for persisting and loading changes from the data model using Entity Framework.
 /// </summary>
-public class EfPersisterService : IPersisterService
+public class EfPersistenceService : IPersistenceService
 {
-    private readonly ILogger<EfPersisterService> _logger;
+    private readonly ILogger<EfPersistenceService> _logger;
     private readonly ApplicationDbContext _dbContext;
 
-    public EfPersisterService(ILogger<EfPersisterService> logger, ApplicationDbContext dbContext)
+    public EfPersistenceService(ILogger<EfPersistenceService> logger, ApplicationDbContext dbContext)
     {
         _logger = logger;
         _dbContext = dbContext;
