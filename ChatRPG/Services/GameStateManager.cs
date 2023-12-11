@@ -9,12 +9,12 @@ namespace ChatRPG.Services;
 public class GameStateManager
 {
     private readonly ILogger<GameStateManager> _logger;
-    private readonly IPersisterService _persisterService;
+    private readonly IPersistenceService _persistenceService;
 
-    public GameStateManager(ILogger<GameStateManager> logger, IPersisterService persisterService)
+    public GameStateManager(ILogger<GameStateManager> logger, IPersistenceService persistenceService)
     {
         _logger = logger;
-        _persisterService = persisterService;
+        _persistenceService = persistenceService;
     }
 
     public void UpdateStateFromMessage(Campaign campaign, OpenAiGptMessage gptMessage)
@@ -29,7 +29,7 @@ public class GameStateManager
 
     public async Task SaveCurrentState(Campaign campaign)
     {
-        await _persisterService.SaveAsync(campaign);
+        await _persistenceService.SaveAsync(campaign);
     }
 
     private void UpdateStateFromResponse(Campaign campaign, OpenAiGptMessage message)
