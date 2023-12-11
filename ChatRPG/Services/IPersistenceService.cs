@@ -5,7 +5,7 @@ namespace ChatRPG.Services;
 /// <summary>
 /// Service for persisting and loading changes from the data model.
 /// </summary>
-public interface IPersisterService
+public interface IPersistenceService
 {
     /// <summary>
     /// Saves the given <paramref name="campaign"/> and all its related entities.

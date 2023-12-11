@@ -30,7 +30,7 @@ public partial class UserCampaignOverview : ComponentBase
 
     [Inject] private AuthenticationStateProvider? AuthProvider { get; set; }
     [Inject] private UserManager<User>? UserManager { get; set; }
-    [Inject] private IPersisterService? PersisterService { get; set; }
+    [Inject] private IPersistenceService? PersisterService { get; set; }
     [Inject] private ICampaignMediatorService? CampaignMediatorService { get; set; }
     [Inject] private NavigationManager? NavMan { get; set; }
 
