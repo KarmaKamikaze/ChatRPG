@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Blazored.Modal" Version="7.1.0" />
+    <PackageReference Include="LangChain" Version="0.15.2" />
     <PackageReference Include="MailKit" Version="4.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.12" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.12" />
