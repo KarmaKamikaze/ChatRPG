@@ -1,5 +1,4 @@
 ﻿@using ChatRPG.API
-@using OpenAI_API.Chat
 @using static OpenAI_API.Chat.ChatMessageRole
 @inherits ComponentBase
 
@@ -12,5 +11,5 @@
     public required OpenAiGptMessage Message { get; set; }
 
     private string MessagePrefix => Message.Role.Equals(Assistant)
-        ? "Assistant" : "Player";
+        ? "GM" : "Player";
 }

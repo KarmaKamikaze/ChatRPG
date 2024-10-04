@@ -35,6 +35,7 @@ public class ReActLlmClient : IOpenAiLlmClient
     {
         var chain = Set() | _agent;
         return (await chain.RunAsync("text"))!;
+        throw new NotImplementedException();
     }
 
     public IAsyncEnumerable<string> GetStreamedChatCompletion(IList<OpenAiGptMessage> inputs, string systemPrompt)
