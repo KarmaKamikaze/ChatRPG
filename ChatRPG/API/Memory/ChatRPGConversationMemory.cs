@@ -11,13 +11,12 @@ namespace ChatRPG.API.Memory;
 
 public class ChatRPGConversationMemory : BaseChatMemory
 {
-    private string SummaryText { get; set; } = string.Empty;
     private IChatModel Model { get; }
     private Campaign Campaign { get; }
     [Inject] private GameStateManager? GameStateManager { get; set; }
 
     public string MemoryKey { get; set; } = "history";
-    public override List<string> MemoryVariables => new List<string> { MemoryKey };
+    public override List<string> MemoryVariables => [MemoryKey];
 
     public ChatRPGConversationMemory(Campaign campaign, IChatModel model)
     {
@@ -25,17 +24,9 @@ public class ChatRPGConversationMemory : BaseChatMemory
         Model = model ?? throw new ArgumentNullException(nameof(model));
     }
 
-    public ChatRPGConversationMemory(Campaign campaign, IChatModel model, string savedSummaryText)
-    {
-        Campaign = campaign;
-        Model = model ?? throw new ArgumentNullException(nameof(model));
-        SummaryText = savedSummaryText ?? throw new ArgumentNullException(nameof(savedSummaryText));
-    }
-
-
     public override OutputValues LoadMemoryVariables(InputValues? inputValues)
     {
-        return new OutputValues(new Dictionary<string, object> { { MemoryKey, SummaryText } });
+        return new OutputValues(new Dictionary<string, object> { { MemoryKey, Campaign.GameSummary } });
     }
 
     public override async Task SaveContext(InputValues inputValues, OutputValues outputValues)
@@ -59,8 +50,7 @@ public class ChatRPGConversationMemory : BaseChatMemory
         newMessages.Add(new Message(aiMessageContent, MessageRole.Ai));
         Campaign.Messages.Add(new Data.Models.Message(Campaign, Data.Models.MessageRole.Assistant, aiMessageContent));
 
-        SummaryText = await Model.SummarizeAsync(newMessages, SummaryText).ConfigureAwait(false);
-        Campaign.GameSummary = SummaryText;
+        Campaign.GameSummary = await Model.SummarizeAsync(newMessages, Campaign.GameSummary).ConfigureAwait(false);
 
         await GameStateManager!.SaveCurrentState(Campaign);
     }
@@ -68,6 +58,5 @@ public class ChatRPGConversationMemory : BaseChatMemory
     public override async Task Clear()
     {
         await base.Clear().ConfigureAwait(false);
-        SummaryText = string.Empty;
     }
 }

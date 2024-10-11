@@ -30,7 +30,7 @@ HttpMessageHandlerFactory httpMessageHandlerFactory = new HttpMessageHandlerFact
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<User>>()
     .AddSingleton(httpMessageHandlerFactory)
     .AddSingleton<IHttpClientFactory, HttpClientFactory>()
-    .AddSingleton<IOpenAiLlmClient, OpenAiLlmClient>()
+    .AddSingleton<IReActLlmClient, ReActLlmClient>()
     .AddTransient<IPersistenceService, EfPersistenceService>()
     .AddTransient<IEmailSender, EmailSender>()
     .AddTransient<GameInputHandler>()

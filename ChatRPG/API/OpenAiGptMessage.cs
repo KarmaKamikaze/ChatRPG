@@ -1,4 +1,3 @@
-using OpenAI_API.Chat;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using ChatRPG.API.Response;
@@ -10,27 +9,29 @@ namespace ChatRPG.API;
 
 public class OpenAiGptMessage
 {
-    public OpenAiGptMessage(ChatMessageRole role, string content)
+    public OpenAiGptMessage(MessageRole role, string content)
     {
         Role = role;
         Content = content;
         NarrativePart = "";
         UpdateNarrativePart();
-        if (!Content.IsNullOrEmpty() && NarrativePart.IsNullOrEmpty() && role.Equals(ChatMessageRole.Assistant))
+        if (!Content.IsNullOrEmpty() && NarrativePart.IsNullOrEmpty() &&
+            role.Equals(LangChain.Providers.MessageRole.Ai))
         {
             NarrativePart = Content;
         }
     }
 
-    public OpenAiGptMessage(ChatMessageRole role, string content, UserPromptType userPromptType) : this(role, content)
+    public OpenAiGptMessage(MessageRole role, string content, UserPromptType userPromptType) : this(role, content)
     {
         UserPromptType = userPromptType;
     }
 
-    public ChatMessageRole Role { get; }
+    public MessageRole Role { get; }
     public string Content { get; private set; }
     public string NarrativePart { get; private set; }
     public readonly UserPromptType UserPromptType = UserPromptType.Do;
+
     private static readonly Regex NarrativeRegex =
         new(pattern: "^\\s*{\\s*\"narrative\":\\s*\"([^\"]*)", RegexOptions.IgnoreCase);
 
@@ -67,7 +68,6 @@ public class OpenAiGptMessage
 
     public static OpenAiGptMessage FromMessage(Message message)
     {
-        ChatMessageRole role = ChatMessageRole.FromString(message.Role.ToString().ToLower());
-        return new OpenAiGptMessage(role, message.Content);
+        return new OpenAiGptMessage(message.Role, message.Content);
     }
 }

@@ -18,9 +18,8 @@ public class GameStateManagerTests
 
     public GameStateManagerTests()
     {
-        ILogger<GameStateManager> logger = Mock.Of<ILogger<GameStateManager>>();
         IPersistenceService persistenceService = Mock.Of<IPersistenceService>();
-        _parser = new GameStateManager(logger, persistenceService);
+        _parser = new GameStateManager(persistenceService);
         _user = new User("test");
         _campaign = new Campaign(_user, "Test");
         _environment = new Environment(_campaign, "Environment", "Test environment");
