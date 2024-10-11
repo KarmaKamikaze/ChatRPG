@@ -7,18 +7,18 @@ namespace ChatRPG.API.Memory;
 public static class ChatRPGSummarizer
 {
     public const string SummaryPrompt = @"
-Progressively summarize the lines of conversation provided, adding onto the previous summary returning a new summary.
+Progressively summarize the interaction between the player and the GM. The player describes their actions in response to the game world, and the GM narrates the outcome, revealing the next part of the adventure. Return a new summary based on each exchange.
 
 EXAMPLE
 Current summary:
-The human asks what the AI thinks of artificial intelligence.The AI thinks artificial intelligence is a force for good.
+The player enters the forest and cautiously looks around. The GM describes towering trees and a narrow path leading deeper into the woods. The player decides to follow the path, staying alert.
 
 New lines of conversation:
-Human: Why do you think artificial intelligence is a force for good?
-AI: Because artificial intelligence will help humans reach their full potential.
+Player: I move carefully down the path, keeping an eye out for any hidden dangers.
+GM: As you continue, the air grows colder, and you hear rustling in the bushes ahead. Suddenly, a shadowy figure leaps out in front of you.
 
 New summary:
-The human asks what the AI thinks of artificial intelligence. The AI thinks artificial intelligence is a force for good because it will help humans reach their full potential.
+The player enters the forest and follows a narrow path, staying alert. The GM introduces a shadowy figure that appears ahead after rustling is heard in the bushes.
 END OF EXAMPLE
 
 Current summary:

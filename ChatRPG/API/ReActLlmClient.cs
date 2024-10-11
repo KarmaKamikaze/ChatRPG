@@ -29,6 +29,8 @@ public class ReActLlmClient : IOpenAiLlmClient
         //agent.UseTool();
         _llm.Settings = new OpenAiChatSettings { UseStreaming = true };
 
+        var test = new ReActAgentChain(_llm, _memory);
+
     }
 
     public async Task<string> GetChatCompletion(IList<OpenAiGptMessage> inputs, string systemPrompt)
