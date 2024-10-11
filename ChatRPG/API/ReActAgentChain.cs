@@ -12,16 +12,16 @@ namespace ChatRPG.API;
 
 public sealed class ReActAgentChain : BaseStackableChain
 {
-    private StackChain? _chain;
-    private bool _useCache;
-    private Dictionary<string, AgentTool> _tools = new();
+    private const string ReActAnswer = "answer";
+    private readonly BaseChatMemory _conversationSummaryMemory;
+    private readonly int _maxActions;
     private readonly IChatModel _model;
     private readonly string _reActPrompt;
-    private readonly int _maxActions;
-    private readonly BaseChatMemory _conversationSummaryMemory;
-    private string _userInput = string.Empty;
-    private const string ReActAnswer = "answer";
     private readonly bool _useStreaming;
+    private StackChain? _chain;
+    private readonly Dictionary<string, AgentTool> _tools = new();
+    private bool _useCache;
+    private string _userInput = string.Empty;
 
     public string DefaultPrompt = @"Assistant is a large language model trained by OpenAI.
 
@@ -92,15 +92,15 @@ New input: {input}";
             Set(() => _userInput, "input")
             | Set(tools, "tools")
             | Set(toolNames, "tool_names")
-            | LoadMemory(_conversationSummaryMemory, outputKey: "history")
+            | LoadMemory(_conversationSummaryMemory, "history")
             | Template(_reActPrompt)
             | LLM(_model, settings: new ChatSettings
             {
                 StopSequences = ["Observation", "[END]"],
                 UseStreaming = _useStreaming
             }).UseCache(_useCache)
-            | UpdateMemory(_conversationSummaryMemory, requestKey: "input", responseKey: "text")
-            | ReActParser(inputKey: "text", outputKey: ReActAnswer);
+            | UpdateMemory(_conversationSummaryMemory, "input", "text")
+            | ReActParser("text", ReActAnswer);
 
         _chain = chain;
     }
@@ -134,7 +134,7 @@ New input: {input}";
             InitializeChain();
         }
 
-        for (int i = 0; i < _maxActions; i++)
+        for (var i = 0; i < _maxActions; i++)
         {
             var res = await _chain!.CallAsync(valuesChain, cancellationToken: cancellationToken).ConfigureAwait(false);
             switch (res.Value[ReActAnswer])
@@ -144,7 +144,8 @@ New input: {input}";
                     var action = (AgentAction)res.Value[ReActAnswer];
                     var tool = _tools[action.Action.ToLower(CultureInfo.InvariantCulture)];
                     var toolRes = await tool.ToolTask(action.ActionInput, cancellationToken).ConfigureAwait(false);
-                    await _conversationSummaryMemory.ChatHistory.AddMessage(new Message("Observation: " + toolRes, MessageRole.System))
+                    await _conversationSummaryMemory.ChatHistory
+                        .AddMessage(new Message("Observation: " + toolRes, MessageRole.System))
                         .ConfigureAwait(false);
                     await _conversationSummaryMemory.ChatHistory.AddMessage(new Message("Thought:", MessageRole.System))
                         .ConfigureAwait(false);
