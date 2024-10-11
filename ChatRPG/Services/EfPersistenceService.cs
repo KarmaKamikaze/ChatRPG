@@ -74,6 +74,7 @@ public class EfPersistenceService : IPersistenceService
         return await _dbContext.Campaigns
             .Where(campaign => campaign.Id == campaignId)
             .Include(campaign => campaign.Messages)
+            .Include(campaign => campaign.GameSummary)
             .Include(campaign => campaign.Environments)
             .Include(campaign => campaign.Characters)
             .ThenInclude(character => character.CharacterAbilities)
