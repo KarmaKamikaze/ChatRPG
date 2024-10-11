@@ -140,7 +140,6 @@ New input: {input}";
             switch (res.Value[ReActAnswer])
             {
                 case AgentAction:
-                {
                     var action = (AgentAction)res.Value[ReActAnswer];
                     var tool = _tools[action.Action.ToLower(CultureInfo.InvariantCulture)];
                     var toolRes = await tool.ToolTask(action.ActionInput, cancellationToken).ConfigureAwait(false);
@@ -150,13 +149,10 @@ New input: {input}";
                     await _conversationSummaryMemory.ChatHistory.AddMessage(new Message("Thought:", MessageRole.System))
                         .ConfigureAwait(false);
                     break;
-                }
                 case AgentFinish:
-                {
                     var finish = (AgentFinish)res.Value[ReActAnswer];
                     values.Value[OutputKeys[0]] = finish.Output;
                     return values;
-                }
             }
         }
 
