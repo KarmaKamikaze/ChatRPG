@@ -90,7 +90,7 @@ public class GameInputHandler
         _logger.LogInformation("Finished processing prompt");
     }
 
-    private async Task<string> GetRelevantSystemPrompt(Campaign campaign, IList<OpenAiGptMessage> conversation)
+    /*private async Task<string> GetRelevantSystemPrompt(Campaign campaign, IList<OpenAiGptMessage> conversation)
     {
         UserPromptType userPromptType = conversation.Last(m => m.Role.Equals(MessageRole.User)).UserPromptType;
 
@@ -116,9 +116,9 @@ public class GameInputHandler
             default:
                 throw new ArgumentOutOfRangeException();
         }
-    }
+    }*/
 
-    private async Task DetermineAndPerformHurtOrHeal(Campaign campaign, ICollection<OpenAiGptMessage> conversation)
+    /*private async Task DetermineAndPerformHurtOrHeal(Campaign campaign, ICollection<OpenAiGptMessage> conversation)
     {
         OpenAiGptMessage lastUserMessage = conversation.Last(m => m.Role.Equals(MessageRole.User));
         string hurtOrHealString = await _llmClient.GetChatCompletionAsync(new List<OpenAiGptMessage>() { lastUserMessage },
@@ -154,10 +154,10 @@ public class GameInputHandler
             conversation.Add(hurtOrHealSystemMessage);
         }
     }
-
-    private async Task<Character?> DetermineOpponent(Campaign campaign, IList<OpenAiGptMessage> conversation)
+*/
+  /*  private async Task<Character?> DetermineOpponent(Campaign campaign, IList<OpenAiGptMessage> conversation)
     {
-        string opponentDescriptionString = await _llmClient.GetChatCompletion(conversation,
+        string opponentDescriptionString = await _llmClient.GetChatCompletionAsync(conversation,
             _systemPrompts[SystemPromptType.CombatOpponentDescription]);
         _logger.LogInformation("Opponent description response: {OpponentDescriptionString}", opponentDescriptionString);
         OpenAiGptMessage opponentDescriptionMessage = new(MessageRole.Assistant, opponentDescriptionString);
@@ -175,8 +175,8 @@ public class GameInputHandler
         string? opponentName = opponentDescriptionResponse?.Opponent?.ToLower();
         return campaign.Characters.LastOrDefault(c => !c.IsPlayer && c.Name.ToLower().Equals(opponentName));
     }
-
-    private static SystemPromptType DetermineCombatOutcome()
+*/
+  /*  private static SystemPromptType DetermineCombatOutcome()
     {
         Random rand = new Random();
         double playerRoll = rand.NextDouble();
@@ -214,8 +214,8 @@ public class GameInputHandler
 
         return (playerDmg, opponentDmg);
     }
-
-    private void ConstructCombatSystemMessage(Campaign campaign, int playerDmg, int opponentDmg, Character opponent,
+*/
+  /*  private void ConstructCombatSystemMessage(Campaign campaign, int playerDmg, int opponentDmg, Character opponent,
         IList<OpenAiGptMessage> conversation)
     {
         string combatMessageContent = "";
@@ -263,7 +263,7 @@ public class GameInputHandler
         OpenAiGptMessage combatSystemMessage = new(MessageRole.System, combatMessageContent);
         conversation.Add(combatSystemMessage);
     }
-
+*/
     private async Task GetResponseAndUpdateState(Campaign campaign, string actionPrompt, string input)
     {
         if (_streamChatCompletions)
@@ -277,6 +277,8 @@ public class GameInputHandler
             }
 
             OnChatCompletionChunkReceived(isStreamingDone: true);
+
+
         }
         else
         {
@@ -284,6 +286,7 @@ public class GameInputHandler
             OpenAiGptMessage message = new(MessageRole.Assistant, response);
             OnChatCompletionReceived(message);
         }
+
 
         await _gameStateManager.SaveCurrentState(campaign);
     }

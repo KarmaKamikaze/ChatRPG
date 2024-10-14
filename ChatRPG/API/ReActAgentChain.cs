@@ -17,6 +17,7 @@ public sealed class ReActAgentChain : BaseStackableChain
     private readonly int _maxActions;
     private readonly IChatModel _model;
     private readonly string _reActPrompt;
+    private readonly string _actionPrompt;
     private readonly bool _useStreaming;
     private StackChain? _chain;
     private readonly Dictionary<string, AgentTool> _tools = new();
@@ -56,6 +57,9 @@ Final Answer: [your response here]
 
 Always add [END] after final answer
 
+Special action:
+{action}
+
 Begin!
 
 Previous conversation history:
@@ -67,6 +71,7 @@ New input: {input}";
         IChatModel model,
         BaseChatMemory memory,
         string? reActPrompt = null,
+        string? actionPrompt = null,
         string inputKey = "input",
         string outputKey = "text",
         int maxActions = 10,
@@ -74,6 +79,7 @@ New input: {input}";
     {
         _model = model;
         _reActPrompt = reActPrompt ?? DefaultPrompt;
+        _actionPrompt = actionPrompt ?? string.Empty;
         _maxActions = maxActions;
 
         InputKeys = [inputKey];
@@ -92,6 +98,7 @@ New input: {input}";
             Set(() => _userInput, "input")
             | Set(tools, "tools")
             | Set(toolNames, "tool_names")
+            | Set(_actionPrompt, "action")
             | LoadMemory(_conversationSummaryMemory, "history")
             | Template(_reActPrompt)
             | LLM(_model, settings: new ChatSettings
@@ -101,6 +108,7 @@ New input: {input}";
             }).UseCache(_useCache)
             | UpdateMemory(_conversationSummaryMemory, "input", "text")
             | ReActParser("text", ReActAnswer);
+
 
         _chain = chain;
     }

@@ -48,6 +48,6 @@ New summary:";
             | Template(SummaryPrompt)
             | LLM(chatModel);
 
-        return await chain.RunAsync("text", cancellationToken: cancellationToken).ConfigureAwait(false) ?? string.Empty;
+        return await chain.RunAsync("text", cancellationToken: cancellationToken).ConfigureAwait(true) ?? string.Empty;
     }
 }

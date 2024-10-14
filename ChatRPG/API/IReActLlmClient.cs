@@ -1,5 +1,4 @@
 using ChatRPG.Data.Models;
-using ChatRPG.Pages;
 
 namespace ChatRPG.API;
 

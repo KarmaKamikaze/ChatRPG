@@ -3,30 +3,24 @@ using ChatRPG.Services;
 using LangChain.Memory;
 using LangChain.Providers;
 using LangChain.Schema;
-using Microsoft.AspNetCore.Components;
 using Message = LangChain.Providers.Message;
 using MessageRole = LangChain.Providers.MessageRole;
 
 namespace ChatRPG.API.Memory;
 
-public class ChatRPGConversationMemory : BaseChatMemory
+public class ChatRPGConversationMemory(IChatModel model, string? summary)
+    : BaseChatMemory
 {
-    private IChatModel Model { get; }
-    private Campaign Campaign { get; }
-    [Inject] private GameStateManager? GameStateManager { get; set; }
+    private IChatModel Model { get; } = model ?? throw new ArgumentNullException(nameof(model));
+    public string? Summary { get; set; } = summary;
+    public Dictionary<Data.Models.MessageRole, string> Messages = new();
 
     public string MemoryKey { get; set; } = "history";
     public override List<string> MemoryVariables => [MemoryKey];
 
-    public ChatRPGConversationMemory(Campaign campaign, IChatModel model)
-    {
-        Campaign = campaign;
-        Model = model ?? throw new ArgumentNullException(nameof(model));
-    }
-
     public override OutputValues LoadMemoryVariables(InputValues? inputValues)
     {
-        return new OutputValues(new Dictionary<string, object> { { MemoryKey, Campaign.GameSummary } });
+        return new OutputValues(new Dictionary<string, object> { { MemoryKey, Summary ?? ""} });
     }
 
     public override async Task SaveContext(InputValues inputValues, OutputValues outputValues)
@@ -41,18 +35,26 @@ public class ChatRPGConversationMemory : BaseChatMemory
 
         var humanMessageContent = inputValues.Value[inputKey].ToString() ?? string.Empty;
         newMessages.Add(new Message(humanMessageContent, MessageRole.Human));
-        Campaign.Messages.Add(new Data.Models.Message(Campaign, Data.Models.MessageRole.User, humanMessageContent));
+
+        Messages.Add(Data.Models.MessageRole.User, humanMessageContent);
 
         // If the OutputKey is not specified, there must only be one output value
         var outputKey = OutputKey ?? outputValues.Value.Keys.Single();
 
         var aiMessageContent = outputValues.Value[outputKey].ToString() ?? string.Empty;
+        int finalAnswerIndex = aiMessageContent.IndexOf("Final Answer: ", StringComparison.Ordinal);
+        if (finalAnswerIndex != -1)
+        {
+            // Only keep final answer
+            int startOutputIndex = finalAnswerIndex + "Final Answer: ".Length;
+            aiMessageContent = aiMessageContent[startOutputIndex..];
+        }
+
         newMessages.Add(new Message(aiMessageContent, MessageRole.Ai));
-        Campaign.Messages.Add(new Data.Models.Message(Campaign, Data.Models.MessageRole.Assistant, aiMessageContent));
 
-        Campaign.GameSummary = await Model.SummarizeAsync(newMessages, Campaign.GameSummary).ConfigureAwait(false);
+        Messages.Add(Data.Models.MessageRole.Assistant, aiMessageContent);
 
-        await GameStateManager!.SaveCurrentState(Campaign);
+        Summary = await Model.SummarizeAsync(newMessages, Summary ?? "").ConfigureAwait(true);
     }
 
     public override async Task Clear()
