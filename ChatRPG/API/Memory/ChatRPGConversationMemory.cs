@@ -1,5 +1,3 @@
-using ChatRPG.Data.Models;
-using ChatRPG.Services;
 using LangChain.Memory;
 using LangChain.Providers;
 using LangChain.Schema;
@@ -8,8 +6,7 @@ using MessageRole = LangChain.Providers.MessageRole;
 
 namespace ChatRPG.API.Memory;
 
-public class ChatRPGConversationMemory(IChatModel model, string? summary)
-    : BaseChatMemory
+public class ChatRPGConversationMemory(IChatModel model, string? summary) : BaseChatMemory
 {
     private IChatModel Model { get; } = model ?? throw new ArgumentNullException(nameof(model));
     public string? Summary { get; set; } = summary;
@@ -20,7 +17,7 @@ public class ChatRPGConversationMemory(IChatModel model, string? summary)
 
     public override OutputValues LoadMemoryVariables(InputValues? inputValues)
     {
-        return new OutputValues(new Dictionary<string, object> { { MemoryKey, Summary ?? ""} });
+        return new OutputValues(new Dictionary<string, object> { { MemoryKey, Summary ?? "" } });
     }
 
     public override async Task SaveContext(InputValues inputValues, OutputValues outputValues)

@@ -23,7 +23,7 @@ public class ReActLlmClient : IReActLlmClient
     {
         var llm = new Gpt4Model(_provider)
         {
-            Settings = new OpenAiChatSettings() {UseStreaming = false}
+            Settings = new OpenAiChatSettings() { UseStreaming = false }
         };
         var memory = new ChatRPGConversationMemory(llm, campaign.GameSummary);
         var agent = new ReActAgentChain(llm, memory, _reActPrompt, "", useStreaming: false);
@@ -37,16 +37,17 @@ public class ReActLlmClient : IReActLlmClient
         return result!;
     }
 
-    public async IAsyncEnumerable<string> GetStreamedChatCompletionAsync(Campaign campaign, string actionPrompt, string input)
+    public async IAsyncEnumerable<string> GetStreamedChatCompletionAsync(Campaign campaign, string actionPrompt,
+        string input)
     {
         var agentLlm = new Gpt4Model(_provider)
         {
-            Settings = new OpenAiChatSettings() {UseStreaming = true}
+            Settings = new OpenAiChatSettings() { UseStreaming = true }
         };
 
         var memoryLlm = new Gpt4Model(_provider)
         {
-            Settings = new OpenAiChatSettings() {UseStreaming = false}
+            Settings = new OpenAiChatSettings() { UseStreaming = false }
         };
 
         var eventProcessor = new LlmEventProcessor(agentLlm);

@@ -81,6 +81,7 @@ public class GameInputHandler
             default:
                 throw new ArgumentOutOfRangeException();
         }
+
         _logger.LogInformation("Finished processing prompt");
     }
 
@@ -155,115 +156,115 @@ public class GameInputHandler
         }
     }
 */
-  /*  private async Task<Character?> DetermineOpponent(Campaign campaign, IList<OpenAiGptMessage> conversation)
-    {
-        string opponentDescriptionString = await _llmClient.GetChatCompletionAsync(conversation,
-            _systemPrompts[SystemPromptType.CombatOpponentDescription]);
-        _logger.LogInformation("Opponent description response: {OpponentDescriptionString}", opponentDescriptionString);
-        OpenAiGptMessage opponentDescriptionMessage = new(MessageRole.Assistant, opponentDescriptionString);
-        LlmResponse? opponentDescriptionResponse = opponentDescriptionMessage.TryParseFromJson();
-        LlmResponseCharacter? resChar = opponentDescriptionResponse?.Characters?.FirstOrDefault();
-        if (resChar != null)
-        {
-            Environment environment = campaign.Environments.Last();
-            Character character = new(campaign, environment,
-                GameStateManager.ParseToEnum(resChar.Type!, CharacterType.Humanoid),
-                resChar.Name!, resChar.Description!, false);
-            campaign.InsertOrUpdateCharacter(character);
-        }
+    /*  private async Task<Character?> DetermineOpponent(Campaign campaign, IList<OpenAiGptMessage> conversation)
+      {
+          string opponentDescriptionString = await _llmClient.GetChatCompletionAsync(conversation,
+              _systemPrompts[SystemPromptType.CombatOpponentDescription]);
+          _logger.LogInformation("Opponent description response: {OpponentDescriptionString}", opponentDescriptionString);
+          OpenAiGptMessage opponentDescriptionMessage = new(MessageRole.Assistant, opponentDescriptionString);
+          LlmResponse? opponentDescriptionResponse = opponentDescriptionMessage.TryParseFromJson();
+          LlmResponseCharacter? resChar = opponentDescriptionResponse?.Characters?.FirstOrDefault();
+          if (resChar != null)
+          {
+              Environment environment = campaign.Environments.Last();
+              Character character = new(campaign, environment,
+                  GameStateManager.ParseToEnum(resChar.Type!, CharacterType.Humanoid),
+                  resChar.Name!, resChar.Description!, false);
+              campaign.InsertOrUpdateCharacter(character);
+          }
 
-        string? opponentName = opponentDescriptionResponse?.Opponent?.ToLower();
-        return campaign.Characters.LastOrDefault(c => !c.IsPlayer && c.Name.ToLower().Equals(opponentName));
-    }
-*/
-  /*  private static SystemPromptType DetermineCombatOutcome()
-    {
-        Random rand = new Random();
-        double playerRoll = rand.NextDouble();
-        double opponentRoll = rand.NextDouble();
+          string? opponentName = opponentDescriptionResponse?.Opponent?.ToLower();
+          return campaign.Characters.LastOrDefault(c => !c.IsPlayer && c.Name.ToLower().Equals(opponentName));
+      }
+  */
+    /*  private static SystemPromptType DetermineCombatOutcome()
+      {
+          Random rand = new Random();
+          double playerRoll = rand.NextDouble();
+          double opponentRoll = rand.NextDouble();
 
-        if (playerRoll >= 0.3)
-        {
-            return opponentRoll >= 0.6 ? SystemPromptType.CombatHitHit : SystemPromptType.CombatHitMiss;
-        }
+          if (playerRoll >= 0.3)
+          {
+              return opponentRoll >= 0.6 ? SystemPromptType.CombatHitHit : SystemPromptType.CombatHitMiss;
+          }
 
-        return opponentRoll >= 0.5 ? SystemPromptType.CombatMissHit : SystemPromptType.CombatMissMiss;
-    }
+          return opponentRoll >= 0.5 ? SystemPromptType.CombatMissHit : SystemPromptType.CombatMissMiss;
+      }
 
-    private static (int, int) ComputeCombatDamage(SystemPromptType combatOutcome, CharacterType opponentType)
-    {
-        Random rand = new Random();
-        int playerDmg = 0;
-        int opponentDmg = 0;
-        (int opponentMin, int opponentMax) = CharacterTypeDamageDict[opponentType];
-        switch (combatOutcome)
-        {
-            case SystemPromptType.CombatHitHit:
-                playerDmg = rand.Next(PlayerDmgMin, PlayerDmgMax);
-                opponentDmg = rand.Next(opponentMin, opponentMax);
-                break;
-            case SystemPromptType.CombatHitMiss:
-                playerDmg = rand.Next(PlayerDmgMin, PlayerDmgMax);
-                break;
-            case SystemPromptType.CombatMissHit:
-                opponentDmg = rand.Next(opponentMin, opponentMax);
-                break;
-            case SystemPromptType.CombatMissMiss:
-                break;
-        }
+      private static (int, int) ComputeCombatDamage(SystemPromptType combatOutcome, CharacterType opponentType)
+      {
+          Random rand = new Random();
+          int playerDmg = 0;
+          int opponentDmg = 0;
+          (int opponentMin, int opponentMax) = CharacterTypeDamageDict[opponentType];
+          switch (combatOutcome)
+          {
+              case SystemPromptType.CombatHitHit:
+                  playerDmg = rand.Next(PlayerDmgMin, PlayerDmgMax);
+                  opponentDmg = rand.Next(opponentMin, opponentMax);
+                  break;
+              case SystemPromptType.CombatHitMiss:
+                  playerDmg = rand.Next(PlayerDmgMin, PlayerDmgMax);
+                  break;
+              case SystemPromptType.CombatMissHit:
+                  opponentDmg = rand.Next(opponentMin, opponentMax);
+                  break;
+              case SystemPromptType.CombatMissMiss:
+                  break;
+          }
 
-        return (playerDmg, opponentDmg);
-    }
-*/
-  /*  private void ConstructCombatSystemMessage(Campaign campaign, int playerDmg, int opponentDmg, Character opponent,
-        IList<OpenAiGptMessage> conversation)
-    {
-        string combatMessageContent = "";
-        if (playerDmg != 0)
-        {
-            if (opponent.AdjustHealth(-playerDmg))
-            {
-                combatMessageContent +=
-                    $" With no health points remaining, {opponent.Name} dies and can no longer participate in the narrative.";
-            }
+          return (playerDmg, opponentDmg);
+      }
+  */
+    /*  private void ConstructCombatSystemMessage(Campaign campaign, int playerDmg, int opponentDmg, Character opponent,
+          IList<OpenAiGptMessage> conversation)
+      {
+          string combatMessageContent = "";
+          if (playerDmg != 0)
+          {
+              if (opponent.AdjustHealth(-playerDmg))
+              {
+                  combatMessageContent +=
+                      $" With no health points remaining, {opponent.Name} dies and can no longer participate in the narrative.";
+              }
 
-            combatMessageContent +=
-                $"The player hits with their attack, dealing {playerDmg} damage. The opponent has {opponent.CurrentHealth} health remaining.";
-            _logger.LogInformation(
-                "Combat: {PlayerName} hits {OpponentName} for {X} damage. Health: {CurrentHealth}/{MaxHealth}",
-                campaign.Player.Name, opponent.Name, playerDmg, opponent.CurrentHealth, opponent.MaxHealth);
-        }
-        else
-        {
-            combatMessageContent +=
-                $"The player misses with their attack, dealing no damage. The opponent has {opponent.CurrentHealth} health remaining.";
-        }
+              combatMessageContent +=
+                  $"The player hits with their attack, dealing {playerDmg} damage. The opponent has {opponent.CurrentHealth} health remaining.";
+              _logger.LogInformation(
+                  "Combat: {PlayerName} hits {OpponentName} for {X} damage. Health: {CurrentHealth}/{MaxHealth}",
+                  campaign.Player.Name, opponent.Name, playerDmg, opponent.CurrentHealth, opponent.MaxHealth);
+          }
+          else
+          {
+              combatMessageContent +=
+                  $"The player misses with their attack, dealing no damage. The opponent has {opponent.CurrentHealth} health remaining.";
+          }
 
-        if (opponentDmg != 0)
-        {
-            bool playerDied = campaign.Player.AdjustHealth(-opponentDmg);
-            combatMessageContent +=
-                $"The opponent will hit with their next attack, dealing {opponentDmg} damage. The player has {campaign.Player.CurrentHealth} health remaining.";
-            if (playerDied)
-            {
-                combatMessageContent += "The player has died and their adventure ends.";
-            }
+          if (opponentDmg != 0)
+          {
+              bool playerDied = campaign.Player.AdjustHealth(-opponentDmg);
+              combatMessageContent +=
+                  $"The opponent will hit with their next attack, dealing {opponentDmg} damage. The player has {campaign.Player.CurrentHealth} health remaining.";
+              if (playerDied)
+              {
+                  combatMessageContent += "The player has died and their adventure ends.";
+              }
 
-            _logger.LogInformation(
-                "Combat: {OpponentName} hits {PlayerName} for {X} damage. Health: {CurrentHealth}/{MaxHealth}",
-                opponent.Name, campaign.Player.Name, opponentDmg, campaign.Player.CurrentHealth,
-                campaign.Player.MaxHealth);
-        }
-        else
-        {
-            combatMessageContent +=
-                $"The opponent will miss their next attack, dealing no damage. The player has {campaign.Player.CurrentHealth} health remaining.";
-        }
+              _logger.LogInformation(
+                  "Combat: {OpponentName} hits {PlayerName} for {X} damage. Health: {CurrentHealth}/{MaxHealth}",
+                  opponent.Name, campaign.Player.Name, opponentDmg, campaign.Player.CurrentHealth,
+                  campaign.Player.MaxHealth);
+          }
+          else
+          {
+              combatMessageContent +=
+                  $"The opponent will miss their next attack, dealing no damage. The player has {campaign.Player.CurrentHealth} health remaining.";
+          }
 
-        OpenAiGptMessage combatSystemMessage = new(MessageRole.System, combatMessageContent);
-        conversation.Add(combatSystemMessage);
-    }
-*/
+          OpenAiGptMessage combatSystemMessage = new(MessageRole.System, combatMessageContent);
+          conversation.Add(combatSystemMessage);
+      }
+  */
     private async Task GetResponseAndUpdateState(Campaign campaign, string actionPrompt, string input)
     {
         if (_streamChatCompletions)
@@ -277,8 +278,6 @@ public class GameInputHandler
             }
 
             OnChatCompletionChunkReceived(isStreamingDone: true);
-
-
         }
         else
         {
