@@ -114,7 +114,7 @@ a, .btn-link {
     background-color: rgb(180, 180, 180);
 }
 
-.message-container.message-container-assistant {
+.message-container-gm {
     background-color: rgb(222, 222, 222);
 }
 
@@ -126,7 +126,7 @@ a, .btn-link {
 .message-player {
 }
 
-.message-assistant {
+.message-gm {
 }
 
 .custom-text-field {

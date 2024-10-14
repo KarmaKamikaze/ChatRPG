@@ -1,6 +1,5 @@
 ﻿@page "/Campaign"
 @using OpenAiGptMessage = ChatRPG.API.OpenAiGptMessage
-@using OpenAI_API.Chat
 @using ChatRPG.Data.Models
 
 <PageTitle>Campaign - @_campaign?.Title</PageTitle>
@@ -55,7 +54,7 @@
             </div>
 
             <div class="conversation-text">
-                @foreach (OpenAiGptMessage message in _conversation.Where(m => !m.Role.Equals(ChatMessageRole.System)))
+                @foreach (OpenAiGptMessage message in _conversation.Where(m => !m.Role.Equals(MessageRole.System)))
                 {
                     <OpenAiGptMessageComponent Message="@message"/>
                 }
@@ -125,6 +124,6 @@
 
 <footer class="footer pl-3 text-muted footer-formatting fixed-bottom custom-gray-container">
     <div class="container">
-        &copy; 2023 - ChatRPG
+        &copy; @DateTime.Now.Year - ChatRPG
     </div>
 </footer>

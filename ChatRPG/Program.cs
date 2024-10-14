@@ -1,5 +1,6 @@
 using Blazored.Modal;
 using ChatRPG.API;
+using ChatRPG.API.Memory;
 using ChatRPG.Areas.Identity;
 using ChatRPG.Data;
 using ChatRPG.Data.Models;
@@ -29,8 +30,8 @@ HttpMessageHandlerFactory httpMessageHandlerFactory = new HttpMessageHandlerFact
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<User>>()
     .AddSingleton(httpMessageHandlerFactory)
     .AddSingleton<IHttpClientFactory, HttpClientFactory>()
-    .AddSingleton<IOpenAiLlmClient, OpenAiLlmClient>()
-    .AddTransient<IPersistenceService, EfPersistenceService>()
+    .AddTransient<IReActLlmClient, ReActLlmClient>()
+    .AddScoped<IPersistenceService, EfPersistenceService>()
     .AddTransient<IEmailSender, EmailSender>()
     .AddTransient<GameInputHandler>()
     .AddTransient<GameStateManager>()
