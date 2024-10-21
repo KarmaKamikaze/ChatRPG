@@ -36,8 +36,4 @@
     <InternalsVisibleTo Include="ChatRPGTests" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="API\Tools\" />
-  </ItemGroup>
-
 </Project>

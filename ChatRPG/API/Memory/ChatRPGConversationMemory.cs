@@ -9,8 +9,8 @@ namespace ChatRPG.API.Memory;
 public class ChatRPGConversationMemory(IChatModel model, string? summary) : BaseChatMemory
 {
     private IChatModel Model { get; } = model ?? throw new ArgumentNullException(nameof(model));
-    public string? Summary { get; set; } = summary;
-    public Dictionary<Data.Models.MessageRole, string> Messages = new();
+    public string? Summary { get; private set; } = summary;
+    public readonly List<(Data.Models.MessageRole, string)> Messages = new();
 
     public string MemoryKey { get; set; } = "history";
     public override List<string> MemoryVariables => [MemoryKey];
@@ -33,7 +33,7 @@ public class ChatRPGConversationMemory(IChatModel model, string? summary) : Base
         var humanMessageContent = inputValues.Value[inputKey].ToString() ?? string.Empty;
         newMessages.Add(new Message(humanMessageContent, MessageRole.Human));
 
-        Messages.Add(Data.Models.MessageRole.User, humanMessageContent);
+        Messages.Add((Data.Models.MessageRole.User, humanMessageContent));
 
         // If the OutputKey is not specified, there must only be one output value
         var outputKey = OutputKey ?? outputValues.Value.Keys.Single();
@@ -49,9 +49,11 @@ public class ChatRPGConversationMemory(IChatModel model, string? summary) : Base
 
         newMessages.Add(new Message(aiMessageContent, MessageRole.Ai));
 
-        Messages.Add(Data.Models.MessageRole.Assistant, aiMessageContent);
+        Messages.Add((Data.Models.MessageRole.Assistant, aiMessageContent));
 
         Summary = await Model.SummarizeAsync(newMessages, Summary ?? "").ConfigureAwait(true);
+
+        await base.SaveContext(inputValues, outputValues).ConfigureAwait(false);
     }
 
     public override async Task Clear()

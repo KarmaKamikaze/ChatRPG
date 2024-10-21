@@ -8,9 +8,4 @@ public class GameStateManager(IPersistenceService persistenceService)
     {
         await persistenceService.SaveAsync(campaign);
     }
-
-    public static T ParseToEnum<T>(string input, T defaultVal) where T : struct, Enum
-    {
-        return Enum.TryParse(input, true, out T type) ? type : defaultVal;
-    }
 }
