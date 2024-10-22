@@ -1,5 +1,4 @@
-using Anthropic;
-using ChatRPG.API.Memory;
+using System.Text;
 using ChatRPG.API.Tools;
 using ChatRPG.Data.Models;
 using LangChain.Chains.StackableChains.Agents.Tools;
@@ -30,10 +29,9 @@ public class ReActLlmClient : IReActLlmClient
     {
         var llm = new Gpt4Model(_provider)
         {
-            Settings = new OpenAiChatSettings() { UseStreaming = false, Number = 1 }
+            Settings = new OpenAiChatSettings() { UseStreaming = false }
         };
-        var memory = new ChatRPGConversationMemory(llm, campaign.GameSummary);
-        var agent = new ReActAgentChain(llm, memory, _reActPrompt, actionPrompt, useStreaming: false);
+        var agent = new ReActAgentChain(llm, _reActPrompt, actionPrompt, campaign.GameSummary);
         var tools = CreateTools(campaign);
         foreach (var tool in tools)
         {
@@ -43,7 +41,7 @@ public class ReActLlmClient : IReActLlmClient
         var chain = Set(input, "input") | agent;
         var result = await chain.RunAsync("text");
 
-        UpdateCampaign(campaign, memory);
+        await UpdateCampaign(campaign, input, result!);
 
         return result!;
     }
@@ -53,17 +51,11 @@ public class ReActLlmClient : IReActLlmClient
     {
         var agentLlm = new Gpt4Model(_provider)
         {
-            Settings = new OpenAiChatSettings() { UseStreaming = true, Number = 1 }
-        };
-
-        var memoryLlm = new Gpt4Model(_provider)
-        {
-            Settings = new OpenAiChatSettings() { UseStreaming = false, Number = 1 }
+            Settings = new OpenAiChatSettings() { UseStreaming = true, Temperature = 0.7, }
         };
 
         var eventProcessor = new LlmEventProcessor(agentLlm);
-        var memory = new ChatRPGConversationMemory(memoryLlm, campaign.GameSummary);
-        var agent = new ReActAgentChain(agentLlm, memory, _reActPrompt, actionPrompt, useStreaming: true);
+        var agent = new ReActAgentChain(agentLlm, _reActPrompt, actionPrompt, campaign.GameSummary);
         var tools = CreateTools(campaign);
         foreach (var tool in tools)
         {
@@ -72,31 +64,44 @@ public class ReActLlmClient : IReActLlmClient
 
         var chain = Set(input, "input") | agent;
 
-        var result = chain.RunAsync();
+        var response = chain.RunAsync("text");
 
         await foreach (var content in eventProcessor.GetContentStreamAsync())
         {
             yield return content;
         }
 
-        await result;
+        var result = await response;
 
-        UpdateCampaign(campaign, memory);
+        await UpdateCampaign(campaign, input, result!);
     }
 
-    private static void UpdateCampaign(Campaign campaign, ChatRPGConversationMemory memory)
+    private async Task UpdateCampaign(Campaign campaign, string playerInput, string assistantOutput)
     {
-        campaign.GameSummary = memory.Summary;
-        foreach (var (role, message) in memory.Messages)
+        var newMessages = new List<LangChain.Providers.Message>
+        {
+            new(playerInput, LangChain.Providers.MessageRole.Human),
+            new(assistantOutput, LangChain.Providers.MessageRole.Ai)
+        };
+
+        var summaryLlm = new Gpt4Model(_provider)
+        {
+            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.7 }
+        };
+
+        campaign.GameSummary = await summaryLlm.SummarizeAsync(newMessages, campaign.GameSummary ?? "");
+        foreach (var message in newMessages)
         {
             // Only add the message, if the list is empty.
             // This is because if the list is empty, the input is the initial prompt. Not player input.
-            if (campaign.Messages.Count == 0 && role == MessageRole.User)
+            if (campaign.Messages.Count == 0 && message.Role == LangChain.Providers.MessageRole.Human)
             {
                 continue;
             }
 
-            campaign.Messages.Add(new Message(campaign, role, message.Trim()));
+            campaign.Messages.Add(new Message(campaign,
+                (message.Role == LangChain.Providers.MessageRole.Human ? MessageRole.User : MessageRole.Assistant),
+                message.Content.Trim()));
         }
     }
 
@@ -113,7 +118,8 @@ public class ReActLlmClient : IReActLlmClient
             "approach a King, which may result in injury when his guards step forward to stop the character. " +
             "Input to this tool must be in the following RAW JSON format: {\"input\": \"The game summary appended with the " +
             "player's input\", \"severity\": \"Describes how devastating the injury to the character will be based on " +
-            "the action. Can be one of the following values: {low, medium, high, extraordinary}}");
+            "the action. Can be one of the following values: {low, medium, high, extraordinary}}\". Do not use markdown, " +
+            "only raw JSON as input. Use this tool only once per character at most.");
         tools.Add(woundCharacterTool);
 
         // Use battle when an attack can be mitigated or dodged by the involved participants.

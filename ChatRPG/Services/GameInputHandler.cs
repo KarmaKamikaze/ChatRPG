@@ -1,9 +1,7 @@
 using ChatRPG.API;
-using ChatRPG.API.Response;
 using ChatRPG.Data.Models;
 using ChatRPG.Pages;
 using ChatRPG.Services.Events;
-using Environment = ChatRPG.Data.Models.Environment;
 
 namespace ChatRPG.Services;
 

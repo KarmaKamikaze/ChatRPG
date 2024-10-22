@@ -13,16 +13,18 @@ namespace ChatRPG.API;
 public sealed class ReActAgentChain : BaseStackableChain
 {
     private const string ReActAnswer = "answer";
-    private readonly BaseChatMemory _conversationSummaryMemory;
+    private readonly ConversationBufferMemory _conversationBufferMemory;
+    private readonly ChatMessageHistory _chatMessageHistory;
+    private readonly MessageFormatter _messageFormatter;
     private readonly int _maxActions;
     private readonly IChatModel _model;
     private readonly string _reActPrompt;
     private readonly string _actionPrompt;
-    private readonly bool _useStreaming;
     private StackChain? _chain;
     private readonly Dictionary<string, AgentTool> _tools = new();
     private bool _useCache;
     private string _userInput = string.Empty;
+    private readonly string _gameSummary;
 
     public string DefaultPrompt = @"Assistant is a large language model trained by OpenAI.
 
@@ -62,6 +64,9 @@ Special action:
 
 Begin!
 
+Game summary:
+{summary}
+
 Previous conversation history:
 {history}
 
@@ -69,24 +74,40 @@ New input: {input}";
 
     public ReActAgentChain(
         IChatModel model,
-        BaseChatMemory memory,
         string? reActPrompt = null,
         string? actionPrompt = null,
+        string? gameSummary = null,
         string inputKey = "input",
         string outputKey = "text",
-        int maxActions = 10,
-        bool useStreaming = true)
+        int maxActions = 10)
     {
         _model = model;
+        _model.Settings!.StopSequences = ["Observation", "[END]"];
         _reActPrompt = reActPrompt ?? DefaultPrompt;
         _actionPrompt = actionPrompt ?? string.Empty;
         _maxActions = maxActions;
+        _gameSummary = gameSummary ?? string.Empty;
 
         InputKeys = [inputKey];
         OutputKeys = [outputKey];
 
-        _useStreaming = useStreaming;
-        _conversationSummaryMemory = memory;
+        _messageFormatter = new MessageFormatter
+        {
+            AiPrefix = "",
+            HumanPrefix = "",
+            SystemPrefix = ""
+        };
+
+        _chatMessageHistory = new ChatMessageHistory()
+        {
+            // Do not save human messages
+            IsMessageAccepted = x => (x.Role != MessageRole.Human)
+        };
+
+        _conversationBufferMemory = new ConversationBufferMemory(_chatMessageHistory)
+        {
+            Formatter = _messageFormatter
+        };
     }
 
     private void InitializeChain()
@@ -99,14 +120,11 @@ New input: {input}";
             | Set(tools, "tools")
             | Set(toolNames, "tool_names")
             | Set(_actionPrompt, "action")
-            | LoadMemory(_conversationSummaryMemory, "history")
+            | Set(_gameSummary, "summary")
+            | LoadMemory(_conversationBufferMemory, "history")
             | Template(_reActPrompt)
-            | LLM(_model, settings: new ChatSettings
-            {
-                StopSequences = ["Observation", "[END]"],
-                UseStreaming = _useStreaming
-            }).UseCache(_useCache)
-            | UpdateMemory(_conversationSummaryMemory, "input", "text")
+            | LLM(_model).UseCache(_useCache)
+            | UpdateMemory(_conversationBufferMemory, "input", "text")
             | ReActParser("text", ReActAnswer);
 
 
@@ -151,10 +169,10 @@ New input: {input}";
                     var action = (AgentAction)res.Value[ReActAnswer];
                     var tool = _tools[action.Action.ToLower(CultureInfo.InvariantCulture)];
                     var toolRes = await tool.ToolTask(action.ActionInput, cancellationToken).ConfigureAwait(false);
-                    await _conversationSummaryMemory.ChatHistory
+                    await _conversationBufferMemory.ChatHistory
                         .AddMessage(new Message("Observation: " + toolRes, MessageRole.System))
                         .ConfigureAwait(false);
-                    await _conversationSummaryMemory.ChatHistory.AddMessage(new Message("Thought:", MessageRole.System))
+                    await _conversationBufferMemory.ChatHistory.AddMessage(new Message("Thought:", MessageRole.System))
                         .ConfigureAwait(false);
                     break;
                 case AgentFinish:

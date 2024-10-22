@@ -1,6 +1,5 @@
 using Blazored.Modal;
 using ChatRPG.API;
-using ChatRPG.API.Memory;
 using ChatRPG.Areas.Identity;
 using ChatRPG.Data;
 using ChatRPG.Data.Models;

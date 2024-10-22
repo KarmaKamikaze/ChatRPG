@@ -35,7 +35,7 @@ public class LlmEventProcessor
         {
             if (_foundFinalAnswer)
             {
-                // Directly output content after "Final answer: " has been detected
+                // Directly output content after "Final Answer: " has been detected
                 _channel.Writer.TryWrite(delta.Content);
             }
             else
@@ -43,19 +43,19 @@ public class LlmEventProcessor
                 // Accumulate the content in the buffer
                 _buffer.Append(delta.Content);
 
-                // Check if the buffer contains "Final answer: "
+                // Check if the buffer contains "Final Answer: "
                 var bufferString = _buffer.ToString();
-                int finalAnswerIndex = bufferString.IndexOf("Final Answer: ", StringComparison.Ordinal);
+                int finalAnswerIndex = bufferString.IndexOf("Final Answer:", StringComparison.Ordinal);
 
                 if (finalAnswerIndex != -1)
                 {
-                    // Output everything after "Final answer: " has been detected
-                    int startOutputIndex = finalAnswerIndex + "Final Answer: ".Length;
+                    // Output everything after "Final Answer: " has been detected
+                    int startOutputIndex = finalAnswerIndex + "Final Answer:".Length;
 
                     // Switch to streaming mode
                     _foundFinalAnswer = true;
 
-                    // Output any content after "Final answer: "
+                    // Output any content after "Final Answer: "
                     _channel.Writer.TryWrite(bufferString[startOutputIndex..]);
 
                     // Clear the buffer since it's no longer needed
@@ -69,10 +69,12 @@ public class LlmEventProcessor
     {
         lock (_lock)
         {
+            _buffer.Clear(); // Clear buffer to avoid carrying over any previous data
+            if (!_foundFinalAnswer) return;
+
             // Reset the state so that the process can start over
             _foundFinalAnswer = false;
             _channel.Writer.TryComplete();
-            _buffer.Clear(); // Clear buffer to avoid carrying over any previous data
         }
     }
 }

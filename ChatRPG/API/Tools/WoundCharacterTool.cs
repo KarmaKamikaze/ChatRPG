@@ -3,7 +3,6 @@ using LangChain.Chains.StackableChains.Agents.Tools;
 using System.Text.Json;
 using JsonSerializerOptions = System.Text.Json.JsonSerializerOptions;
 
-
 namespace ChatRPG.API.Tools;
 
 public class WoundCharacterTool(
@@ -33,7 +32,7 @@ public class WoundCharacterTool(
             var effectInput = JsonSerializer.Deserialize<EffectInput>(input, JsonOptions) ??
                               throw new JsonException("Failed to deserialize");
 
-            var instruction = configuration.GetSection("SystemPrompts")?.GetValue<string>("WoundCharacterInstruction")!;
+            var instruction = configuration.GetSection("SystemPrompts").GetValue<string>("WoundCharacterInstruction")!;
             var character = await utilities.FindCharacter(campaign, effectInput.Input!, instruction);
 
             if (character is null)
@@ -55,11 +54,11 @@ public class WoundCharacterTool(
                 if (character.IsPlayer)
                 {
                     return result +
-                           $"With no health points remaining, {character.Name} dies and the adventure is over. No more actions can be taken.";
+                           $" With no health points remaining, {character.Name} dies and the adventure is over. No more actions can be taken.";
                 }
 
                 return result +
-                       $"With no health points remaining, {character.Name} dies and can no longer perform actions in the narrative.";
+                       $" With no health points remaining, {character.Name} dies and can no longer perform actions in the narrative.";
             }
 
             // Character survived

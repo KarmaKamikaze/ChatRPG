@@ -2,12 +2,12 @@ using LangChain.Memory;
 using LangChain.Providers;
 using static LangChain.Chains.Chain;
 
-namespace ChatRPG.API.Memory;
+namespace ChatRPG.API;
 
 public static class ChatRPGSummarizer
 {
     public const string SummaryPrompt = @"
-Progressively summarize the interaction between the player and the GM. The player describes their actions in response to the game world, and the GM narrates the outcome, revealing the next part of the adventure. Return a new summary based on each exchange taking into account the previous summary.
+Progressively summarize the interaction between the player and the GM. Append to the summary so that new messages are most represented, while still remembering key details of the far past. The player describes their actions in response to the game world, and the GM narrates the outcome, revealing the next part of the adventure. Return a new summary based on each exchange taking into account the previous summary.
 
 EXAMPLE
 Current summary:

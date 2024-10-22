@@ -145,9 +145,9 @@ public partial class CampaignPage
         OpenAiGptMessage userInput = new(MessageRole.User, _userInput, _activeUserPromptType);
         _conversation.Add(userInput);
         _latestPlayerMessage = userInput;
-        await ScrollToElement(BottomId);
-        await GameInputHandler!.HandleUserPrompt(_campaign, _activeUserPromptType, _userInput);
         _userInput = string.Empty;
+        await ScrollToElement(BottomId);
+        await GameInputHandler!.HandleUserPrompt(_campaign, _activeUserPromptType, userInput.Content);
         _conversation.RemoveAll(m => m.Role.Equals(MessageRole.System));
         UpdateStatsUi();
     }
