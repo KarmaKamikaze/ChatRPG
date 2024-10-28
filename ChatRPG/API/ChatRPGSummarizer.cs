@@ -4,6 +4,7 @@ using static LangChain.Chains.Chain;
 
 namespace ChatRPG.API;
 
+// ReSharper disable once InconsistentNaming
 public static class ChatRPGSummarizer
 {
     public const string SummaryPrompt = @"

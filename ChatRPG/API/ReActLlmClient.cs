@@ -1,4 +1,3 @@
-using System.Text;
 using ChatRPG.API.Tools;
 using ChatRPG.Data.Models;
 using LangChain.Chains.StackableChains.Agents.Tools;
@@ -18,11 +17,11 @@ public class ReActLlmClient : IReActLlmClient
 
     public ReActLlmClient(IConfiguration configuration)
     {
-        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("ApiKeys")?.GetValue<string>("OpenAI"));
-        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts")?.GetValue<string>("ReAct"));
+        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI"));
+        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts").GetValue<string>("ReAct"));
         _configuration = configuration;
-        _reActPrompt = _configuration.GetSection("SystemPrompts")?.GetValue<string>("ReAct")!;
-        _provider = new OpenAiProvider(_configuration.GetSection("ApiKeys")?.GetValue<string>("OpenAI")!);
+        _reActPrompt = _configuration.GetSection("SystemPrompts").GetValue<string>("ReAct")!;
+        _provider = new OpenAiProvider(_configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
     }
 
     public async Task<string> GetChatCompletionAsync(Campaign campaign, string actionPrompt, string input)
