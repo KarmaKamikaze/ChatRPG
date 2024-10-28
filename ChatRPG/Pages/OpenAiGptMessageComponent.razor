@@ -1,10 +1,9 @@
 ﻿@using ChatRPG.API
-@using OpenAI_API.Chat
-@using static OpenAI_API.Chat.ChatMessageRole
+@using static Data.Models.MessageRole
 @inherits ComponentBase
 
 <div class="message-container message-container-@($"{MessagePrefix.ToLower()}")" id="conversation-message">
-    <p class="message message-@($"{MessagePrefix.ToLower()}")"><span class="fw-bold">@(MessagePrefix):</span> @(Message.Role.Equals(Assistant) ? Message.NarrativePart : Message.Content)</p>
+    <p class="message message-@($"{MessagePrefix.ToLower()}")"><span class="fw-bold">@(MessagePrefix):</span> @(Message.Content)</p>
 </div>
 
 @code {
@@ -12,5 +11,5 @@
     public required OpenAiGptMessage Message { get; set; }
 
     private string MessagePrefix => Message.Role.Equals(Assistant)
-        ? "Assistant" : "Player";
+        ? "GM" : "Player";
 }

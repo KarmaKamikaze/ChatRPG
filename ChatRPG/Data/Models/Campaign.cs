@@ -24,6 +24,7 @@ public class Campaign
     public string Title { get; private set; } = null!;
     public DateTime StartedOn { get; private set; }
     public ICollection<Message> Messages { get; } = new List<Message>();
+    public string? GameSummary { get; set; }
     public ICollection<Character> Characters { get; } = new List<Character>();
     public ICollection<Environment> Environments { get; } = new List<Environment>();
     public Character Player => Characters.First(c => c.IsPlayer);

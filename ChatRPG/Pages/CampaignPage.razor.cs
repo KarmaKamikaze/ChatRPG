@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
-using OpenAI_API.Chat;
 using Environment = ChatRPG.Data.Models.Environment;
 using OpenAiGptMessage = ChatRPG.API.OpenAiGptMessage;
 
@@ -114,9 +113,9 @@ public partial class CampaignPage
         }
 
         _isWaitingForResponse = true;
-        OpenAiGptMessage message = new(ChatMessageRole.System, content);
+        OpenAiGptMessage message = new(MessageRole.System, content);
         _conversation.Add(message);
-        GameInputHandler?.HandleInitialPrompt(_campaign, _conversation);
+        GameInputHandler?.HandleInitialPrompt(_campaign, content);
         UpdateStatsUi();
     }
 
@@ -143,13 +142,13 @@ public partial class CampaignPage
         }
 
         _isWaitingForResponse = true;
-        OpenAiGptMessage userInput = new(ChatMessageRole.User, _userInput, _activeUserPromptType);
+        OpenAiGptMessage userInput = new(MessageRole.User, _userInput, _activeUserPromptType);
         _conversation.Add(userInput);
         _latestPlayerMessage = userInput;
         _userInput = string.Empty;
         await ScrollToElement(BottomId);
-        await GameInputHandler!.HandleUserPrompt(_campaign, _conversation);
-        _conversation.RemoveAll(m => m.Role.Equals(ChatMessageRole.System));
+        await GameInputHandler!.HandleUserPrompt(_campaign, _activeUserPromptType, userInput.Content);
+        _conversation.RemoveAll(m => m.Role.Equals(MessageRole.System));
         UpdateStatsUi();
     }
 
@@ -191,7 +190,7 @@ public partial class CampaignPage
     /// <param name="eventArgs">The arguments for this event, including the text chunk and whether the streaming is done.</param>
     private void OnChatCompletionChunkReceived(object? sender, ChatCompletionChunkReceivedEventArgs eventArgs)
     {
-        OpenAiGptMessage message = _conversation.LastOrDefault(new OpenAiGptMessage(ChatMessageRole.Assistant, ""));
+        OpenAiGptMessage message = _conversation.LastOrDefault(new OpenAiGptMessage(MessageRole.Assistant, ""));
         if (eventArgs.IsStreamingDone)
         {
             _isWaitingForResponse = false;
