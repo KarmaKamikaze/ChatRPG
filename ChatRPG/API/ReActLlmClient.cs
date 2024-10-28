@@ -121,6 +121,19 @@ public class ReActLlmClient : IReActLlmClient
             "only raw JSON as input. Use this tool only once per character at most.");
         tools.Add(woundCharacterTool);
 
+        var healCharacterTool = new HealCharacterTool(_configuration, campaign, utils, "healcharactertool",
+            "This tool must be used when a character performs an action that could heal or restore them to " +
+            "health after being wounded. The tool is only appropriate if the healing can be done without any " +
+            "further actions. Example: A character is wounded by an enemy attack and the player decides to heal " +
+            "the character. Another example would be a scenario where a character consumes a beneficial item like " +
+            "a potion, a magical item, or spends time in an area that could provide healing " +
+            "benefits. Resting may provide modest healing effects depending on the duration of the rest. " +
+            "Input to this tool must be in the following RAW JSON format: {\"input\": \"The game " +
+            "summary appended with the player's input\", \"magnitude\": \"Describes how much health the character will " +
+            "regain based on the action. Can be one of the following values: {low, medium, high, extraordinary}}\". " +
+            "Do not use markdown, only raw JSON as input. Use this tool only once per character at most.");
+        tools.Add(healCharacterTool);
+
         // Use battle when an attack can be mitigated or dodged by the involved participants.
         // This tool is appropriate for combat, battle between multiple participants,
         // or attacks that can be avoided and a to-hit roll would be needed in order to determine a hit.
