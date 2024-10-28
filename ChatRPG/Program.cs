@@ -25,10 +25,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddBlazoredModal();
 
-HttpMessageHandlerFactory httpMessageHandlerFactory = new HttpMessageHandlerFactory(configuration);
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<User>>()
-    .AddSingleton(httpMessageHandlerFactory)
-    .AddSingleton<IHttpClientFactory, HttpClientFactory>()
     .AddTransient<IReActLlmClient, ReActLlmClient>()
     .AddScoped<IPersistenceService, EfPersistenceService>()
     .AddTransient<IEmailSender, EmailSender>()
