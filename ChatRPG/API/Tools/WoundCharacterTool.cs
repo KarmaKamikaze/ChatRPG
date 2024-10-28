@@ -37,7 +37,8 @@ public class WoundCharacterTool(
 
             if (character is null)
             {
-                return "Could not determine the character to wound.";
+                return "Could not determine the character to wound. The character does not exist in the game. " +
+                       "Consider creating the character before wounding it.";
             }
 
             // Determine damage
@@ -68,7 +69,8 @@ public class WoundCharacterTool(
         }
         catch (Exception)
         {
-            return "Could not determine the character to wound";
+            return "Could not determine the character to wound. Tool input format was invalid. " +
+                   "Please provide a valid character name, description, and severity level in valid JSON without markdown.";
         }
     }
 }
