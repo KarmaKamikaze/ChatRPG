@@ -37,7 +37,7 @@ public class HealCharacterTool(
             if (character is null)
             {
                 return "Could not determine the character to heal. The character does not exist in the game. " +
-                       "Consider creating the character before wounding it.";
+                       "Consider creating the character before healing it.";
             }
 
             // Determine damage
