@@ -29,7 +29,7 @@ public class HealCharacterTool(
         try
         {
             var healInput = JsonSerializer.Deserialize<HealInput>(input, JsonOptions) ??
-                              throw new JsonException("Failed to deserialize");
+                            throw new JsonException("Failed to deserialize");
 
             var instruction = configuration.GetSection("SystemPrompts").GetValue<string>("HealCharacterInstruction")!;
             var character = await utilities.FindCharacter(campaign, healInput.Input!, instruction);
@@ -47,8 +47,9 @@ public class HealCharacterTool(
 
             character.AdjustHealth(healing);
 
-            return $"The character {character.Name} is healed for {healing} health points. They now have {character.CurrentHealth} health points out of a total of {character.MaxHealth}.";
-
+            return
+                $"The character {character.Name} is healed for {healing} health points. " +
+                $"They now have {character.CurrentHealth} health points out of a total of {character.MaxHealth}.";
         }
         catch (Exception)
         {

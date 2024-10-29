@@ -28,8 +28,8 @@ public class ReActLlmClient : IReActLlmClient
         {
             Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.7 }
         };
-        var agent = new ReActAgentChain(llm, _reActPrompt, actionPrompt:actionPrompt, campaign.GameSummary);
-        var tools = CreateTools(campaign, actionPrompt);
+        var agent = new ReActAgentChain(llm, _reActPrompt, actionPrompt: actionPrompt, campaign.GameSummary);
+        var tools = CreateTools(campaign);
         foreach (var tool in tools)
         {
             agent.UseTool(tool);
@@ -48,8 +48,8 @@ public class ReActLlmClient : IReActLlmClient
         };
 
         var eventProcessor = new LlmEventProcessor(agentLlm);
-        var agent = new ReActAgentChain(agentLlm, _reActPrompt, actionPrompt:actionPrompt, campaign.GameSummary);
-        var tools = CreateTools(campaign, actionPrompt);
+        var agent = new ReActAgentChain(agentLlm, _reActPrompt, actionPrompt: actionPrompt, campaign.GameSummary);
+        var tools = CreateTools(campaign);
         foreach (var tool in tools)
         {
             agent.UseTool(tool);
@@ -67,18 +67,10 @@ public class ReActLlmClient : IReActLlmClient
         await response;
     }
 
-    private List<AgentTool> CreateTools(Campaign campaign, string actionPrompt)
+    private List<AgentTool> CreateTools(Campaign campaign)
     {
         var tools = new List<AgentTool>();
         var utils = new ToolUtilities(_configuration);
-
-        /*var narrativeTool = new NarrativeTool(_configuration, campaign, actionPrompt, "narrativetool",
-            "This tool must be used when the player's input requires a narrative response. " +
-            "The tool is appropriate for any action that requires a narrative response. " +
-            "Example: A player's input could be to explore a new area, " +
-            "interact with a non-player character, or perform a specific action. " +
-            "Input to this tool must be the player's most recent action.");
-        tools.Add(narrativeTool);*/
 
         var woundCharacterTool = new WoundCharacterTool(_configuration, campaign, utils, "woundcharactertool",
             "This tool must be used when a character will be hurt or wounded resulting from unnoticed attacks" +
