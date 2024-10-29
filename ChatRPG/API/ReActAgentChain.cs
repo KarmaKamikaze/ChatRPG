@@ -14,19 +14,17 @@ public sealed class ReActAgentChain : BaseStackableChain
 {
     private const string ReActAnswer = "answer";
     private readonly ConversationBufferMemory _conversationBufferMemory;
-    private readonly ChatMessageHistory _chatMessageHistory;
-    private readonly MessageFormatter _messageFormatter;
     private readonly int _maxActions;
     private readonly IChatModel _model;
     private readonly string _reActPrompt;
-    private readonly string _actionPrompt;
+    private readonly string _actionPrompt = string.Empty;
     private StackChain? _chain;
     private readonly Dictionary<string, AgentTool> _tools = new();
     private bool _useCache;
     private string _userInput = string.Empty;
     private readonly string _gameSummary;
-    private string _characters = string.Empty;
-    private string _environments = string.Empty;
+    private readonly string _characters = string.Empty;
+    private readonly string _environments = string.Empty;
 
     public string DefaultPrompt = @"Assistant is a large language model trained by OpenAI.
 
@@ -91,22 +89,22 @@ New input: {input}";
         InputKeys = [inputKey];
         OutputKeys = [outputKey];
 
-        _messageFormatter = new MessageFormatter
+        var messageFormatter = new MessageFormatter
         {
             AiPrefix = "",
             HumanPrefix = "",
             SystemPrefix = ""
         };
 
-        _chatMessageHistory = new ChatMessageHistory()
+        var chatMessageHistory = new ChatMessageHistory()
         {
             // Do not save human messages
             IsMessageAccepted = x => (x.Role != MessageRole.Human)
         };
 
-        _conversationBufferMemory = new ConversationBufferMemory(_chatMessageHistory)
+        _conversationBufferMemory = new ConversationBufferMemory(chatMessageHistory)
         {
-            Formatter = _messageFormatter
+            Formatter = messageFormatter
         };
     }
 
