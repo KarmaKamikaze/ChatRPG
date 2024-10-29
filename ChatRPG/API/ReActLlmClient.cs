@@ -4,8 +4,6 @@ using LangChain.Chains.StackableChains.Agents.Tools;
 using LangChain.Providers.OpenAI;
 using LangChain.Providers.OpenAI.Predefined;
 using static LangChain.Chains.Chain;
-using Message = ChatRPG.Data.Models.Message;
-using MessageRole = ChatRPG.Data.Models.MessageRole;
 
 namespace ChatRPG.API;
 
@@ -28,21 +26,17 @@ public class ReActLlmClient : IReActLlmClient
     {
         var llm = new Gpt4Model(_provider)
         {
-            Settings = new OpenAiChatSettings() { UseStreaming = false }
+            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.7 }
         };
-        var agent = new ReActAgentChain(llm, _reActPrompt, actionPrompt, campaign.GameSummary);
-        var tools = CreateTools(campaign);
+        var agent = new ReActAgentChain(llm, _reActPrompt, actionPrompt:actionPrompt, campaign.GameSummary);
+        var tools = CreateTools(campaign, actionPrompt);
         foreach (var tool in tools)
         {
             agent.UseTool(tool);
         }
 
         var chain = Set(input, "input") | agent;
-        var result = await chain.RunAsync("text");
-
-        await UpdateCampaign(campaign, input, result!);
-
-        return result!;
+        return (await chain.RunAsync("text"))!;
     }
 
     public async IAsyncEnumerable<string> GetStreamedChatCompletionAsync(Campaign campaign, string actionPrompt,
@@ -50,12 +44,12 @@ public class ReActLlmClient : IReActLlmClient
     {
         var agentLlm = new Gpt4Model(_provider)
         {
-            Settings = new OpenAiChatSettings() { UseStreaming = true, Temperature = 0.7, }
+            Settings = new OpenAiChatSettings() { UseStreaming = true, Temperature = 0.7 }
         };
 
         var eventProcessor = new LlmEventProcessor(agentLlm);
-        var agent = new ReActAgentChain(agentLlm, _reActPrompt, actionPrompt, campaign.GameSummary);
-        var tools = CreateTools(campaign);
+        var agent = new ReActAgentChain(agentLlm, _reActPrompt, actionPrompt:actionPrompt, campaign.GameSummary);
+        var tools = CreateTools(campaign, actionPrompt);
         foreach (var tool in tools)
         {
             agent.UseTool(tool);
@@ -70,44 +64,21 @@ public class ReActLlmClient : IReActLlmClient
             yield return content;
         }
 
-        var result = await response;
-
-        await UpdateCampaign(campaign, input, result!);
+        await response;
     }
 
-    private async Task UpdateCampaign(Campaign campaign, string playerInput, string assistantOutput)
-    {
-        var newMessages = new List<LangChain.Providers.Message>
-        {
-            new(playerInput, LangChain.Providers.MessageRole.Human),
-            new(assistantOutput, LangChain.Providers.MessageRole.Ai)
-        };
-
-        var summaryLlm = new Gpt4Model(_provider)
-        {
-            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.7 }
-        };
-
-        campaign.GameSummary = await summaryLlm.SummarizeAsync(newMessages, campaign.GameSummary ?? "");
-        foreach (var message in newMessages)
-        {
-            // Only add the message, if the list is empty.
-            // This is because if the list is empty, the input is the initial prompt. Not player input.
-            if (campaign.Messages.Count == 0 && message.Role == LangChain.Providers.MessageRole.Human)
-            {
-                continue;
-            }
-
-            campaign.Messages.Add(new Message(campaign,
-                (message.Role == LangChain.Providers.MessageRole.Human ? MessageRole.User : MessageRole.Assistant),
-                message.Content.Trim()));
-        }
-    }
-
-    private List<AgentTool> CreateTools(Campaign campaign)
+    private List<AgentTool> CreateTools(Campaign campaign, string actionPrompt)
     {
         var tools = new List<AgentTool>();
         var utils = new ToolUtilities(_configuration);
+
+        /*var narrativeTool = new NarrativeTool(_configuration, campaign, actionPrompt, "narrativetool",
+            "This tool must be used when the player's input requires a narrative response. " +
+            "The tool is appropriate for any action that requires a narrative response. " +
+            "Example: A player's input could be to explore a new area, " +
+            "interact with a non-player character, or perform a specific action. " +
+            "Input to this tool must be the player's most recent action.");
+        tools.Add(narrativeTool);*/
 
         var woundCharacterTool = new WoundCharacterTool(_configuration, campaign, utils, "woundcharactertool",
             "This tool must be used when a character will be hurt or wounded resulting from unnoticed attacks" +
@@ -115,9 +86,9 @@ public class ReActLlmClient : IReActLlmClient
             "cannot be mitigated, dodged, or avoided. Example: A character performs a sneak attack " +
             "without being spotted by the enemies they try to attack. A dangerous activity could be to threateningly " +
             "approach a King, which may result in injury when his guards step forward to stop the character. " +
-            "Input to this tool must be in the following RAW JSON format: {\"input\": \"The game summary appended with the " +
-            "player's input\", \"severity\": \"Describes how devastating the injury to the character will be based on " +
-            "the action. Can be one of the following values: {low, medium, high, extraordinary}}\". Do not use markdown, " +
+            "Input to this tool must be in the following RAW JSON format: {\"input\": \"The player's input\", " +
+            "\"severity\": \"Describes how devastating the injury to the character will be based on the action. " +
+            "Can be one of the following values: {low, medium, high, extraordinary}}\". Do not use markdown, " +
             "only raw JSON as input. Use this tool only once per character at most.");
         tools.Add(woundCharacterTool);
 
@@ -128,9 +99,9 @@ public class ReActLlmClient : IReActLlmClient
             "the character. Another example would be a scenario where a character consumes a beneficial item like " +
             "a potion, a magical item, or spends time in an area that could provide healing " +
             "benefits. Resting may provide modest healing effects depending on the duration of the rest. " +
-            "Input to this tool must be in the following RAW JSON format: {\"input\": \"The game " +
-            "summary appended with the player's input\", \"magnitude\": \"Describes how much health the character will " +
-            "regain based on the action. Can be one of the following values: {low, medium, high, extraordinary}}\". " +
+            "Input to this tool must be in the following RAW JSON format: {\"input\": \"The player's input\", " +
+            "\"magnitude\": \"Describes how much health the character will regain based on the action. " +
+            "Can be one of the following values: {low, medium, high, extraordinary}}\". " +
             "Do not use markdown, only raw JSON as input. Use this tool only once per character at most.");
         tools.Add(healCharacterTool);
 

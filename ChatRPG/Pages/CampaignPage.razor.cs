@@ -34,8 +34,7 @@ public partial class CampaignPage
     private static readonly Dictionary<UserPromptType, string> InputPlaceholder = new()
     {
         { UserPromptType.Do, "What do you do?" },
-        { UserPromptType.Say, "What do you say?" },
-        { UserPromptType.Attack, "How do you attack?" }
+        { UserPromptType.Say, "What do you say?" }
     };
 
     private string SpinnerContainerStyle => _isWaitingForResponse
@@ -70,7 +69,7 @@ public partial class CampaignPage
         {
             _npcList = _campaign!.Characters.Where(c => !c.IsPlayer).ToList();
             _npcList.Reverse();
-            _currentLocation = _campaign.Environments.LastOrDefault();
+            _currentLocation = _campaign.Player.Environment;
             _mainCharacter = _campaign.Player;
 
             _conversation = _campaign.Messages.OrderBy(m => m.Timestamp)
@@ -222,9 +221,6 @@ public partial class CampaignPage
                 break;
             case UserPromptType.Say:
                 _userInputPlaceholder = InputPlaceholder[UserPromptType.Say];
-                break;
-            case UserPromptType.Attack:
-                _userInputPlaceholder = InputPlaceholder[UserPromptType.Attack];
                 break;
             default:
                 _userInputPlaceholder = InputPlaceholder[UserPromptType.Do];

@@ -3,7 +3,5 @@
 public enum UserPromptType
 {
     Do,
-    Say,
-    Attack
+    Say
 }
-

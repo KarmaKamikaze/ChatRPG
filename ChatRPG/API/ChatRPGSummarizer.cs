@@ -8,7 +8,7 @@ namespace ChatRPG.API;
 public static class ChatRPGSummarizer
 {
     public const string SummaryPrompt = @"
-Progressively summarize the interaction between the player and the GM. Append to the summary so that new messages are most represented, while still remembering key details of the far past. The player describes their actions in response to the game world, and the GM narrates the outcome, revealing the next part of the adventure. Return a new summary based on each exchange taking into account the previous summary.
+Progressively summarize the interaction between the player and the GM. Append to the summary so that new messages are most represented, while still remembering key details of the far past. The player describes their actions in response to the game world, and the GM narrates the outcome, revealing the next part of the adventure. Return a new summary based on each exchange taking into account the previous summary. Expand the summary so that it is long enough to capture the essence of the story from the beginning without forgetting key details. Do not remove important people, events, or locations from the summary.
 
 EXAMPLE
 Current summary:

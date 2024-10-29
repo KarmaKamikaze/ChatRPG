@@ -25,6 +25,8 @@ public sealed class ReActAgentChain : BaseStackableChain
     private bool _useCache;
     private string _userInput = string.Empty;
     private readonly string _gameSummary;
+    private string _characters = string.Empty;
+    private string _environments = string.Empty;
 
     public string DefaultPrompt = @"Assistant is a large language model trained by OpenAI.
 
@@ -75,7 +77,6 @@ New input: {input}";
     public ReActAgentChain(
         IChatModel model,
         string? reActPrompt = null,
-        string? actionPrompt = null,
         string? gameSummary = null,
         string inputKey = "input",
         string outputKey = "text",
@@ -84,7 +85,6 @@ New input: {input}";
         _model = model;
         _model.Settings!.StopSequences = ["Observation", "[END]"];
         _reActPrompt = reActPrompt ?? DefaultPrompt;
-        _actionPrompt = actionPrompt ?? string.Empty;
         _maxActions = maxActions;
         _gameSummary = gameSummary ?? string.Empty;
 
@@ -110,25 +110,72 @@ New input: {input}";
         };
     }
 
+    public ReActAgentChain(
+        IChatModel model,
+        string reActPrompt,
+        string? actionPrompt = null,
+        string? gameSummary = null,
+        string inputKey = "input",
+        string outputKey = "text",
+        int maxActions = 10) : this(model, reActPrompt, gameSummary, inputKey, outputKey, maxActions)
+    {
+        _actionPrompt = actionPrompt ?? string.Empty;
+    }
+
+    public ReActAgentChain(
+        IChatModel model,
+        string reActPrompt,
+        string characters,
+        string environments,
+        string? gameSummary = null,
+        string inputKey = "input",
+        string outputKey = "text",
+        int maxActions = 10) : this(model, reActPrompt, gameSummary, inputKey, outputKey, maxActions)
+    {
+        _characters = characters;
+        _environments = environments;
+    }
+
+
     private void InitializeChain()
     {
         var toolNames = string.Join(",", _tools.Select(x => x.Key));
         var tools = string.Join("\n", _tools.Select(x => $"{x.Value.Name}, {x.Value.Description}"));
 
-        var chain =
-            Set(() => _userInput, "input")
-            | Set(tools, "tools")
-            | Set(toolNames, "tool_names")
-            | Set(_actionPrompt, "action")
-            | Set(_gameSummary, "summary")
-            | LoadMemory(_conversationBufferMemory, "history")
-            | Template(_reActPrompt)
-            | LLM(_model).UseCache(_useCache)
-            | UpdateMemory(_conversationBufferMemory, "input", "text")
-            | ReActParser("text", ReActAnswer);
 
+        if (_characters == "")
+        {
+            var chain =
+                Set(() => _userInput, "input")
+                | Set(tools, "tools")
+                | Set(toolNames, "tool_names")
+                | Set(_actionPrompt, "action")
+                | Set(_gameSummary, "summary")
+                | LoadMemory(_conversationBufferMemory, "history")
+                | Template(_reActPrompt)
+                | LLM(_model).UseCache(_useCache)
+                | UpdateMemory(_conversationBufferMemory, "input", "text")
+                | ReActParser("text", ReActAnswer);
 
-        _chain = chain;
+            _chain = chain;
+        }
+        else
+        {
+            var chain =
+                Set(() => _userInput, "input")
+                | Set(tools, "tools")
+                | Set(toolNames, "tool_names")
+                | Set(_characters, "characters")
+                | Set(_environments, "environments")
+                | Set(_gameSummary, "summary")
+                | LoadMemory(_conversationBufferMemory, "history")
+                | Template(_reActPrompt)
+                | LLM(_model).UseCache(_useCache)
+                | UpdateMemory(_conversationBufferMemory, "input", "text")
+                | ReActParser("text", ReActAnswer);
+
+            _chain = chain;
+        }
     }
 
     public ReActAgentChain UseCache(bool enabled = true)

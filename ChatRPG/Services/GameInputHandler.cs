@@ -275,16 +275,19 @@ public class GameInputHandler
                 OnChatCompletionChunkReceived(isStreamingDone: false, chunk);
             }
 
-            OnChatCompletionChunkReceived(isStreamingDone: true);
+            await _gameStateManager.StoreMessagesInCampaign(campaign, input, message.Content);
+            await _gameStateManager.UpdateCampaignFromNarrative(campaign, message.Content);
         }
         else
         {
             string response = await _llmClient.GetChatCompletionAsync(campaign, actionPrompt, input);
             OpenAiGptMessage message = new(MessageRole.Assistant, response);
             OnChatCompletionReceived(message);
+            await _gameStateManager.StoreMessagesInCampaign(campaign, input, response);
+            await _gameStateManager.UpdateCampaignFromNarrative(campaign, response);
         }
 
-
         await _gameStateManager.SaveCurrentState(campaign);
+        OnChatCompletionChunkReceived(isStreamingDone: true);
     }
 }
