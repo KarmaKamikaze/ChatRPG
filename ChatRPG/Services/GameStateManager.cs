@@ -67,7 +67,7 @@ public class GameStateManager
 
         environments.Append("\n]}");
 
-        var agent = new ReActAgentChain(llm, _updateCampaignPrompt, characters.ToString(), campaign.Player.Name, 
+        var agent = new ReActAgentChain(llm, _updateCampaignPrompt, characters.ToString(), campaign.Player.Name,
             environments.ToString(), gameSummary: campaign.GameSummary);
 
         var tools = CreateTools(campaign);
