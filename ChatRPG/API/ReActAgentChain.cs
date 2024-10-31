@@ -141,13 +141,16 @@ New input: {input}";
         var tools = string.Join("\n", _tools.Select(x => $"{x.Value.Name}, {x.Value.Description}"));
 
 
-        if (_characters == "")
-        {
-            var chain =
-                Set(() => _userInput, "input")
-                | Set(tools, "tools")
-                | Set(toolNames, "tool_names")
-                | Set(_actionPrompt, "action")
+        var chain =
+            Set(() => _userInput, "input")
+            | Set(tools, "tools")
+            | Set(toolNames, "tool_names");
+
+        chain = _characters == ""
+            ? chain | Set(_actionPrompt, "action")
+            : chain | Set(_characters, "characters") | Set(_environments, "environments");
+
+        chain = chain
                 | Set(_gameSummary, "summary")
                 | LoadMemory(_conversationBufferMemory, "history")
                 | Template(_reActPrompt)
@@ -155,25 +158,7 @@ New input: {input}";
                 | UpdateMemory(_conversationBufferMemory, "input", "text")
                 | ReActParser("text", ReActAnswer);
 
-            _chain = chain;
-        }
-        else
-        {
-            var chain =
-                Set(() => _userInput, "input")
-                | Set(tools, "tools")
-                | Set(toolNames, "tool_names")
-                | Set(_characters, "characters")
-                | Set(_environments, "environments")
-                | Set(_gameSummary, "summary")
-                | LoadMemory(_conversationBufferMemory, "history")
-                | Template(_reActPrompt)
-                | LLM(_model).UseCache(_useCache)
-                | UpdateMemory(_conversationBufferMemory, "input", "text")
-                | ReActParser("text", ReActAnswer);
-
-            _chain = chain;
-        }
+        _chain = chain;
     }
 
     public ReActAgentChain UseCache(bool enabled = true)
@@ -227,6 +212,6 @@ New input: {input}";
             }
         }
 
-        return values;
+        throw new ReActChainNoFinalAnswerReachedException("The ReAct Chain could not reach a final answer", values);
     }
 }

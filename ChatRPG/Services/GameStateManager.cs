@@ -6,6 +6,8 @@ using LangChain.Chains.StackableChains.Agents.Tools;
 using LangChain.Providers.OpenAI;
 using LangChain.Providers.OpenAI.Predefined;
 using static LangChain.Chains.Chain;
+using Message = ChatRPG.Data.Models.Message;
+using MessageRole = ChatRPG.Data.Models.MessageRole;
 
 namespace ChatRPG.Services;
 
@@ -20,9 +22,11 @@ public class GameStateManager
     {
         _configuration = configuration;
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI"));
-        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts").GetValue<string>("UpdateCampaignFromNarrative"));
+        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts")
+            .GetValue<string>("UpdateCampaignFromNarrative"));
         _provider = new OpenAiProvider(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
-        _updateCampaignPrompt = configuration.GetSection("SystemPrompts").GetValue<string>("UpdateCampaignFromNarrative")!;
+        _updateCampaignPrompt =
+            configuration.GetSection("SystemPrompts").GetValue<string>("UpdateCampaignFromNarrative")!;
         _persistenceService = persistenceService;
     }
 
@@ -55,7 +59,8 @@ public class GameStateManager
 
         foreach (var environment in campaign.Environments)
         {
-            environments.Append($"{{\"name:\" \"{environment.Name}\", \"description\": \"{environment.Description}\"}},");
+            environments.Append(
+                $"{{\"name:\" \"{environment.Name}\", \"description\": \"{environment.Description}\"}},");
         }
 
         environments.Length--; // Remove last comma
@@ -86,7 +91,10 @@ public class GameStateManager
             "Input to this tool must be in the following RAW JSON format: {\"name\": \"<character name>\", " +
             "\"description\": \"<new or updated character description>\", \"type\": \"<character type>\", " +
             "\"state\": \"<character health state>\"}, where type is one of the following: {Humanoid, SmallCreature, " +
-            "LargeCreature, Monster}, and state is one of the following: {Dead, Unconscious, HeavilyWounded, LightlyWounded, Healthy}.");
+            "LargeCreature, Monster}, and state is one of the following: {Dead, Unconscious, HeavilyWounded, " +
+            "LightlyWounded, Healthy}. The description of a character could describe their physical characteristics, " +
+            "personality, what they are known for, or other cool descriptive features. " +
+            "The tool should only be used once per character per narrative.");
         tools.Add(updateCharacterTool);
 
         return tools;

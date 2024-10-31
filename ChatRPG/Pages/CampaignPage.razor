@@ -54,7 +54,7 @@
             </div>
 
             <div class="conversation-text">
-                @foreach (OpenAiGptMessage message in _conversation.Where(m => !m.Role.Equals(MessageRole.System)))
+                @foreach (OpenAiGptMessage message in _conversation)
                 {
                     <OpenAiGptMessageComponent Message="@message"/>
                 }

@@ -3,13 +3,19 @@
 @inherits ComponentBase
 
 <div class="message-container message-container-@($"{MessagePrefix.ToLower()}")" id="conversation-message">
-    <p class="message message-@($"{MessagePrefix.ToLower()}")"><span class="fw-bold">@(MessagePrefix):</span> @(Message.Content)</p>
+    <p class="message message-@($"{MessagePrefix.ToLower()}")">
+        <span class="fw-bold">@(MessagePrefix):</span> @(Message.Content)
+    </p>
 </div>
 
 @code {
-    [Parameter]
-    public required OpenAiGptMessage Message { get; set; }
+    [Parameter] public required OpenAiGptMessage Message { get; set; }
 
-    private string MessagePrefix => Message.Role.Equals(Assistant)
-        ? "GM" : "Player";
+    private string MessagePrefix => Message.Role switch
+    {
+        Assistant => "GM",
+        System => "System",
+        _ => "Player"
+    };
+
 }

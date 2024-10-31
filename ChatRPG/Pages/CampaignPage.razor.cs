@@ -114,8 +114,22 @@ public partial class CampaignPage
         _isWaitingForResponse = true;
         OpenAiGptMessage message = new(MessageRole.System, content);
         _conversation.Add(message);
-        GameInputHandler?.HandleInitialPrompt(_campaign, content);
-        UpdateStatsUi();
+
+        try
+        {
+            GameInputHandler?.HandleInitialPrompt(_campaign, content);
+        }
+        catch (Exception)
+        {
+            _conversation.Add(new OpenAiGptMessage(MessageRole.System,
+                "An error occurred when generating the response \uD83D\uDCA9. " +
+                "Please try again by reloading the campaign."));
+            _isWaitingForResponse = false;
+        }
+        finally
+        {
+            UpdateStatsUi();
+        }
     }
 
     /// <summary>
@@ -146,9 +160,22 @@ public partial class CampaignPage
         _latestPlayerMessage = userInput;
         _userInput = string.Empty;
         await ScrollToElement(BottomId);
-        await GameInputHandler!.HandleUserPrompt(_campaign, _activeUserPromptType, userInput.Content);
-        _conversation.RemoveAll(m => m.Role.Equals(MessageRole.System));
-        UpdateStatsUi();
+        try
+        {
+            await GameInputHandler!.HandleUserPrompt(_campaign, _activeUserPromptType, userInput.Content);
+            _conversation.RemoveAll(m => m.Role.Equals(MessageRole.System));
+        }
+        catch (Exception)
+        {
+            _conversation.Add(new OpenAiGptMessage(MessageRole.System,
+                "An error occurred when generating the response \uD83D\uDCA9. Please try again."));
+            _campaign = await PersistenceService!.LoadFromCampaignIdAsync(_campaign.Id); // Rollback campaign
+            _isWaitingForResponse = false;
+        }
+        finally
+        {
+            UpdateStatsUi();
+        }
     }
 
     /// <summary>
