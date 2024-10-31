@@ -36,7 +36,6 @@ public class Character
     public string Description { get; set; } = null!;
     public int MaxHealth { get; private set; }
     public int CurrentHealth { get; private set; }
-    public ICollection<CharacterAbility?> CharacterAbilities { get; } = new List<CharacterAbility?>();
 
     /// <summary>
     /// Adjust the current health of this character.
@@ -46,23 +45,5 @@ public class Character
     {
         CurrentHealth = Math.Min(MaxHealth, Math.Max(0, CurrentHealth + value));
         return CurrentHealth <= 0;
-    }
-
-    /// <summary>
-    /// Creates a <see cref="CharacterAbility"/> for this character and the given <paramref name="ability"/>, and adds it to its list of <see cref="CharacterAbilities"/> if it does not already exist.
-    /// </summary>
-    /// <param name="ability">The ability to add.</param>
-    /// <returns>The created <see cref="CharacterAbility"/> entity.</returns>
-    public CharacterAbility? AddAbility(Ability ability)
-    {
-        CharacterAbility? charAbility = CharacterAbilities.FirstOrDefault(a => a!.Ability == ability, null);
-        if (charAbility is not null)
-        {
-            return charAbility;
-        }
-        charAbility = new CharacterAbility(this, ability);
-        CharacterAbilities.Add(charAbility);
-
-        return charAbility;
     }
 }

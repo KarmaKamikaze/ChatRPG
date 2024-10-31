@@ -68,9 +68,6 @@ public class EfPersistenceService(ILogger<EfPersistenceService> logger, Applicat
             .Include(campaign => campaign.Messages)
             .Include(campaign => campaign.Environments)
             .Include(campaign => campaign.Characters)
-            .ThenInclude(character => character.CharacterAbilities)
-            .ThenInclude(characterAbility => characterAbility!.Ability)
-            .AsSplitQuery()
             .FirstAsync();
     }
 

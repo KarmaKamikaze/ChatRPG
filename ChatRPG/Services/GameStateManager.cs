@@ -96,6 +96,15 @@ public class GameStateManager
             "personality, what they are known for, or other cool descriptive features. " +
             "The tool should only be used once per character per narrative.");
         tools.Add(updateCharacterTool);
+        
+        var updateEnvironmentTool = new UpdateEnvironmentTool(campaign, "updateenvironmenttool",
+            "This tool must be used to create a new environment or update an existing environment in the campaign. " +
+            "Example: The narrative text mentions a new environment or contains changes to an existing environment. " +
+            "Input to this tool must be in the following RAW JSON format: {\"name\": \"<environment name>\", " +
+            "\"description\": \"<new or updated environment description>\"}, where the description of an environment " +
+            "could describe its physical characteristics, the creatures that inhabit it, the weather, or other cool " +
+            "descriptive features. The tool should only be used once per environment per narrative.");
+        tools.Add(updateEnvironmentTool);
 
         return tools;
     }

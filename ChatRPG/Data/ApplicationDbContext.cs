@@ -5,29 +5,11 @@ using Environment = ChatRPG.Data.Models.Environment;
 
 namespace ChatRPG.Data;
 
-public sealed class ApplicationDbContext : IdentityDbContext<User>
+public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+    : IdentityDbContext<User>(options)
 {
     public DbSet<StartScenario> StartScenarios { get; private set; } = null!;
     public DbSet<Campaign> Campaigns { get; private set; } = null!;
     public DbSet<Character> Characters { get; private set; } = null!;
     public DbSet<Environment> Environments { get; private set; } = null!;
-    public DbSet<Ability> Abilities { get; private set; } = null!;
-    public DbSet<CharacterAbility> CharacterAbilities { get; private set; } = null!;
-
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options)
-    {
-    }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        base.OnModelCreating(modelBuilder);
-
-        modelBuilder
-            .Entity<CharacterAbility>(builder =>
-            {
-                builder.HasKey("CharacterId", "AbilityId");
-                builder.HasOne(c => c.Character).WithMany(c => c.CharacterAbilities!);
-            });
-    }
 }
