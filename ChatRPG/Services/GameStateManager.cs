@@ -67,8 +67,8 @@ public class GameStateManager
 
         environments.Append("\n]}");
 
-        var agent = new ReActAgentChain(llm, _updateCampaignPrompt, characters.ToString(), environments.ToString(),
-            gameSummary: campaign.GameSummary);
+        var agent = new ReActAgentChain(llm, _updateCampaignPrompt, characters.ToString(), campaign.Player.Name, 
+            environments.ToString(), gameSummary: campaign.GameSummary);
 
         var tools = CreateTools(campaign);
         foreach (var tool in tools)
@@ -94,21 +94,26 @@ public class GameStateManager
             "LargeCreature, Monster}, and state is one of the following: {Dead, Unconscious, HeavilyWounded, " +
             "LightlyWounded, Healthy}. The description of a character could describe their physical characteristics, " +
             "personality, what they are known for, or other cool descriptive features. " +
-            "The tool should only be used once per character per narrative.");
+            "The tool should only be used once per character.");
         tools.Add(updateCharacterTool);
-        
+
         var updateEnvironmentTool = new UpdateEnvironmentTool(campaign, "updateenvironmenttool",
-            "This tool must be used to create a new environment or update an existing environment in the campaign. " +
-            "Example: The narrative text mentions a new environment or contains changes to an existing environment. " +
-            "Input to this tool must be in the following RAW JSON format: {\"name\": \"<environment name>\", " +
-            "\"description\": \"<new or updated environment description>\"}, where the description of an environment " +
-            "could describe its physical characteristics, the creatures that inhabit it, the weather, or other cool " +
-            "descriptive features. The tool should only be used once per environment per narrative.");
+            "This tool must be used to create a new environment or update an existing environment in the " +
+            "campaign. Example: The narrative text mentions a new environment or contains changes to an existing " +
+            "environment. An environment refers to a place, location, or area that is well enough defined that it " +
+            "warrants its own description. Such a place could be a landmark with its own history, a building where " +
+            "story events take place, or a larger place like a magical forest. Input to this tool must be in the " +
+            "following RAW JSON format: {\"name\": \"<environment name>\", \"description\": \"<new or updated " +
+            "environment description>\", \"isPlayerHere\": <true if the Player character is currently at this " +
+            "environment, false otherwise>}, where the description of an environment could describe its physical " +
+            "characteristics, its significance, the creatures that inhabit it, the weather, or other cool " +
+            "descriptive features so that it gives the Player useful information about the places they travel to " +
+            "while keeping the locations' descriptions interesting, mysterious and engaging. " +
+            "The tool should only be used once per environment.");
         tools.Add(updateEnvironmentTool);
 
         return tools;
     }
-
 
     public async Task StoreMessagesInCampaign(Campaign campaign, string playerInput, string assistantOutput)
     {

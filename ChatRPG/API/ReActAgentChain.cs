@@ -23,6 +23,7 @@ public sealed class ReActAgentChain : BaseStackableChain
     private bool _useCache;
     private string _userInput = string.Empty;
     private readonly string _gameSummary;
+    private readonly string _playerCharacter = string.Empty;
     private readonly string _characters = string.Empty;
     private readonly string _environments = string.Empty;
 
@@ -124,6 +125,7 @@ New input: {input}";
         IChatModel model,
         string reActPrompt,
         string characters,
+        string playerCharacter,
         string environments,
         string? gameSummary = null,
         string inputKey = "input",
@@ -131,6 +133,7 @@ New input: {input}";
         int maxActions = 10) : this(model, reActPrompt, gameSummary, inputKey, outputKey, maxActions)
     {
         _characters = characters;
+        _playerCharacter = playerCharacter;
         _environments = environments;
     }
 
@@ -148,7 +151,7 @@ New input: {input}";
 
         chain = _characters == ""
             ? chain | Set(_actionPrompt, "action")
-            : chain | Set(_characters, "characters") | Set(_environments, "environments");
+            : chain | Set(_characters, "characters") | Set(_environments, "environments") | Set(_playerCharacter, "player_character");
 
         chain = chain
                 | Set(_gameSummary, "summary")
