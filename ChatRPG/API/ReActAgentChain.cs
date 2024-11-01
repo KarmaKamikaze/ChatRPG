@@ -14,17 +14,18 @@ public sealed class ReActAgentChain : BaseStackableChain
 {
     private const string ReActAnswer = "answer";
     private readonly ConversationBufferMemory _conversationBufferMemory;
-    private readonly ChatMessageHistory _chatMessageHistory;
-    private readonly MessageFormatter _messageFormatter;
     private readonly int _maxActions;
     private readonly IChatModel _model;
     private readonly string _reActPrompt;
-    private readonly string _actionPrompt;
+    private readonly string _actionPrompt = string.Empty;
     private StackChain? _chain;
     private readonly Dictionary<string, AgentTool> _tools = new();
     private bool _useCache;
     private string _userInput = string.Empty;
     private readonly string _gameSummary;
+    private readonly string _playerCharacter = string.Empty;
+    private readonly string _characters = string.Empty;
+    private readonly string _environments = string.Empty;
 
     public string DefaultPrompt = @"Assistant is a large language model trained by OpenAI.
 
@@ -75,7 +76,6 @@ New input: {input}";
     public ReActAgentChain(
         IChatModel model,
         string? reActPrompt = null,
-        string? actionPrompt = null,
         string? gameSummary = null,
         string inputKey = "input",
         string outputKey = "text",
@@ -84,49 +84,82 @@ New input: {input}";
         _model = model;
         _model.Settings!.StopSequences = ["Observation", "[END]"];
         _reActPrompt = reActPrompt ?? DefaultPrompt;
-        _actionPrompt = actionPrompt ?? string.Empty;
         _maxActions = maxActions;
         _gameSummary = gameSummary ?? string.Empty;
 
         InputKeys = [inputKey];
         OutputKeys = [outputKey];
 
-        _messageFormatter = new MessageFormatter
+        var messageFormatter = new MessageFormatter
         {
             AiPrefix = "",
             HumanPrefix = "",
             SystemPrefix = ""
         };
 
-        _chatMessageHistory = new ChatMessageHistory()
+        var chatMessageHistory = new ChatMessageHistory()
         {
             // Do not save human messages
             IsMessageAccepted = x => (x.Role != MessageRole.Human)
         };
 
-        _conversationBufferMemory = new ConversationBufferMemory(_chatMessageHistory)
+        _conversationBufferMemory = new ConversationBufferMemory(chatMessageHistory)
         {
-            Formatter = _messageFormatter
+            Formatter = messageFormatter
         };
     }
+
+    public ReActAgentChain(
+        IChatModel model,
+        string reActPrompt,
+        string? actionPrompt = null,
+        string? gameSummary = null,
+        string inputKey = "input",
+        string outputKey = "text",
+        int maxActions = 10) : this(model, reActPrompt, gameSummary, inputKey, outputKey, maxActions)
+    {
+        _actionPrompt = actionPrompt ?? string.Empty;
+    }
+
+    public ReActAgentChain(
+        IChatModel model,
+        string reActPrompt,
+        string characters,
+        string playerCharacter,
+        string environments,
+        string? gameSummary = null,
+        string inputKey = "input",
+        string outputKey = "text",
+        int maxActions = 10) : this(model, reActPrompt, gameSummary, inputKey, outputKey, maxActions)
+    {
+        _characters = characters;
+        _playerCharacter = playerCharacter;
+        _environments = environments;
+    }
+
 
     private void InitializeChain()
     {
         var toolNames = string.Join(",", _tools.Select(x => x.Key));
         var tools = string.Join("\n", _tools.Select(x => $"{x.Value.Name}, {x.Value.Description}"));
 
+
         var chain =
             Set(() => _userInput, "input")
             | Set(tools, "tools")
-            | Set(toolNames, "tool_names")
-            | Set(_actionPrompt, "action")
-            | Set(_gameSummary, "summary")
-            | LoadMemory(_conversationBufferMemory, "history")
-            | Template(_reActPrompt)
-            | LLM(_model).UseCache(_useCache)
-            | UpdateMemory(_conversationBufferMemory, "input", "text")
-            | ReActParser("text", ReActAnswer);
+            | Set(toolNames, "tool_names");
 
+        chain = _characters == ""
+            ? chain | Set(_actionPrompt, "action")
+            : chain | Set(_characters, "characters") | Set(_environments, "environments") | Set(_playerCharacter, "player_character");
+
+        chain = chain
+                | Set(_gameSummary, "summary")
+                | LoadMemory(_conversationBufferMemory, "history")
+                | Template(_reActPrompt)
+                | LLM(_model).UseCache(_useCache)
+                | UpdateMemory(_conversationBufferMemory, "input", "text")
+                | ReActParser("text", ReActAnswer);
 
         _chain = chain;
     }
@@ -182,6 +215,6 @@ New input: {input}";
             }
         }
 
-        return values;
+        throw new ReActChainNoFinalAnswerReachedException("The ReAct Chain could not reach a final answer", values);
     }
 }

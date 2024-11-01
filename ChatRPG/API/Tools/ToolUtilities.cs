@@ -28,9 +28,11 @@ public class ToolUtilities(IConfiguration configuration)
         query.Append(configuration.GetSection("SystemPrompts")?.GetValue<string>("FindCharacter")!
             .Replace("{instruction}", instruction));
 
-        query.Append($"\n\nThe story up until now and the players newest action: {input}");
+        query.Append($"\n\nThe story up until now: {campaign.GameSummary}");
 
-        query.Append("\n\nHere is the list of all characters present in the story:\n\n{\n");
+        query.Append($"\n\nThe player's newest action: {input}");
+
+        query.Append("\n\nHere is the list of all characters present in the story:\n\n{\"characters\": [\n");
 
         foreach (var character in campaign.Characters)
         {
@@ -40,7 +42,7 @@ public class ToolUtilities(IConfiguration configuration)
 
         query.Length--; // Remove last comma
 
-        query.Append("\n}");
+        query.Append("\n]}");
 
         var response = await llm.GenerateAsync(query.ToString());
 

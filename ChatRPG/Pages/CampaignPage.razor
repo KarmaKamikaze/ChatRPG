@@ -54,7 +54,7 @@
             </div>
 
             <div class="conversation-text">
-                @foreach (OpenAiGptMessage message in _conversation.Where(m => !m.Role.Equals(MessageRole.System)))
+                @foreach (OpenAiGptMessage message in _conversation)
                 {
                     <OpenAiGptMessageComponent Message="@message"/>
                 }
@@ -75,7 +75,6 @@
                         <Items>
                             <RadzenSelectBarItem Text="Do" Value="UserPromptType.Do" class="rz-ripple" id="do-prompt"/>
                             <RadzenSelectBarItem Text="Say" Value="UserPromptType.Say" class="rz-ripple" id="say-prompt"/>
-                            <RadzenSelectBarItem Text="Attack" Value="UserPromptType.Attack" class="rz-ripple" id="attack-prompt"/>
                         </Items>
                     </RadzenSelectBar>
                 </div>
