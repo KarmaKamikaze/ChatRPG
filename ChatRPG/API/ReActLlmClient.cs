@@ -116,16 +116,17 @@ public class ReActLlmClient : IReActLlmClient
             "accumulative for each time they hit an enemy during battle. The damage severity describes how " +
             "powerful the attack is which is derived from the narrative description of the attacks. " +
             "If there are no direct description, estimate the impact of an attack based on the character type and " +
-            "their description. Input to this tool must be in the following RAW JSON format: {{\"name\": " +
-            "\"<name of participant one>\", \"description\": \"<description of participant one>\"}, {\"name\": " +
-            "\"<name of participant two>\", \"description\": \"<description of participant two>\"}, " +
-            "\"participant1HitChance\": \"<hit chance specifier for participant one>\", \"participant2HitChance\": " +
-            "\"<hit chance specifier for participant two>\", \"participant1DamageSeverity\": " +
-            "\"<damage severity for participant one>\", \"participant2DamageSeverity\": " +
-            "\"<damage severity for participant two>\"} where participant#HitChance specifiers are one " +
-            "of the following {high, medium, low, impossible} and participant#DamageSeverity is one of " +
-            "the following {low, medium, high, extraordinary}. Do not use markdown, only raw JSON as input. " +
-            "The narrative battle is over when each character has had the chance to attack another character at most once.");
+            "their description. Input to this tool must be in the following RAW JSON format: {\"participant1\": " +
+            "{\"name\": \"<name of participant one>\", \"description\": \"<description of participant one>\"}, " +
+            "\"participant2\": {\"name\": \"<name of participant two>\", \"description\": " +
+            "\"<description of participant two>\"}, \"participant1HitChance\": \"<hit chance specifier for " +
+            "participant one>\", \"participant2HitChance\": \"<hit chance specifier for participant two>\", " +
+            "\"participant1DamageSeverity\": \"<damage severity for participant one>\", " +
+            "\"participant2DamageSeverity\": \"<damage severity for participant two>\"} where participant#HitChance " +
+            "specifiers are one of the following {high, medium, low, impossible} and participant#DamageSeverity is " +
+            "one of the following {low, medium, high, extraordinary}. Do not use markdown, only raw JSON as input. " +
+            "The narrative battle is over when each character has had the chance to attack another character at " +
+            "most once.");
         tools.Add(battleTool);
 
         return tools;
