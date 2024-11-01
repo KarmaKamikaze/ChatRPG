@@ -1,6 +1,7 @@
 using ChatRPG.API.Tools;
 using ChatRPG.Data.Models;
 using LangChain.Chains.StackableChains.Agents.Tools;
+using LangChain.Providers;
 using LangChain.Providers.OpenAI;
 using LangChain.Providers.OpenAI.Predefined;
 using static LangChain.Chains.Chain;
@@ -48,7 +49,7 @@ public class ReActLlmClient : IReActLlmClient
         };
 
         var eventProcessor = new LlmEventProcessor(agentLlm);
-        var agent = new ReActAgentChain(agentLlm, _reActPrompt, actionPrompt: actionPrompt, campaign.GameSummary);
+        var agent = new ReActAgentChain(agentLlm.UseConsoleForDebug(), _reActPrompt, actionPrompt: actionPrompt, campaign.GameSummary);
         var tools = CreateTools(campaign);
         foreach (var tool in tools)
         {
@@ -81,7 +82,8 @@ public class ReActLlmClient : IReActLlmClient
             "Input to this tool must be in the following RAW JSON format: {\"input\": \"The player's input\", " +
             "\"severity\": \"Describes how devastating the injury to the character will be based on the action. " +
             "Can be one of the following values: {low, medium, high, extraordinary}}\". Do not use markdown, " +
-            "only raw JSON as input. Use this tool only once per character at most.");
+            "only raw JSON as input. Use this tool only once per character at most and only if they are not engaged " +
+            "in battle.");
         tools.Add(woundCharacterTool);
 
         var healCharacterTool = new HealCharacterTool(_configuration, campaign, utils, "healcharactertool",
@@ -101,17 +103,18 @@ public class ReActLlmClient : IReActLlmClient
             "Use the battle tool to resolve battle or combat between two participants. If there are more " +
             "than two participants, the tool must be used once per attacker to give everyone a chance at fighting. " +
             "The battle tool will give each participant a chance to fight the other participant. The tool should " +
-            "also be used when an attack can be mitigated or dodged by the involved participants. A hit chance " +
-            "specifier will help adjust the chance that a participant gets to retaliate. Example: There are " +
-            "three combatants, the Player's character and two assassins. The battle tool is called first with the " +
-            "Player's character as participant one and one of the assassins as participant two. Chances are high " +
-            "that the player will hit the assassin but assassins must be precise, making it harder to hit, however, " +
-            "they deal high damage if they hit. We observe that the participant one hits participant two and " +
-            "participant two misses participant one. After this round of battle has been resolved, call the tool again " +
-            "with the Player's character as participant one and the other assassin as participant two. Since " +
-            "participant one in this case has already hit once during this narrative, we impose a penalty to their " +
-            "hit chance, which is accumulative for each time they hit an enemy during battle. The damage severity " +
-            "describes how powerful the attack is which is derived from the narrative description of the attacks. " +
+            "also be used when an attack can be mitigated or dodged by the involved participants. It is also " +
+            "possible for either or both participants to miss. A hit chance specifier will help adjust the chance " +
+            "that a participant gets to retaliate. Example: There are three combatants, the Player's character " +
+            "and two assassins. The battle tool is called first with the Player's character as participant one and " +
+            "one of the assassins as participant two. Chances are high that the player will hit the assassin but " +
+            "assassins must be precise, making it harder to hit, however, they deal high damage if they hit. We " +
+            "observe that the participant one hits participant two and participant two misses participant one. " +
+            "After this round of battle has been resolved, call the tool again with the Player's character as " +
+            "participant one and the other assassin as participant two. Since participant one in this case has " +
+            "already hit once during this narrative, we impose a penalty to their hit chance, which is " +
+            "accumulative for each time they hit an enemy during battle. The damage severity describes how " +
+            "powerful the attack is which is derived from the narrative description of the attacks. " +
             "If there are no direct description, estimate the impact of an attack based on the character type and " +
             "their description. Input to this tool must be in the following RAW JSON format: {{\"name\": " +
             "\"<name of participant one>\", \"description\": \"<description of participant one>\"}, {\"name\": " +
@@ -121,7 +124,8 @@ public class ReActLlmClient : IReActLlmClient
             "\"<damage severity for participant one>\", \"participant2DamageSeverity\": " +
             "\"<damage severity for participant two>\"} where participant#HitChance specifiers are one " +
             "of the following {high, medium, low, impossible} and participant#DamageSeverity is one of " +
-            "the following {low, medium, high, extraordinary}. Do not use markdown, only raw JSON as input.");
+            "the following {low, medium, high, extraordinary}. Do not use markdown, only raw JSON as input. " +
+            "The narrative battle is over when each character has had the chance to attack another character at most once.");
         tools.Add(battleTool);
 
         return tools;

@@ -61,24 +61,11 @@ public class BattleTool(
                 $"{{\"name\": {battleInput.Participant2!.Name}, " +
                 $"\"description\": {battleInput.Participant2.Description}}}", instruction);
 
-            if (participant1 is null && participant2 is null)
-            {
-                return $"Could not determine the characters corresponding to {battleInput.Participant1.Name} and " +
-                       $"{battleInput.Participant2.Name}. The characters do not exist in the game. " +
-                       $"Consider creating the characters before calling the battle tool.";
-            }
-
-            if (participant1 is null)
-            {
-                return $"Could not determine the character corresponding to {battleInput.Participant1.Name}. " +
-                       $"The character does not exist in the game. Consider creating the character before calling the battle tool.";
-            }
-
-            if (participant2 is null)
-            {
-                return $"Could not determine the character corresponding to {battleInput.Participant2.Name}. " +
-                       $"The character does not exist in the game. Consider creating the character before calling the battle tool.";
-            }
+            // Create dummy characters if they do not exist and pray that the archive chain will update them
+            participant1 ??= new Character(campaign, campaign.Player.Environment, CharacterType.Humanoid,
+                battleInput.Participant1.Name!, battleInput.Participant1.Description!, false);
+            participant2 ??= new Character(campaign, campaign.Player.Environment, CharacterType.Humanoid,
+                battleInput.Participant2.Name!, battleInput.Participant2.Description!, false);
 
             var firstHitter = DetermineFirstHitter(participant1, participant2);
 
@@ -91,16 +78,16 @@ public class BattleTool(
             if (firstHitter == participant1)
             {
                 secondHitter = participant2;
-                firstHitChance = battleInput.Participant1ChanceToHit!;
-                secondHitChance = battleInput.Participant2ChanceToHit!;
+                firstHitChance = battleInput.Participant1HitChance!;
+                secondHitChance = battleInput.Participant2HitChance!;
                 firstHitSeverity = battleInput.Participant1DamageSeverity!;
                 secondHitSeverity = battleInput.Participant2DamageSeverity!;
             }
             else
             {
                 secondHitter = participant1;
-                firstHitChance = battleInput.Participant2ChanceToHit!;
-                secondHitChance = battleInput.Participant1ChanceToHit!;
+                firstHitChance = battleInput.Participant2HitChance!;
+                secondHitChance = battleInput.Participant1HitChance!;
                 firstHitSeverity = battleInput.Participant2DamageSeverity!;
                 secondHitSeverity = battleInput.Participant1DamageSeverity!;
             }
@@ -119,7 +106,9 @@ public class BattleTool(
     private static string ResolveCombat(Character firstHitter, Character secondHitter, string firstHitChance,
         string secondHitChance, string firstHitSeverity, string secondHitSeverity)
     {
-        var resultString = string.Empty;
+        var resultString = $"{firstHitter.Name} described as \"{firstHitter.Description}\" fights " +
+                           $"{secondHitter.Name} described as \"{secondHitter.Description}\"\n";
+
 
         resultString += ResolveAttack(firstHitter, secondHitter, firstHitChance, firstHitSeverity);
         if (secondHitter.CurrentHealth <= 0)
@@ -127,7 +116,7 @@ public class BattleTool(
             return resultString;
         }
 
-        resultString += ResolveAttack(secondHitter, firstHitter, secondHitChance, secondHitSeverity);
+        resultString += " " + ResolveAttack(secondHitter, firstHitter, secondHitChance, secondHitSeverity);
 
         return resultString;
     }
@@ -143,7 +132,7 @@ public class BattleTool(
         {
             var (minDamage, maxDamage) = DamageRanges[hitSeverity];
             var damage = rand.Next(minDamage, maxDamage);
-            resultString += $"{damageDealer.Name} deals {damage} damage to {damageTaker.Name}.";
+            resultString += $"{damageDealer.Name} deals {damage} damage to {damageTaker.Name}. ";
             if (damageTaker.AdjustHealth(-damage))
             {
                 if (damageTaker.IsPlayer)

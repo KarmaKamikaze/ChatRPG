@@ -23,8 +23,6 @@ public class GameStateManager
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI"));
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts")
             .GetValue<string>("UpdateCampaignFromNarrative"));
-        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts")
-            .GetValue<string>("ShouldSummarize"));
         _provider = new OpenAiProvider(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
         _updateCampaignPrompt =
             configuration.GetSection("SystemPrompts").GetValue<string>("UpdateCampaignFromNarrative")!;

@@ -7,8 +7,8 @@ public class BattleInput
 
     public CharacterInput? Participant1 { get; set; }
     public CharacterInput? Participant2 { get; set; }
-    public string? Participant1ChanceToHit { get; set; }
-    public string? Participant2ChanceToHit { get; set; }
+    public string? Participant1HitChance { get; set; }
+    public string? Participant2HitChance { get; set; }
     public string? Participant1DamageSeverity { get; set; }
     public string? Participant2DamageSeverity { get; set; }
 
@@ -34,10 +34,10 @@ public class BattleInput
             validationErrors.AddRange(participant2Errors.Select(e => $"Participant2: {e}"));
         }
 
-        if (Participant1ChanceToHit != null && !ValidChancesToHit.Contains(Participant1ChanceToHit))
+        if (Participant1HitChance != null && !ValidChancesToHit.Contains(Participant1HitChance))
             validationErrors.Add("Participant1ChanceToHit must be one of the following: high, medium, low, impossible.");
 
-        if (Participant2ChanceToHit != null && !ValidChancesToHit.Contains(Participant2ChanceToHit))
+        if (Participant2HitChance != null && !ValidChancesToHit.Contains(Participant2HitChance))
             validationErrors.Add("Participant2ChanceToHit must be one of the following: high, medium, low, impossible.");
 
         if (Participant1DamageSeverity != null && !ValidDamageSeverities.Contains(Participant1DamageSeverity))
