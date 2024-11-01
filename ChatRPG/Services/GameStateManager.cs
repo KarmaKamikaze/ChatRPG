@@ -15,18 +15,20 @@ public class GameStateManager
 {
     private readonly OpenAiProvider _provider;
     private readonly IPersistenceService _persistenceService;
-    private readonly IConfiguration _configuration;
     private readonly string _updateCampaignPrompt;
+    private readonly bool _summarizeMessages;
 
     public GameStateManager(IConfiguration configuration, IPersistenceService persistenceService)
     {
-        _configuration = configuration;
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI"));
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts")
             .GetValue<string>("UpdateCampaignFromNarrative"));
+        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts")
+            .GetValue<string>("ShouldSummarize"));
         _provider = new OpenAiProvider(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
         _updateCampaignPrompt =
             configuration.GetSection("SystemPrompts").GetValue<string>("UpdateCampaignFromNarrative")!;
+        _summarizeMessages = configuration.GetSection("SystemPrompts").GetValue<bool>("ShouldSummarize");
         _persistenceService = persistenceService;
     }
 
@@ -80,17 +82,16 @@ public class GameStateManager
         await chain.RunAsync("text");
     }
 
-    private List<AgentTool> CreateTools(Campaign campaign)
+    private static List<AgentTool> CreateTools(Campaign campaign)
     {
         var tools = new List<AgentTool>();
-        var utils = new ToolUtilities(_configuration);
 
         var updateCharacterTool = new UpdateCharacterTool(campaign, "updatecharactertool",
             "This tool must be used to create a new character or update an existing character in the campaign. " +
             "Example: The narrative text mentions a new character or contains changes to an existing character. " +
             "Input to this tool must be in the following RAW JSON format: {\"name\": \"<character name>\", " +
             "\"description\": \"<new or updated character description>\", \"type\": \"<character type>\", " +
-            "\"state\": \"<character health state>\"}, where type is one of the following: {Humanoid, SmallCreature, " +
+            "\"state\": \"<character health state>\"}, where type is one of the following: {SmallCreature, Humanoid, " +
             "LargeCreature, Monster}, and state is one of the following: {Dead, Unconscious, HeavilyWounded, " +
             "LightlyWounded, Healthy}. The description of a character could describe their physical characteristics, " +
             "personality, what they are known for, or other cool descriptive features. " +
@@ -128,7 +129,16 @@ public class GameStateManager
             Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.7 }
         };
 
-        campaign.GameSummary = await summaryLlm.SummarizeAsync(newMessages, campaign.GameSummary ?? "");
+        if (_summarizeMessages)
+        {
+            campaign.GameSummary = await summaryLlm.SummarizeAsync(newMessages, campaign.GameSummary ?? "");
+        }
+        else
+        {
+            campaign.GameSummary ??= string.Empty;
+            campaign.GameSummary += string.Join("\n", newMessages.Select(m => m.Content)) + "\n";
+        }
+
         foreach (var message in newMessages)
         {
             // Only add the message, if the list is empty.

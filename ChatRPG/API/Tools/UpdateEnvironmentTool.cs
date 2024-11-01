@@ -20,7 +20,7 @@ public class UpdateEnvironmentTool(
     {
         try
         {
-            var updateEnvironmentInput = JsonSerializer.Deserialize<UpdateEnvironmentInput>(input, JsonOptions) ??
+            var updateEnvironmentInput = JsonSerializer.Deserialize<EnvironmentInput>(input, JsonOptions) ??
                                          throw new JsonException("Failed to deserialize");
 
             if (updateEnvironmentInput.Name.IsNullOrEmpty())

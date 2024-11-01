@@ -30,7 +30,7 @@ public class ToolUtilities(IConfiguration configuration)
 
         query.Append($"\n\nThe story up until now: {campaign.GameSummary}");
 
-        query.Append($"\n\nThe player's newest action: {input}");
+        query.Append($"\n\nFind the character using the following content: {input}");
 
         query.Append("\n\nHere is the list of all characters present in the story:\n\n{\"characters\": [\n");
 

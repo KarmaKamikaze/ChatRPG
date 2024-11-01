@@ -2,8 +2,8 @@
 
 public enum CharacterType
 {
-    Humanoid,
     SmallCreature,
+    Humanoid,
     LargeCreature,
     Monster
 }
