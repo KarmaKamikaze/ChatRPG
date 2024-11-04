@@ -6,7 +6,8 @@ public class Character
     {
     }
 
-    public Character(Campaign campaign, Environment environment, CharacterType type, string name, string description, bool isPlayer)
+    public Character(Campaign campaign, Environment environment, CharacterType type, string name, string description,
+        bool isPlayer)
     {
         Campaign = campaign;
         Environment = environment;

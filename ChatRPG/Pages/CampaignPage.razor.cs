@@ -105,8 +105,6 @@ public partial class CampaignPage
         }
 
         _isWaitingForResponse = true;
-        OpenAiGptMessage message = new(MessageRole.System, content);
-        _conversation.Add(message);
 
         try
         {

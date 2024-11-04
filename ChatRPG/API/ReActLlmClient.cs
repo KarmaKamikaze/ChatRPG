@@ -13,6 +13,7 @@ public class ReActLlmClient : IReActLlmClient
     private readonly IConfiguration _configuration;
     private readonly OpenAiProvider _provider;
     private readonly string _reActPrompt;
+    private readonly bool _narratorDebugMode;
 
     public ReActLlmClient(IConfiguration configuration)
     {
@@ -21,6 +22,7 @@ public class ReActLlmClient : IReActLlmClient
         _configuration = configuration;
         _reActPrompt = _configuration.GetSection("SystemPrompts").GetValue<string>("ReAct")!;
         _provider = new OpenAiProvider(_configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
+        _narratorDebugMode = _configuration.GetValue<bool>("NarrativeChainDebug")!;
     }
 
     public async Task<string> GetChatCompletionAsync(Campaign campaign, string actionPrompt, string input)
@@ -29,7 +31,9 @@ public class ReActLlmClient : IReActLlmClient
         {
             Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.7 }
         };
-        var agent = new ReActAgentChain(llm, _reActPrompt, actionPrompt: actionPrompt, campaign.GameSummary);
+
+        var agent = new ReActAgentChain(_narratorDebugMode ? llm.UseConsoleForDebug() : llm, _reActPrompt,
+            actionPrompt: actionPrompt, campaign.GameSummary);
         var tools = CreateTools(campaign);
         foreach (var tool in tools)
         {
@@ -43,13 +47,14 @@ public class ReActLlmClient : IReActLlmClient
     public async IAsyncEnumerable<string> GetStreamedChatCompletionAsync(Campaign campaign, string actionPrompt,
         string input)
     {
-        var agentLlm = new Gpt4Model(_provider)
+        var llm = new Gpt4Model(_provider)
         {
             Settings = new OpenAiChatSettings() { UseStreaming = true, Temperature = 0.7 }
         };
 
-        var eventProcessor = new LlmEventProcessor(agentLlm);
-        var agent = new ReActAgentChain(agentLlm.UseConsoleForDebug(), _reActPrompt, actionPrompt: actionPrompt, campaign.GameSummary);
+        var eventProcessor = new LlmEventProcessor(llm);
+        var agent = new ReActAgentChain(_narratorDebugMode ? llm.UseConsoleForDebug() : llm, _reActPrompt,
+            actionPrompt: actionPrompt, campaign.GameSummary);
         var tools = CreateTools(campaign);
         foreach (var tool in tools)
         {
@@ -105,7 +110,8 @@ public class ReActLlmClient : IReActLlmClient
             "The battle tool will give each participant a chance to fight the other participant. The tool should " +
             "also be used when an attack can be mitigated or dodged by the involved participants. It is also " +
             "possible for either or both participants to miss. A hit chance specifier will help adjust the chance " +
-            "that a participant gets to retaliate. Example: There are three combatants, the Player's character " +
+            "that a participant gets to retaliate. Example: There are only two combatants. Call the tool only ONCE " +
+            "since both characters get an attack. Another example: There are three combatants, the Player's character " +
             "and two assassins. The battle tool is called first with the Player's character as participant one and " +
             "one of the assassins as participant two. Chances are high that the player will hit the assassin but " +
             "assassins must be precise, making it harder to hit, however, they deal high damage if they hit. We " +

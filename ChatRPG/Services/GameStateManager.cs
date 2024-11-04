@@ -3,6 +3,7 @@ using ChatRPG.API;
 using ChatRPG.API.Tools;
 using ChatRPG.Data.Models;
 using LangChain.Chains.StackableChains.Agents.Tools;
+using LangChain.Providers;
 using LangChain.Providers.OpenAI;
 using LangChain.Providers.OpenAI.Predefined;
 using static LangChain.Chains.Chain;
@@ -16,6 +17,7 @@ public class GameStateManager
     private readonly OpenAiProvider _provider;
     private readonly IPersistenceService _persistenceService;
     private readonly string _updateCampaignPrompt;
+    private readonly bool _archivistDebugMode;
     private readonly bool _summarizeMessages;
 
     public GameStateManager(IConfiguration configuration, IPersistenceService persistenceService)
@@ -26,7 +28,8 @@ public class GameStateManager
         _provider = new OpenAiProvider(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
         _updateCampaignPrompt =
             configuration.GetSection("SystemPrompts").GetValue<string>("UpdateCampaignFromNarrative")!;
-        _summarizeMessages = configuration.GetSection("SystemPrompts").GetValue<bool>("ShouldSummarize");
+        _archivistDebugMode = configuration.GetValue<bool>("ArchivistChainDebug");
+        _summarizeMessages = configuration.GetValue<bool>("ShouldSummarize");
         _persistenceService = persistenceService;
     }
 
@@ -35,7 +38,7 @@ public class GameStateManager
         await _persistenceService.SaveAsync(campaign);
     }
 
-    public async Task UpdateCampaignFromNarrative(Campaign campaign, string narrative)
+    public async Task UpdateCampaignFromNarrative(Campaign campaign, string input, string narrative)
     {
         var llm = new Gpt4Model(_provider)
         {
@@ -67,8 +70,8 @@ public class GameStateManager
 
         environments.Append("\n]}");
 
-        var agent = new ReActAgentChain(llm, _updateCampaignPrompt, characters.ToString(), campaign.Player.Name,
-            environments.ToString(), gameSummary: campaign.GameSummary);
+        var agent = new ReActAgentChain(_archivistDebugMode ? llm.UseConsoleForDebug() : llm, _updateCampaignPrompt,
+            characters.ToString(), campaign.Player.Name, environments.ToString(), gameSummary: campaign.GameSummary);
 
         var tools = CreateTools(campaign);
         foreach (var tool in tools)
@@ -76,7 +79,9 @@ public class GameStateManager
             agent.UseTool(tool);
         }
 
-        var chain = Set(narrative, "input") | agent;
+        var newInformation = $"The player says: {input}\nThe DM says: {narrative}";
+
+        var chain = Set(newInformation, "input") | agent;
         await chain.RunAsync("text");
     }
 

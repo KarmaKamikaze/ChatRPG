@@ -93,7 +93,8 @@ public class BattleTool(
             }
 
             return ResolveCombat(firstHitter, secondHitter, firstHitChance, secondHitChance, firstHitSeverity,
-                secondHitSeverity);
+                       secondHitSeverity) + $" {firstHitter.Name} and {secondHitter.Name}'s battle has " +
+                   "been resolved and this pair can not be used for the battle tool again.";
         }
         catch (Exception)
         {

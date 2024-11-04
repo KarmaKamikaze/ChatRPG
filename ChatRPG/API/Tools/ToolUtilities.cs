@@ -10,6 +10,8 @@ namespace ChatRPG.API.Tools;
 
 public class ToolUtilities(IConfiguration configuration)
 {
+    private const int IncludedPreviousMessages = 4;
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true
@@ -30,7 +32,12 @@ public class ToolUtilities(IConfiguration configuration)
 
         query.Append($"\n\nThe story up until now: {campaign.GameSummary}");
 
-        query.Append($"\n\nFind the character using the following content: {input}");
+        var content = campaign.Messages.TakeLast(IncludedPreviousMessages).Select(m => m.Content);
+        query.Append("\n\nUse these previous messages as context:");
+        foreach (var message in content)
+        {
+            query.Append($"\n {message}");
+        }
 
         query.Append("\n\nHere is the list of all characters present in the story:\n\n{\"characters\": [\n");
 
@@ -43,6 +50,9 @@ public class ToolUtilities(IConfiguration configuration)
         query.Length--; // Remove last comma
 
         query.Append("\n]}");
+
+        query.Append($"\n\nFind the character using the following content: {input}. " +
+                     $"If no character match, do NOT return a character.");
 
         var response = await llm.GenerateAsync(query.ToString());
 
