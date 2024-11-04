@@ -20,9 +20,9 @@ public class GameInputHandler
     private static readonly Dictionary<CharacterType, (int, int)> CharacterTypeDamageDict = new()
     {
         { CharacterType.Humanoid, (10, 20) },
-        { CharacterType.SmallCreature, (5, 10) },
-        { CharacterType.LargeCreature, (15, 25) },
-        { CharacterType.Monster, (20, 30) }
+        { CharacterType.SmallMonster, (5, 10) },
+        { CharacterType.LargeMonster, (15, 25) },
+        { CharacterType.BossMonster, (20, 30) }
     };
 
     public GameInputHandler(ILogger<GameInputHandler> logger, IReActLlmClient llmClient,

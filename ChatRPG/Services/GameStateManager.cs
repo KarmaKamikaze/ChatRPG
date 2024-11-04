@@ -89,16 +89,31 @@ public class GameStateManager
     {
         var tools = new List<AgentTool>();
 
-        var updateCharacterTool = new UpdateCharacterTool(campaign, "updatecharactertool",
+        var updateCharacterToolDescription = new StringBuilder();
+        updateCharacterToolDescription.Append(
             "This tool must be used to create a new character or update an existing character in the campaign. " +
             "Example: The narrative text mentions a new character or contains changes to an existing character. " +
             "Input to this tool must be in the following RAW JSON format: {\"name\": \"<character name>\", " +
             "\"description\": \"<new or updated character description>\", \"type\": \"<character type>\", " +
-            "\"state\": \"<character health state>\"}, where type is one of the following: {SmallCreature, Humanoid, " +
-            "LargeCreature, Monster}, and state is one of the following: {Dead, Unconscious, HeavilyWounded, " +
+            "\"state\": \"<character health state>\"}, where type is one of the following: {");
+
+        var characterTypes = Enum.GetNames<CharacterType>();
+        for (var i = 0; i < characterTypes.Length; i++)
+        {
+            updateCharacterToolDescription.Append($"{characterTypes[i]}");
+            if (i < characterTypes.Length - 1)
+            {
+                updateCharacterToolDescription.Append(", ");
+            }
+        }
+
+        updateCharacterToolDescription.Append(
+            "}, and state is one of the following: {Dead, Unconscious, HeavilyWounded, " +
             "LightlyWounded, Healthy}. The description of a character could describe their physical characteristics, " +
             "personality, what they are known for, or other cool descriptive features. " +
             "The tool should only be used once per character.");
+        var updateCharacterTool =
+            new UpdateCharacterTool(campaign, "updatecharactertool", updateCharacterToolDescription.ToString());
         tools.Add(updateCharacterTool);
 
         var updateEnvironmentTool = new UpdateEnvironmentTool(campaign, "updateenvironmenttool",
