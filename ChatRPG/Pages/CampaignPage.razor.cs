@@ -110,8 +110,9 @@ public partial class CampaignPage
         {
             GameInputHandler?.HandleInitialPrompt(_campaign, content);
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            Console.WriteLine($"An error occurred when generating the response: {e.Message}");
             _conversation.Add(new OpenAiGptMessage(MessageRole.System,
                 "An error occurred when generating the response \uD83D\uDCA9. " +
                 "Please try again by reloading the campaign."));
@@ -155,8 +156,9 @@ public partial class CampaignPage
             await GameInputHandler!.HandleUserPrompt(_campaign, _activeUserPromptType, userInput.Content);
             _conversation.RemoveAll(m => m.Role.Equals(MessageRole.System));
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            Console.WriteLine($"An error occurred when generating the response: {e.Message}");
             _conversation.Add(new OpenAiGptMessage(MessageRole.System,
                 "An error occurred when generating the response \uD83D\uDCA9. Please try again."));
             _campaign = await PersistenceService!.LoadFromCampaignIdAsync(_campaign.Id); // Rollback campaign

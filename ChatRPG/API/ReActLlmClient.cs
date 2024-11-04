@@ -105,7 +105,8 @@ public class ReActLlmClient : IReActLlmClient
         tools.Add(healCharacterTool);
 
         var battleTool = new BattleTool(_configuration, campaign, utils, "battletool",
-            "Use the battle tool to resolve battle or combat between two participants. If there are more " +
+            "Use the battle tool to resolve battle or combat between two participants. A participant is " +
+            "a single character and cannot be a combination of characters. If there are more " +
             "than two participants, the tool must be used once per attacker to give everyone a chance at fighting. " +
             "The battle tool will give each participant a chance to fight the other participant. The tool should " +
             "also be used when an attack can be mitigated or dodged by the involved participants. It is also " +

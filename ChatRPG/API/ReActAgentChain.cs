@@ -215,6 +215,7 @@ New input: {input}";
             }
         }
 
-        throw new ReActChainNoFinalAnswerReachedException("The ReAct Chain could not reach a final answer", values);
+        throw new ReActChainNoFinalAnswerReachedException($"The ReAct Chain could not reach a final answer. " +
+                                                          $"Values: {values}", values);
     }
 }
