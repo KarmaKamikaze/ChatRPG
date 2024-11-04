@@ -88,7 +88,7 @@ public class GameInputHandler
         await GetResponseAndUpdateState(campaign, _systemPrompts[SystemPromptType.Initial], initialInput);
         _logger.LogInformation("Finished processing prompt");
     }
-    
+
     private async Task GetResponseAndUpdateState(Campaign campaign, string actionPrompt, string input)
     {
         if (_streamChatCompletions)
