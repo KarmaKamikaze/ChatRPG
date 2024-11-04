@@ -12,18 +12,6 @@ public class GameInputHandler
     private readonly GameStateManager _gameStateManager;
     private readonly bool _streamChatCompletions;
     private readonly Dictionary<SystemPromptType, string> _systemPrompts = new();
-    private const int PlayerDmgMin = 10;
-    private const int PlayerDmgMax = 25;
-    private const int PlayerHealMin = 15;
-    private const int PlayerHealMax = 30;
-
-    private static readonly Dictionary<CharacterType, (int, int)> CharacterTypeDamageDict = new()
-    {
-        { CharacterType.Humanoid, (10, 20) },
-        { CharacterType.SmallMonster, (5, 10) },
-        { CharacterType.LargeMonster, (15, 25) },
-        { CharacterType.BossMonster, (20, 30) }
-    };
 
     public GameInputHandler(ILogger<GameInputHandler> logger, IReActLlmClient llmClient,
         GameStateManager gameStateManager, IConfiguration configuration)
