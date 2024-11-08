@@ -54,7 +54,7 @@ public class ToolUtilities(IConfiguration configuration)
         query.Append($"\n\nFind the character using the following content: {input}. " +
                      $"If no character match, do NOT return a character.");
 
-        var response = await llm.UseConsoleForDebug().GenerateAsync(query.ToString());
+        var response = await llm.GenerateAsync(query.ToString());
 
         try
         {
