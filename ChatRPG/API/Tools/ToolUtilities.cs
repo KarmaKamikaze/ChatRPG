@@ -20,7 +20,7 @@ public class ToolUtilities(IConfiguration configuration)
     public async Task<Character?> FindCharacter(Campaign campaign, string input, string instruction)
     {
         var provider = new OpenAiProvider(configuration.GetSection("ApiKeys")?.GetValue<string>("OpenAI")!);
-        var llm = new Gpt4Model(provider)
+        var llm = new Gpt4OmniModel(provider)
         {
             Settings = new OpenAiChatSettings() { UseStreaming = false }
         };

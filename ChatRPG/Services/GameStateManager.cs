@@ -40,7 +40,7 @@ public class GameStateManager
 
     public async Task UpdateCampaignFromNarrative(Campaign campaign, string input, string narrative)
     {
-        var llm = new Gpt4Model(_provider)
+        var llm = new Gpt4OmniModel(_provider)
         {
             Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.7 }
         };
@@ -142,7 +142,7 @@ public class GameStateManager
             new(assistantOutput, LangChain.Providers.MessageRole.Ai)
         };
 
-        var summaryLlm = new Gpt4Model(_provider)
+        var summaryLlm = new Gpt4OmniModel(_provider)
         {
             Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.7 }
         };

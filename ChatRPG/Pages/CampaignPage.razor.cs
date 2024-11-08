@@ -74,11 +74,6 @@ public partial class CampaignPage
 
         GameInputHandler!.ChatCompletionReceived += OnChatCompletionReceived;
         GameInputHandler!.ChatCompletionChunkReceived += OnChatCompletionChunkReceived;
-        if (_conversation.Count == 0)
-        {
-            InitializeCampaign();
-        }
-        StateHasChanged();
     }
 
     /// <summary>
@@ -94,10 +89,15 @@ public partial class CampaignPage
             _detectScrollBarJsScript ??=
                 await JsRuntime!.InvokeAsync<IJSObjectReference>("import", "./js/detectScrollBar.js");
             await ScrollToElement(BottomId); // scroll down to latest message
+
+            if (_conversation.Count == 0)
+            {
+                await InitializeCampaign();
+            }
         }
     }
 
-    private void InitializeCampaign()
+    private async Task InitializeCampaign()
     {
         string content = $"The player is {_campaign!.Player.Name}, described as \"{_campaign.Player.Description}\".";
         if (_campaign.StartScenario != null)
@@ -109,7 +109,7 @@ public partial class CampaignPage
 
         try
         {
-            GameInputHandler?.HandleInitialPrompt(_campaign, content);
+            await GameInputHandler!.HandleInitialPrompt(_campaign, content);
         }
         catch (Exception e)
         {

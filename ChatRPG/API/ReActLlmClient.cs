@@ -27,7 +27,7 @@ public class ReActLlmClient : IReActLlmClient
 
     public async Task<string> GetChatCompletionAsync(Campaign campaign, string actionPrompt, string input)
     {
-        var llm = new Gpt4Model(_provider)
+        var llm = new Gpt4OmniModel(_provider)
         {
             Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.7 }
         };
@@ -47,7 +47,7 @@ public class ReActLlmClient : IReActLlmClient
     public async IAsyncEnumerable<string> GetStreamedChatCompletionAsync(Campaign campaign, string actionPrompt,
         string input)
     {
-        var llm = new Gpt4Model(_provider)
+        var llm = new Gpt4OmniModel(_provider)
         {
             Settings = new OpenAiChatSettings() { UseStreaming = true, Temperature = 0.7 }
         };
