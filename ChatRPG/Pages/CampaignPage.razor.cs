@@ -78,6 +78,7 @@ public partial class CampaignPage
         {
             InitializeCampaign();
         }
+        StateHasChanged();
     }
 
     /// <summary>

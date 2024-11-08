@@ -27,6 +27,7 @@ public class BattleTool(
 
     private static readonly Dictionary<string, (int, int)> DamageRanges = new()
     {
+        { "harmless", (0, 1) },
         { "low", (5, 10) },
         { "medium", (10, 20) },
         { "high", (15, 25) },
