@@ -26,6 +26,7 @@ public partial class CampaignPage
     private Character? _mainCharacter;
     private UserPromptType _activeUserPromptType = UserPromptType.Do;
     private string _userInputPlaceholder = InputPlaceholder[UserPromptType.Do];
+    private bool _pageInitialized = false;
 
     private static readonly Dictionary<UserPromptType, string> InputPlaceholder = new()
     {
@@ -74,6 +75,7 @@ public partial class CampaignPage
 
         GameInputHandler!.ChatCompletionReceived += OnChatCompletionReceived;
         GameInputHandler!.ChatCompletionChunkReceived += OnChatCompletionChunkReceived;
+        _pageInitialized = true;
     }
 
     /// <summary>
@@ -89,11 +91,11 @@ public partial class CampaignPage
             _detectScrollBarJsScript ??=
                 await JsRuntime!.InvokeAsync<IJSObjectReference>("import", "./js/detectScrollBar.js");
             await ScrollToElement(BottomId); // scroll down to latest message
+        }
 
-            if (_conversation.Count == 0)
-            {
-                await InitializeCampaign();
-            }
+        if (_pageInitialized && _conversation.Count == 0)
+        {
+            await InitializeCampaign();
         }
     }
 
@@ -249,9 +251,8 @@ public partial class CampaignPage
     /// </summary>
     private void UpdateStatsUi()
     {
-        _npcList = _campaign!.Characters.Where(c => !c.IsPlayer).ToList();
-        _npcList.Reverse(); // Show the most newly encountered npc first
-        _currentLocation = _campaign!.Environments.LastOrDefault();
+        _npcList = _campaign!.Characters.Where(c => !c.IsPlayer).OrderByDescending(c => c.Id).ToList();
+        _currentLocation = _campaign!.Player.Environment;
         _mainCharacter = _campaign!.Player;
         StateHasChanged();
     }

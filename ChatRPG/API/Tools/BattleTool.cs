@@ -56,11 +56,11 @@ public class BattleTool(
             }
 
             var participant1 = await utilities.FindCharacter(campaign,
-                $"{{\"name\": {battleInput.Participant1!.Name}, " +
-                $"\"description\": {battleInput.Participant1.Description}}}", instruction);
+                $"{{\"name\": \"{battleInput.Participant1!.Name}\", " +
+                $"\"description\": \"{battleInput.Participant1.Description}\"}}", instruction);
             var participant2 = await utilities.FindCharacter(campaign,
-                $"{{\"name\": {battleInput.Participant2!.Name}, " +
-                $"\"description\": {battleInput.Participant2.Description}}}", instruction);
+                $"{{\"name\": \"{battleInput.Participant2!.Name}\", " +
+                $"\"description\": \"{battleInput.Participant2.Description}\"}}", instruction);
 
             // Create dummy characters if they do not exist and pray that the archive chain will update them
             participant1 ??= new Character(campaign, campaign.Player.Environment, CharacterType.Humanoid,
