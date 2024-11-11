@@ -31,6 +31,7 @@ public class OpenAiGptMessage
     public string Content { get; private set; }
     public string NarrativePart { get; private set; }
     public readonly UserPromptType UserPromptType = UserPromptType.Do;
+
     private static readonly Regex NarrativeRegex =
         new(pattern: "^\\s*{\\s*\"narrative\":\\s*\"([^\"]*)", RegexOptions.IgnoreCase);
 
@@ -81,5 +82,4 @@ public class OpenAiGptMessage
 
         return content;
     }
-    
 }
