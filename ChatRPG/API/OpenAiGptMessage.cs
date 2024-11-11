@@ -13,7 +13,7 @@ public class OpenAiGptMessage
     public OpenAiGptMessage(ChatMessageRole role, string content)
     {
         Role = role;
-        Content = content;
+        Content = RemoveMarkdown(content);
         NarrativePart = "";
         UpdateNarrativePart();
         if (!Content.IsNullOrEmpty() && NarrativePart.IsNullOrEmpty() && role.Equals(ChatMessageRole.Assistant))
@@ -42,7 +42,7 @@ public class OpenAiGptMessage
             {
                 PropertyNameCaseInsensitive = true
             };
-            return JsonSerializer.Deserialize<LlmResponse>(Content, options);
+            return JsonSerializer.Deserialize<LlmResponse>(RemoveMarkdown(Content), options);
         }
         catch (JsonException)
         {
@@ -70,4 +70,16 @@ public class OpenAiGptMessage
         ChatMessageRole role = ChatMessageRole.FromString(message.Role.ToString().ToLower());
         return new OpenAiGptMessage(role, message.Content);
     }
+
+    private string RemoveMarkdown(string content)
+    {
+        if (content.StartsWith("```json") && content.EndsWith("```"))
+        {
+            content = content.Replace("```json", "");
+            content = content.Replace("```", "");
+        }
+
+        return content;
+    }
+    
 }
