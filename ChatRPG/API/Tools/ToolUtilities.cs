@@ -86,7 +86,7 @@ public class ToolUtilities(IConfiguration configuration)
             return null; // Format was unexpected
         }
     }
-    
+
     public static string RemoveMarkdown(string text)
     {
         if (text.StartsWith("```json") && text.EndsWith("```"))
@@ -94,6 +94,7 @@ public class ToolUtilities(IConfiguration configuration)
             text = text.Replace("```json", "");
             text = text.Replace("```", "");
         }
+
         return text;
     }
 }
