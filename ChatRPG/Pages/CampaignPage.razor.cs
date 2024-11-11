@@ -97,8 +97,6 @@ public partial class CampaignPage
         {
             await InitializeCampaign();
         }
-
-
     }
 
     private async Task InitializeCampaign()
