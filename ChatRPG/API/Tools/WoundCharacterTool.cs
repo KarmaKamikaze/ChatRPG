@@ -29,7 +29,7 @@ public class WoundCharacterTool(
     {
         try
         {
-            var woundInput = JsonSerializer.Deserialize<WoundInput>(ResponseCleaner.RemoveMarkdown(input), JsonOptions) ??
+            var woundInput = JsonSerializer.Deserialize<WoundInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
                               throw new JsonException("Failed to deserialize");
 
             var instruction = configuration.GetSection("SystemPrompts").GetValue<string>("WoundCharacterInstruction")!;

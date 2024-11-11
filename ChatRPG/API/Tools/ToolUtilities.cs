@@ -60,7 +60,7 @@ public class ToolUtilities(IConfiguration configuration)
         try
         {
             var llmResponseCharacter =
-                JsonSerializer.Deserialize<LlmResponseCharacter>(ResponseCleaner.RemoveMarkdown(response.ToString()),
+                JsonSerializer.Deserialize<LlmResponseCharacter>(RemoveMarkdown(response.ToString()),
                     JsonOptions);
 
             if (llmResponseCharacter is null) return null;
@@ -85,5 +85,15 @@ public class ToolUtilities(IConfiguration configuration)
         {
             return null; // Format was unexpected
         }
+    }
+    
+    public static string RemoveMarkdown(string text)
+    {
+        if (text.StartsWith("```json") && text.EndsWith("```"))
+        {
+            text = text.Replace("```json", "");
+            text = text.Replace("```", "");
+        }
+        return text;
     }
 }

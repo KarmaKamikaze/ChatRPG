@@ -28,7 +28,7 @@ public class HealCharacterTool(
     {
         try
         {
-            var healInput = JsonSerializer.Deserialize<HealInput>(ResponseCleaner.RemoveMarkdown(input), JsonOptions) ??
+            var healInput = JsonSerializer.Deserialize<HealInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
                             throw new JsonException("Failed to deserialize");
 
             var instruction = configuration.GetSection("SystemPrompts").GetValue<string>("HealCharacterInstruction")!;

@@ -38,7 +38,7 @@ public class BattleTool(
     {
         try
         {
-            var battleInput = JsonSerializer.Deserialize<BattleInput>(ResponseCleaner.RemoveMarkdown(input), JsonOptions) ??
+            var battleInput = JsonSerializer.Deserialize<BattleInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
                               throw new JsonException("Failed to deserialize");
             var instruction = configuration.GetSection("SystemPrompts").GetValue<string>("BattleInstruction")!;
 

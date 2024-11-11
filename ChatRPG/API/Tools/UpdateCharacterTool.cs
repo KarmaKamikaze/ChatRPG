@@ -19,7 +19,7 @@ public class UpdateCharacterTool(
     {
         try
         {
-            var updateCharacterInput = JsonSerializer.Deserialize<CharacterInput>(ResponseCleaner.RemoveMarkdown(input), JsonOptions) ??
+            var updateCharacterInput = JsonSerializer.Deserialize<CharacterInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
                                        throw new JsonException("Failed to deserialize");
             if (updateCharacterInput.Name.IsNullOrEmpty())
             {
