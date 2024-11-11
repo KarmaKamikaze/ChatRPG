@@ -50,7 +50,7 @@ public class ToolUtilities(IConfiguration configuration)
         query.Length--; // Remove last comma
 
         query.Append("\n]}");
-
+        
         query.Append($"\n\nFind the character using the following content: {input}. " +
                      $"If no character match, do NOT return a character.");
 
@@ -59,7 +59,7 @@ public class ToolUtilities(IConfiguration configuration)
         try
         {
             var llmResponseCharacter =
-                JsonSerializer.Deserialize<LlmResponseCharacter>(response.ToString(), JsonOptions);
+                JsonSerializer.Deserialize<LlmResponseCharacter>(ResponseCleaner.RemoveMarkdown(response.ToString()), JsonOptions);
 
             if (llmResponseCharacter is null) return null;
 

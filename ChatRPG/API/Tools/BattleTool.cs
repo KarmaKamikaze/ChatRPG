@@ -38,7 +38,7 @@ public class BattleTool(
     {
         try
         {
-            var battleInput = JsonSerializer.Deserialize<BattleInput>(input, JsonOptions) ??
+            var battleInput = JsonSerializer.Deserialize<BattleInput>(ResponseCleaner.RemoveMarkdown(input), JsonOptions) ??
                               throw new JsonException("Failed to deserialize");
             var instruction = configuration.GetSection("SystemPrompts").GetValue<string>("BattleInstruction")!;
 
@@ -101,7 +101,7 @@ public class BattleTool(
         {
             return
                 "Could not execute the battle. Tool input format was invalid. " +
-                "Please provide the input in valid JSON without markdown.";
+                "Please provide the input in valid JSON.";
         }
     }
 

@@ -28,7 +28,7 @@ public class HealCharacterTool(
     {
         try
         {
-            var healInput = JsonSerializer.Deserialize<HealInput>(input, JsonOptions) ??
+            var healInput = JsonSerializer.Deserialize<HealInput>(ResponseCleaner.RemoveMarkdown(input), JsonOptions) ??
                             throw new JsonException("Failed to deserialize");
 
             var instruction = configuration.GetSection("SystemPrompts").GetValue<string>("HealCharacterInstruction")!;
@@ -54,7 +54,7 @@ public class HealCharacterTool(
         catch (Exception)
         {
             return "Could not determine the character to heal. Tool input format was invalid. " +
-                   "Please provide a valid character name, description, and magnitude level in valid JSON without markdown.";
+                   "Please provide a valid character name, description, and magnitude level in valid JSON.";
         }
     }
 }
