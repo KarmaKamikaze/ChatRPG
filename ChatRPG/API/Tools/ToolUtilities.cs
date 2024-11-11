@@ -50,9 +50,9 @@ public class ToolUtilities(IConfiguration configuration)
         query.Length--; // Remove last comma
 
         query.Append("\n]}");
-        
+
         query.Append($"\n\nThe player is {campaign.Player.Name}. First-person pronouns refer to them.");
-        
+
         query.Append($"\n\nFind the character using the following content: {input}.");
 
         var response = await llm.GenerateAsync(query.ToString());
@@ -60,7 +60,8 @@ public class ToolUtilities(IConfiguration configuration)
         try
         {
             var llmResponseCharacter =
-                JsonSerializer.Deserialize<LlmResponseCharacter>(ResponseCleaner.RemoveMarkdown(response.ToString()), JsonOptions);
+                JsonSerializer.Deserialize<LlmResponseCharacter>(ResponseCleaner.RemoveMarkdown(response.ToString()),
+                    JsonOptions);
 
             if (llmResponseCharacter is null) return null;
 
