@@ -51,8 +51,9 @@ public class ToolUtilities(IConfiguration configuration)
 
         query.Append("\n]}");
         
-        query.Append($"\n\nFind the character using the following content: {input}. " +
-                     $"If no character match, do NOT return a character.");
+        query.Append($"\n\nThe player is {campaign.Player.Name}. First-person pronouns refer to them.");
+        
+        query.Append($"\n\nFind the character using the following content: {input}.");
 
         var response = await llm.GenerateAsync(query.ToString());
 
