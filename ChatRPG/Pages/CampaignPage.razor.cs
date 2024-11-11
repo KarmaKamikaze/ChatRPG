@@ -90,6 +90,7 @@ public partial class CampaignPage
             _scrollJsScript ??= await JsRuntime!.InvokeAsync<IJSObjectReference>("import", "./js/scroll.js");
             _detectScrollBarJsScript ??=
                 await JsRuntime!.InvokeAsync<IJSObjectReference>("import", "./js/detectScrollBar.js");
+            await ScrollToElement(BottomId); // scroll down to latest message
         }
 
         if (_pageInitialized && _conversation.Count == 0)
@@ -97,7 +98,7 @@ public partial class CampaignPage
             await InitializeCampaign();
         }
 
-        await ScrollToElement(BottomId); // scroll down to latest message
+
     }
 
     private async Task InitializeCampaign()
