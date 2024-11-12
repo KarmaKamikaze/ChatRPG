@@ -2,6 +2,8 @@ using ChatRPG.API;
 using ChatRPG.Data.Models;
 using ChatRPG.Pages;
 using ChatRPG.Services.Events;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace ChatRPG.Services;
 
@@ -12,7 +14,8 @@ public class GameInputHandler
     private readonly GameStateManager _gameStateManager;
     private readonly bool _streamChatCompletions;
     private readonly Dictionary<SystemPromptType, string> _systemPrompts = new();
-
+    private readonly AutoResetEvent _autoResetEvent = new(true);
+    
     public GameInputHandler(ILogger<GameInputHandler> logger, IReActLlmClient llmClient,
         GameStateManager gameStateManager, IConfiguration configuration)
     {
@@ -40,6 +43,7 @@ public class GameInputHandler
 
     public event EventHandler<ChatCompletionReceivedEventArgs>? ChatCompletionReceived;
     public event EventHandler<ChatCompletionChunkReceivedEventArgs>? ChatCompletionChunkReceived;
+    public event Action? CampaignUpdated;
 
     private void OnChatCompletionReceived(OpenAiGptMessage message)
     {
@@ -54,6 +58,11 @@ public class GameInputHandler
         ChatCompletionChunkReceived?.Invoke(this, args);
     }
 
+    private void OnCampaignUpdated()
+    {
+        CampaignUpdated?.Invoke();
+    }
+    
     public async Task HandleUserPrompt(Campaign campaign, UserPromptType promptType, string userInput)
     {
         switch (promptType)
@@ -79,6 +88,8 @@ public class GameInputHandler
 
     private async Task GetResponseAndUpdateState(Campaign campaign, string actionPrompt, string input)
     {
+        _autoResetEvent.WaitOne();
+
         if (_streamChatCompletions)
         {
             OpenAiGptMessage message = new(MessageRole.Assistant, "");
@@ -88,25 +99,34 @@ public class GameInputHandler
             {
                 OnChatCompletionChunkReceived(isStreamingDone: false, chunk);
             }
-
-            await SaveInteraction(campaign, input, message.Content);
+            
             OnChatCompletionChunkReceived(isStreamingDone: true);
+            
+            _ = Task.Run(async () =>
+            {
+                await SaveInteraction(campaign, input, message.Content);
+                _autoResetEvent.Set();
+            });
         }
         else
         {
-            string response = await _llmClient.GetChatCompletionAsync(campaign, actionPrompt, input);
+            var response = await _llmClient.GetChatCompletionAsync(campaign, actionPrompt, input);
             OpenAiGptMessage message = new(MessageRole.Assistant, response);
             OnChatCompletionReceived(message);
 
-            await SaveInteraction(campaign, input, response);
+            _ = Task.Run(async () =>
+            {
+                await SaveInteraction(campaign, input, message.Content);
+                _autoResetEvent.Set();
+            });
         }
     }
 
     private async Task SaveInteraction(Campaign campaign, string input, string response)
     {
-        await _gameStateManager.StoreMessagesInCampaign(campaign, input, response);
         await _gameStateManager.UpdateCampaignFromNarrative(campaign, input, response);
-
+        OnCampaignUpdated();
+        await _gameStateManager.StoreMessagesInCampaign(campaign, input, response);
         await _gameStateManager.SaveCurrentState(campaign);
     }
 }

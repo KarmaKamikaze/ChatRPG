@@ -75,6 +75,7 @@ public partial class CampaignPage
 
         GameInputHandler!.ChatCompletionReceived += OnChatCompletionReceived;
         GameInputHandler!.ChatCompletionChunkReceived += OnChatCompletionChunkReceived;
+        GameInputHandler!.CampaignUpdated += OnCampaignUpdated;
         _pageInitialized = true;
     }
 
@@ -121,10 +122,6 @@ public partial class CampaignPage
                 "Please try again by reloading the campaign."));
             _isWaitingForResponse = false;
         }
-        finally
-        {
-            UpdateStatsUi();
-        }
     }
 
     /// <summary>
@@ -166,10 +163,6 @@ public partial class CampaignPage
                 "An error occurred when generating the response \uD83D\uDCA9. Please try again."));
             _campaign = await PersistenceService!.LoadFromCampaignIdAsync(_campaign.Id); // Rollback campaign
             _isWaitingForResponse = false;
-        }
-        finally
-        {
-            UpdateStatsUi();
         }
     }
 
@@ -225,6 +218,11 @@ public partial class CampaignPage
         Task.Run(() => ScrollToElement(BottomId));
     }
 
+    private async void OnCampaignUpdated()
+    {
+        await InvokeAsync(UpdateStatsUi);
+    }
+    
     private void OnPromptTypeChange(UserPromptType type)
     {
         switch (type)
