@@ -15,7 +15,7 @@ public class GameInputHandler
     private readonly bool _streamChatCompletions;
     private readonly Dictionary<SystemPromptType, string> _systemPrompts = new();
     private readonly AutoResetEvent _autoResetEvent = new(true);
-    
+
     public GameInputHandler(ILogger<GameInputHandler> logger, IReActLlmClient llmClient,
         GameStateManager gameStateManager, IConfiguration configuration)
     {
@@ -62,7 +62,7 @@ public class GameInputHandler
     {
         CampaignUpdated?.Invoke();
     }
-    
+
     public async Task HandleUserPrompt(Campaign campaign, UserPromptType promptType, string userInput)
     {
         switch (promptType)
@@ -99,9 +99,9 @@ public class GameInputHandler
             {
                 OnChatCompletionChunkReceived(isStreamingDone: false, chunk);
             }
-            
+
             OnChatCompletionChunkReceived(isStreamingDone: true);
-            
+
             _ = Task.Run(async () =>
             {
                 await SaveInteraction(campaign, input, message.Content);

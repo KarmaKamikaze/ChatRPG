@@ -222,7 +222,7 @@ public partial class CampaignPage
     {
         await InvokeAsync(UpdateStatsUi);
     }
-    
+
     private void OnPromptTypeChange(UserPromptType type)
     {
         switch (type)
