@@ -94,17 +94,10 @@
                         </button>
                     </div>
                 </div>
-
-                @if (_hasScrollBar)
-                {
-                    <button class="btn-scroll-to-top text-xl-center rounded" @onclick='() => ScrollToElement("campaign-title")'>
-                        <i class="bi bi-arrow-bar-up fs-3"></i>
-                    </button>
-                }
             </div>
         </div>
 
-        <div class="col player-info floating-stats rounded text-white">
+        <div class="col player-info floating-stats rounded text-white" style="position: relative;">
             <div class="sticky">
                 <div class="mx-4 mt-3">
                     <h3 class="text-center mb-4">@_mainCharacter?.Name</h3>
@@ -121,6 +114,22 @@
                     <HealthBar MaxHealth="_mainCharacter?.MaxHealth" CurrentHealth="_mainCharacter?.CurrentHealth"></HealthBar>
                 </div>
             </div>
+            <!-- RadzenStack fixed to the bottom of the outer div -->
+            <div style="position: absolute; bottom: 1rem; left: 0; right: 0; text-align: center;">
+                @if (_isArchiving)
+                {
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Wrap="FlexWrap.Wrap" Class="rz-m-12" Gap="0.5rem">
+                        <span style="font-size: 1.25rem;">Archiving campaign...</span>
+                        <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Light" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" Style="max-height: 28px; max-width: 28px;"/>
+                    </RadzenStack>
+                }
+            </div>
+            @if (_hasScrollBar)
+            {
+                <button class="btn-scroll-to-top text-xl-center rounded" @onclick='() => ScrollToElement("campaign-title")'>
+                    <i class="bi bi-arrow-bar-up fs-3"></i>
+                </button>
+            }
         </div>
     </div>
 </div>

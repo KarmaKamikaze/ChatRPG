@@ -19,6 +19,7 @@ public partial class CampaignPage
     private List<OpenAiGptMessage> _conversation = new();
     private string _userInput = "";
     private bool _isWaitingForResponse;
+    private bool _isArchiving;
     private const string BottomId = "bottom-id";
     private Campaign? _campaign;
     private List<Character> _npcList = new();
@@ -192,6 +193,7 @@ public partial class CampaignPage
         if (eventArgs.Message.Content != string.Empty)
         {
             _isWaitingForResponse = false;
+            _isArchiving = true;
             StateHasChanged();
         }
     }
@@ -207,6 +209,7 @@ public partial class CampaignPage
         if (eventArgs.IsStreamingDone)
         {
             _isWaitingForResponse = false;
+            _isArchiving = true;
             StateHasChanged();
         }
         else if (eventArgs.Chunk is not null)
@@ -220,6 +223,7 @@ public partial class CampaignPage
 
     private async void OnCampaignUpdated()
     {
+        _isArchiving = false;
         await InvokeAsync(UpdateStatsUi);
     }
 
