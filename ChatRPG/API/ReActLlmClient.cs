@@ -1,6 +1,7 @@
 using ChatRPG.API.Tools;
 using ChatRPG.Data.Models;
 using LangChain.Chains.StackableChains.Agents.Tools;
+using LangChain.Providers;
 using LangChain.Providers.OpenAI;
 using LangChain.Providers.OpenAI.Predefined;
 using static LangChain.Chains.Chain;
@@ -12,6 +13,7 @@ public class ReActLlmClient : IReActLlmClient
     private readonly IConfiguration _configuration;
     private readonly OpenAiProvider _provider;
     private readonly string _reActPrompt;
+    private readonly bool _narratorDebugMode;
 
     public ReActLlmClient(IConfiguration configuration)
     {
@@ -20,15 +22,18 @@ public class ReActLlmClient : IReActLlmClient
         _configuration = configuration;
         _reActPrompt = _configuration.GetSection("SystemPrompts").GetValue<string>("ReAct")!;
         _provider = new OpenAiProvider(_configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
+        _narratorDebugMode = _configuration.GetValue<bool>("NarrativeChainDebug")!;
     }
 
     public async Task<string> GetChatCompletionAsync(Campaign campaign, string actionPrompt, string input)
     {
-        var llm = new Gpt4Model(_provider)
+        var llm = new Gpt4OmniModel(_provider)
         {
             Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.7 }
         };
-        var agent = new ReActAgentChain(llm, _reActPrompt, actionPrompt: actionPrompt, campaign.GameSummary);
+
+        var agent = new ReActAgentChain(_narratorDebugMode ? llm.UseConsoleForDebug() : llm, _reActPrompt,
+            actionPrompt: actionPrompt, campaign.GameSummary);
         var tools = CreateTools(campaign);
         foreach (var tool in tools)
         {
@@ -42,13 +47,14 @@ public class ReActLlmClient : IReActLlmClient
     public async IAsyncEnumerable<string> GetStreamedChatCompletionAsync(Campaign campaign, string actionPrompt,
         string input)
     {
-        var agentLlm = new Gpt4Model(_provider)
+        var llm = new Gpt4OmniModel(_provider)
         {
             Settings = new OpenAiChatSettings() { UseStreaming = true, Temperature = 0.7 }
         };
 
-        var eventProcessor = new LlmEventProcessor(agentLlm);
-        var agent = new ReActAgentChain(agentLlm, _reActPrompt, actionPrompt: actionPrompt, campaign.GameSummary);
+        var eventProcessor = new LlmEventProcessor(llm);
+        var agent = new ReActAgentChain(_narratorDebugMode ? llm.UseConsoleForDebug() : llm, _reActPrompt,
+            actionPrompt: actionPrompt, campaign.GameSummary);
         var tools = CreateTools(campaign);
         foreach (var tool in tools)
         {
@@ -81,7 +87,8 @@ public class ReActLlmClient : IReActLlmClient
             "Input to this tool must be in the following RAW JSON format: {\"input\": \"The player's input\", " +
             "\"severity\": \"Describes how devastating the injury to the character will be based on the action. " +
             "Can be one of the following values: {low, medium, high, extraordinary}}\". Do not use markdown, " +
-            "only raw JSON as input. Use this tool only once per character at most.");
+            "only raw JSON as input. Use this tool only once per character at most and only if they are not engaged " +
+            "in battle.");
         tools.Add(woundCharacterTool);
 
         var healCharacterTool = new HealCharacterTool(_configuration, campaign, utils, "healcharactertool",
@@ -97,9 +104,39 @@ public class ReActLlmClient : IReActLlmClient
             "Do not use markdown, only raw JSON as input. Use this tool only once per character at most.");
         tools.Add(healCharacterTool);
 
-        // Use battle when an attack can be mitigated or dodged by the involved participants.
-        // This tool is appropriate for combat, battle between multiple participants,
-        // or attacks that can be avoided and a to-hit roll would be needed in order to determine a hit.
+        var battleTool = new BattleTool(_configuration, campaign, utils, "battletool",
+            "Use the battle tool to resolve battle or combat between two participants. A participant is " +
+            "a single character and cannot be a combination of characters. If there are more " +
+            "than two participants, the tool must be used once per attacker to give everyone a chance at fighting. " +
+            "The battle tool will give each participant a chance to fight the other participant. The tool should " +
+            "also be used when an attack can be mitigated or dodged by the involved participants. It is also " +
+            "possible for either or both participants to miss. A hit chance specifier will help adjust the chance " +
+            "that a participant gets to retaliate. Example: There are only two combatants. Call the tool only ONCE " +
+            "since both characters get an attack. Another example: There are three combatants, the Player's character " +
+            "and two assassins. The battle tool is called first with the Player's character as participant one and " +
+            "one of the assassins as participant two. Chances are high that the player will hit the assassin but " +
+            "assassins must be precise, making it harder to hit, however, they deal high damage if they hit. We " +
+            "observe that the participant one hits participant two and participant two misses participant one. " +
+            "After this round of battle has been resolved, call the tool again with the Player's character as " +
+            "participant one and the other assassin as participant two. Since participant one in this case has " +
+            "already hit once during this narrative, we impose a penalty to their hit chance, which is " +
+            "accumulative for each time they hit an enemy during battle. The damage severity describes how " +
+            "powerful the attack is which is derived from the narrative description of the attacks. " +
+            "If the participants engage in a friendly sparring fight, does not intend to hurt, or does mock battle, " +
+            "the damage severity is <harmless>. " +
+            "If there are no direct description, estimate the impact of an attack based on the character type and " +
+            "their description. Input to this tool must be in the following RAW JSON format: {\"participant1\": " +
+            "{\"name\": \"<name of participant one>\", \"description\": \"<description of participant one>\"}, " +
+            "\"participant2\": {\"name\": \"<name of participant two>\", \"description\": " +
+            "\"<description of participant two>\"}, \"participant1HitChance\": \"<hit chance specifier for " +
+            "participant one>\", \"participant2HitChance\": \"<hit chance specifier for participant two>\", " +
+            "\"participant1DamageSeverity\": \"<damage severity for participant one>\", " +
+            "\"participant2DamageSeverity\": \"<damage severity for participant two>\"} where participant#HitChance " +
+            "specifiers are one of the following {high, medium, low, impossible} and participant#DamageSeverity is " +
+            "one of the following {harmless, low, medium, high, extraordinary}. Do not use markdown, only raw JSON as " +
+            "input. The narrative battle is over when each character has had the chance to attack another character at " +
+            "most once.");
+        tools.Add(battleTool);
 
         return tools;
     }

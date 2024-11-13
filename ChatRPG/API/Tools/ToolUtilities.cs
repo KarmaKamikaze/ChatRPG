@@ -10,6 +10,8 @@ namespace ChatRPG.API.Tools;
 
 public class ToolUtilities(IConfiguration configuration)
 {
+    private const int IncludedPreviousMessages = 4;
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true
@@ -18,7 +20,7 @@ public class ToolUtilities(IConfiguration configuration)
     public async Task<Character?> FindCharacter(Campaign campaign, string input, string instruction)
     {
         var provider = new OpenAiProvider(configuration.GetSection("ApiKeys")?.GetValue<string>("OpenAI")!);
-        var llm = new Gpt4Model(provider)
+        var llm = new Gpt4OmniModel(provider)
         {
             Settings = new OpenAiChatSettings() { UseStreaming = false }
         };
@@ -30,7 +32,12 @@ public class ToolUtilities(IConfiguration configuration)
 
         query.Append($"\n\nThe story up until now: {campaign.GameSummary}");
 
-        query.Append($"\n\nThe player's newest action: {input}");
+        var content = campaign.Messages.TakeLast(IncludedPreviousMessages).Select(m => m.Content);
+        query.Append("\n\nUse these previous messages as context:");
+        foreach (var message in content)
+        {
+            query.Append($"\n {message}");
+        }
 
         query.Append("\n\nHere is the list of all characters present in the story:\n\n{\"characters\": [\n");
 
@@ -44,12 +51,17 @@ public class ToolUtilities(IConfiguration configuration)
 
         query.Append("\n]}");
 
+        query.Append($"\n\nThe player is {campaign.Player.Name}. First-person pronouns refer to them.");
+
+        query.Append($"\n\nFind the character using the following content: {input}.");
+
         var response = await llm.GenerateAsync(query.ToString());
 
         try
         {
             var llmResponseCharacter =
-                JsonSerializer.Deserialize<LlmResponseCharacter>(response.ToString(), JsonOptions);
+                JsonSerializer.Deserialize<LlmResponseCharacter>(RemoveMarkdown(response.ToString()),
+                    JsonOptions);
 
             if (llmResponseCharacter is null) return null;
 
@@ -73,5 +85,16 @@ public class ToolUtilities(IConfiguration configuration)
         {
             return null; // Format was unexpected
         }
+    }
+
+    public static string RemoveMarkdown(string text)
+    {
+        if (text.StartsWith("```json") && text.EndsWith("```"))
+        {
+            text = text.Replace("```json", "");
+            text = text.Replace("```", "");
+        }
+
+        return text;
     }
 }

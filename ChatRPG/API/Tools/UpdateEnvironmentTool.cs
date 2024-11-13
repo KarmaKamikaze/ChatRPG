@@ -20,7 +20,7 @@ public class UpdateEnvironmentTool(
     {
         try
         {
-            var updateEnvironmentInput = JsonSerializer.Deserialize<UpdateEnvironmentInput>(input, JsonOptions) ??
+            var updateEnvironmentInput = JsonSerializer.Deserialize<EnvironmentInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
                                          throw new JsonException("Failed to deserialize");
 
             if (updateEnvironmentInput.Name.IsNullOrEmpty())
@@ -73,7 +73,7 @@ public class UpdateEnvironmentTool(
         {
             return Task.FromResult("Could not determine the environment to update. Tool input format was invalid. " +
                                    "Please provide a valid environment name, description, and determine if the " +
-                                   "player character is present in the environment in valid JSON without markdown.");
+                                   "player character is present in the environment in valid JSON.");
         }
     }
 }

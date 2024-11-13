@@ -29,11 +29,11 @@ public class WoundCharacterTool(
     {
         try
         {
-            var effectInput = JsonSerializer.Deserialize<WoundInput>(input, JsonOptions) ??
+            var woundInput = JsonSerializer.Deserialize<WoundInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
                               throw new JsonException("Failed to deserialize");
 
             var instruction = configuration.GetSection("SystemPrompts").GetValue<string>("WoundCharacterInstruction")!;
-            var character = await utilities.FindCharacter(campaign, effectInput.Input!, instruction);
+            var character = await utilities.FindCharacter(campaign, woundInput.Input!, instruction);
 
             if (character is null)
             {
@@ -43,7 +43,7 @@ public class WoundCharacterTool(
 
             // Determine damage
             Random rand = new Random();
-            var (minDamage, maxDamage) = DamageRanges[effectInput.Severity!];
+            var (minDamage, maxDamage) = DamageRanges[woundInput.Severity!];
             var damage = rand.Next(minDamage, maxDamage);
 
             if (character.AdjustHealth(-damage))
@@ -70,7 +70,7 @@ public class WoundCharacterTool(
         catch (Exception)
         {
             return "Could not determine the character to wound. Tool input format was invalid. " +
-                   "Please provide a valid character name, description, and severity level in valid JSON without markdown.";
+                   "Please provide a valid character name, description, and severity level in valid JSON.";
         }
     }
 }

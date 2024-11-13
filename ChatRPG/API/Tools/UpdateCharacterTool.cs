@@ -19,7 +19,7 @@ public class UpdateCharacterTool(
     {
         try
         {
-            var updateCharacterInput = JsonSerializer.Deserialize<UpdateCharacterInput>(input, JsonOptions) ??
+            var updateCharacterInput = JsonSerializer.Deserialize<CharacterInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
                                        throw new JsonException("Failed to deserialize");
             if (updateCharacterInput.Name.IsNullOrEmpty())
             {
@@ -74,7 +74,7 @@ public class UpdateCharacterTool(
         catch (JsonException)
         {
             return Task.FromResult("Could not determine the character to update. Tool input format was invalid. " +
-                                   "Please provide a valid character name, description, type, and state in valid JSON without markdown.");
+                                   "Please provide a valid character name, description, type, and state in valid JSON.");
         }
     }
 

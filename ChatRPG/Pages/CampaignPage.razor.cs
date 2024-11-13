@@ -19,6 +19,7 @@ public partial class CampaignPage
     private List<OpenAiGptMessage> _conversation = new();
     private string _userInput = "";
     private bool _isWaitingForResponse;
+    private bool _isArchiving;
     private const string BottomId = "bottom-id";
     private Campaign? _campaign;
     private List<Character> _npcList = new();
@@ -26,6 +27,7 @@ public partial class CampaignPage
     private Character? _mainCharacter;
     private UserPromptType _activeUserPromptType = UserPromptType.Do;
     private string _userInputPlaceholder = InputPlaceholder[UserPromptType.Do];
+    private bool _pageInitialized = false;
 
     private static readonly Dictionary<UserPromptType, string> InputPlaceholder = new()
     {
@@ -74,10 +76,8 @@ public partial class CampaignPage
 
         GameInputHandler!.ChatCompletionReceived += OnChatCompletionReceived;
         GameInputHandler!.ChatCompletionChunkReceived += OnChatCompletionChunkReceived;
-        if (_conversation.Count == 0)
-        {
-            InitializeCampaign();
-        }
+        GameInputHandler!.CampaignUpdated += OnCampaignUpdated;
+        _pageInitialized = true;
     }
 
     /// <summary>
@@ -94,9 +94,14 @@ public partial class CampaignPage
                 await JsRuntime!.InvokeAsync<IJSObjectReference>("import", "./js/detectScrollBar.js");
             await ScrollToElement(BottomId); // scroll down to latest message
         }
+
+        if (_pageInitialized && _conversation.Count == 0)
+        {
+            await InitializeCampaign();
+        }
     }
 
-    private void InitializeCampaign()
+    private async Task InitializeCampaign()
     {
         string content = $"The player is {_campaign!.Player.Name}, described as \"{_campaign.Player.Description}\".";
         if (_campaign.StartScenario != null)
@@ -105,23 +110,18 @@ public partial class CampaignPage
         }
 
         _isWaitingForResponse = true;
-        OpenAiGptMessage message = new(MessageRole.System, content);
-        _conversation.Add(message);
 
         try
         {
-            GameInputHandler?.HandleInitialPrompt(_campaign, content);
+            await GameInputHandler!.HandleInitialPrompt(_campaign, content);
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            Console.WriteLine($"An error occurred when generating the response: {e.Message}");
             _conversation.Add(new OpenAiGptMessage(MessageRole.System,
                 "An error occurred when generating the response \uD83D\uDCA9. " +
                 "Please try again by reloading the campaign."));
             _isWaitingForResponse = false;
-        }
-        finally
-        {
-            UpdateStatsUi();
         }
     }
 
@@ -157,16 +157,13 @@ public partial class CampaignPage
             await GameInputHandler!.HandleUserPrompt(_campaign, _activeUserPromptType, userInput.Content);
             _conversation.RemoveAll(m => m.Role.Equals(MessageRole.System));
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            Console.WriteLine($"An error occurred when generating the response: {e.Message}");
             _conversation.Add(new OpenAiGptMessage(MessageRole.System,
                 "An error occurred when generating the response \uD83D\uDCA9. Please try again."));
             _campaign = await PersistenceService!.LoadFromCampaignIdAsync(_campaign.Id); // Rollback campaign
             _isWaitingForResponse = false;
-        }
-        finally
-        {
-            UpdateStatsUi();
         }
     }
 
@@ -196,6 +193,7 @@ public partial class CampaignPage
         if (eventArgs.Message.Content != string.Empty)
         {
             _isWaitingForResponse = false;
+            _isArchiving = true;
             StateHasChanged();
         }
     }
@@ -211,6 +209,7 @@ public partial class CampaignPage
         if (eventArgs.IsStreamingDone)
         {
             _isWaitingForResponse = false;
+            _isArchiving = true;
             StateHasChanged();
         }
         else if (eventArgs.Chunk is not null)
@@ -220,6 +219,12 @@ public partial class CampaignPage
         }
 
         Task.Run(() => ScrollToElement(BottomId));
+    }
+
+    private async void OnCampaignUpdated()
+    {
+        _isArchiving = false;
+        await InvokeAsync(UpdateStatsUi);
     }
 
     private void OnPromptTypeChange(UserPromptType type)
@@ -248,9 +253,8 @@ public partial class CampaignPage
     /// </summary>
     private void UpdateStatsUi()
     {
-        _npcList = _campaign!.Characters.Where(c => !c.IsPlayer).ToList();
-        _npcList.Reverse(); // Show the most newly encountered npc first
-        _currentLocation = _campaign!.Environments.LastOrDefault();
+        _npcList = _campaign!.Characters.Where(c => !c.IsPlayer).OrderByDescending(c => c.Id).ToList();
+        _currentLocation = _campaign!.Player.Environment;
         _mainCharacter = _campaign!.Player;
         StateHasChanged();
     }

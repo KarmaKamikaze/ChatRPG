@@ -1,6 +1,6 @@
 namespace ChatRPG.API.Tools;
 
-public class UpdateEnvironmentInput
+public class EnvironmentInput
 {
     public string? Name { get; set; }
     public string? Description { get; set; }

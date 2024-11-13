@@ -6,7 +6,8 @@ public class Character
     {
     }
 
-    public Character(Campaign campaign, Environment environment, CharacterType type, string name, string description, bool isPlayer)
+    public Character(Campaign campaign, Environment environment, CharacterType type, string name, string description,
+        bool isPlayer)
     {
         Campaign = campaign;
         Environment = environment;
@@ -16,10 +17,11 @@ public class Character
         IsPlayer = isPlayer;
         MaxHealth = type switch
         {
-            CharacterType.Humanoid => 50,
-            CharacterType.SmallCreature => 30,
-            CharacterType.LargeCreature => 70,
-            CharacterType.Monster => 90,
+            CharacterType.Humanoid => 40,
+            CharacterType.SmallMonster => 15,
+            CharacterType.MediumMonster => 35,
+            CharacterType.LargeMonster => 55,
+            CharacterType.BossMonster => 90,
             _ => 50
         };
         if (isPlayer)

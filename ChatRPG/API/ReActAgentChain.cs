@@ -79,7 +79,7 @@ New input: {input}";
         string? gameSummary = null,
         string inputKey = "input",
         string outputKey = "text",
-        int maxActions = 10)
+        int maxActions = 20)
     {
         _model = model;
         _model.Settings!.StopSequences = ["Observation", "[END]"];
@@ -116,7 +116,7 @@ New input: {input}";
         string? gameSummary = null,
         string inputKey = "input",
         string outputKey = "text",
-        int maxActions = 10) : this(model, reActPrompt, gameSummary, inputKey, outputKey, maxActions)
+        int maxActions = 20) : this(model, reActPrompt, gameSummary, inputKey, outputKey, maxActions)
     {
         _actionPrompt = actionPrompt ?? string.Empty;
     }
@@ -130,7 +130,7 @@ New input: {input}";
         string? gameSummary = null,
         string inputKey = "input",
         string outputKey = "text",
-        int maxActions = 10) : this(model, reActPrompt, gameSummary, inputKey, outputKey, maxActions)
+        int maxActions = 20) : this(model, reActPrompt, gameSummary, inputKey, outputKey, maxActions)
     {
         _characters = characters;
         _playerCharacter = playerCharacter;
@@ -215,6 +215,7 @@ New input: {input}";
             }
         }
 
-        throw new ReActChainNoFinalAnswerReachedException("The ReAct Chain could not reach a final answer", values);
+        throw new ReActChainNoFinalAnswerReachedException($"The ReAct Chain could not reach a final answer. " +
+                                                          $"Values: {values}", values);
     }
 }

@@ -3,6 +3,7 @@ using ChatRPG.API;
 using ChatRPG.API.Tools;
 using ChatRPG.Data.Models;
 using LangChain.Chains.StackableChains.Agents.Tools;
+using LangChain.Providers;
 using LangChain.Providers.OpenAI;
 using LangChain.Providers.OpenAI.Predefined;
 using static LangChain.Chains.Chain;
@@ -15,18 +16,20 @@ public class GameStateManager
 {
     private readonly OpenAiProvider _provider;
     private readonly IPersistenceService _persistenceService;
-    private readonly IConfiguration _configuration;
     private readonly string _updateCampaignPrompt;
+    private readonly bool _archivistDebugMode;
+    private readonly bool _summarizeMessages;
 
     public GameStateManager(IConfiguration configuration, IPersistenceService persistenceService)
     {
-        _configuration = configuration;
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI"));
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts")
             .GetValue<string>("UpdateCampaignFromNarrative"));
         _provider = new OpenAiProvider(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
         _updateCampaignPrompt =
             configuration.GetSection("SystemPrompts").GetValue<string>("UpdateCampaignFromNarrative")!;
+        _archivistDebugMode = configuration.GetValue<bool>("ArchivistChainDebug");
+        _summarizeMessages = configuration.GetValue<bool>("ShouldSummarize");
         _persistenceService = persistenceService;
     }
 
@@ -35,9 +38,9 @@ public class GameStateManager
         await _persistenceService.SaveAsync(campaign);
     }
 
-    public async Task UpdateCampaignFromNarrative(Campaign campaign, string narrative)
+    public async Task UpdateCampaignFromNarrative(Campaign campaign, string input, string narrative)
     {
-        var llm = new Gpt4Model(_provider)
+        var llm = new Gpt4OmniModel(_provider)
         {
             Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.7 }
         };
@@ -67,8 +70,8 @@ public class GameStateManager
 
         environments.Append("\n]}");
 
-        var agent = new ReActAgentChain(llm, _updateCampaignPrompt, characters.ToString(), campaign.Player.Name,
-            environments.ToString(), gameSummary: campaign.GameSummary);
+        var agent = new ReActAgentChain(_archivistDebugMode ? llm.UseConsoleForDebug() : llm, _updateCampaignPrompt,
+            characters.ToString(), campaign.Player.Name, environments.ToString(), gameSummary: campaign.GameSummary);
 
         var tools = CreateTools(campaign);
         foreach (var tool in tools)
@@ -76,25 +79,41 @@ public class GameStateManager
             agent.UseTool(tool);
         }
 
-        var chain = Set(narrative, "input") | agent;
+        var newInformation = $"The player says: {input}\nThe DM says: {narrative}";
+
+        var chain = Set(newInformation, "input") | agent;
         await chain.RunAsync("text");
     }
 
-    private List<AgentTool> CreateTools(Campaign campaign)
+    private static List<AgentTool> CreateTools(Campaign campaign)
     {
         var tools = new List<AgentTool>();
-        var utils = new ToolUtilities(_configuration);
 
-        var updateCharacterTool = new UpdateCharacterTool(campaign, "updatecharactertool",
+        var updateCharacterToolDescription = new StringBuilder();
+        updateCharacterToolDescription.Append(
             "This tool must be used to create a new character or update an existing character in the campaign. " +
             "Example: The narrative text mentions a new character or contains changes to an existing character. " +
             "Input to this tool must be in the following RAW JSON format: {\"name\": \"<character name>\", " +
             "\"description\": \"<new or updated character description>\", \"type\": \"<character type>\", " +
-            "\"state\": \"<character health state>\"}, where type is one of the following: {Humanoid, SmallCreature, " +
-            "LargeCreature, Monster}, and state is one of the following: {Dead, Unconscious, HeavilyWounded, " +
+            "\"state\": \"<character health state>\"}, where type is one of the following: {");
+
+        var characterTypes = Enum.GetNames<CharacterType>();
+        for (var i = 0; i < characterTypes.Length; i++)
+        {
+            updateCharacterToolDescription.Append($"{characterTypes[i]}");
+            if (i < characterTypes.Length - 1)
+            {
+                updateCharacterToolDescription.Append(", ");
+            }
+        }
+
+        updateCharacterToolDescription.Append(
+            "}, and state is one of the following: {Dead, Unconscious, HeavilyWounded, " +
             "LightlyWounded, Healthy}. The description of a character could describe their physical characteristics, " +
             "personality, what they are known for, or other cool descriptive features. " +
             "The tool should only be used once per character.");
+        var updateCharacterTool =
+            new UpdateCharacterTool(campaign, "updatecharactertool", updateCharacterToolDescription.ToString());
         tools.Add(updateCharacterTool);
 
         var updateEnvironmentTool = new UpdateEnvironmentTool(campaign, "updateenvironmenttool",
@@ -123,12 +142,21 @@ public class GameStateManager
             new(assistantOutput, LangChain.Providers.MessageRole.Ai)
         };
 
-        var summaryLlm = new Gpt4Model(_provider)
+        var summaryLlm = new Gpt4OmniModel(_provider)
         {
             Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.7 }
         };
 
-        campaign.GameSummary = await summaryLlm.SummarizeAsync(newMessages, campaign.GameSummary ?? "");
+        if (_summarizeMessages)
+        {
+            campaign.GameSummary = await summaryLlm.SummarizeAsync(newMessages, campaign.GameSummary ?? "");
+        }
+        else
+        {
+            campaign.GameSummary ??= string.Empty;
+            campaign.GameSummary += string.Join("\n", newMessages.Select(m => m.Content)) + "\n";
+        }
+
         foreach (var message in newMessages)
         {
             // Only add the message, if the list is empty.
