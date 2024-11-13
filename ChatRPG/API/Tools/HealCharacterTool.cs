@@ -41,7 +41,7 @@ public class HealCharacterTool(
             }
 
             // Determine damage
-            Random rand = new Random();
+            var rand = new Random();
             var (minHealing, maxHealing) = HealingRanges[healInput.Magnitude!];
             var healing = rand.Next(minHealing, maxHealing);
 

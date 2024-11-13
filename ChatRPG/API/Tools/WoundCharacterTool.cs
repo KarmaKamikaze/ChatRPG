@@ -42,7 +42,7 @@ public class WoundCharacterTool(
             }
 
             // Determine damage
-            Random rand = new Random();
+            var rand = new Random();
             var (minDamage, maxDamage) = DamageRanges[woundInput.Severity!];
             var damage = rand.Next(minDamage, maxDamage);
 

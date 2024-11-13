@@ -2,11 +2,7 @@ using ChatRPG.API;
 
 namespace ChatRPG.Services.Events;
 
-public class ChatCompletionReceivedEventArgs : EventArgs
+public class ChatCompletionReceivedEventArgs(OpenAiGptMessage message) : EventArgs
 {
-    public ChatCompletionReceivedEventArgs(OpenAiGptMessage message)
-    {
-        Message = message;
-    }
-    public OpenAiGptMessage Message { get; }
+    public OpenAiGptMessage Message { get; } = message;
 }

@@ -1,13 +1,7 @@
 namespace ChatRPG.Services.Events;
 
-public class ChatCompletionChunkReceivedEventArgs : EventArgs
+public class ChatCompletionChunkReceivedEventArgs(bool isStreamingDone, string? chunk = null) : EventArgs
 {
-    public bool IsStreamingDone { get; }
-    public string? Chunk { get; }
-
-    public ChatCompletionChunkReceivedEventArgs(bool isStreamingDone, string? chunk = null)
-    {
-        IsStreamingDone = isStreamingDone;
-        Chunk = chunk;
-    }
+    public bool IsStreamingDone { get; } = isStreamingDone;
+    public string? Chunk { get; } = chunk;
 }

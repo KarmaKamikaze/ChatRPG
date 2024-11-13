@@ -1,5 +1,4 @@
 @using ChatRPG.Data.Models
-@using ChatRPG.Services
 @using CampaignModel = ChatRPG.Data.Models.Campaign;
 
 <div class="container" style="margin-bottom: 50px">
@@ -12,36 +11,45 @@
             <div class="col rounded custom-gray-container">
                 <div class="m-3">
                     <h3 class="text-center mb-4">Your Campaigns</h3>
-                    <div class="vstack overflow-auto form-text-black mb-1 scrollbar" style="max-height: 500px;" id="your-campaigns">
+                    <div class="vstack overflow-auto form-text-black mb-1 scrollbar" style="max-height: 500px;"
+                         id="your-campaigns">
                         @foreach (CampaignModel campaign in Campaigns)
                         {
-                            <button class="campaign-button card card-dim mb-2" @onclick='() => LaunchCampaign(campaign.Id)'>
+                            <button class="campaign-button card card-dim mb-2"
+                                    @onclick='() => LaunchCampaign(campaign.Id)'>
                                 <div class="card-body col-12">
                                     <h5 class="card-title">@campaign.Title</h5>
-                                    <h6 class="card-subtitle mb-2 text-muted" style="font-size: 14px;">@campaign.Player.Name</h6>
+                                    <h6 class="card-subtitle mb-2 text-muted"
+                                        style="font-size: 14px;">@campaign.Player.Name</h6>
                                     <hr/>
                                     <p class="card-text line-clamp text-start">@(campaign.StartScenario ?? "No scenario")</p>
-                                    <p class="card-text" style="font-size: 14px;">Started @campaign.StartedOn.ToShortDateString() @campaign.StartedOn.ToShortTimeString()</p>
+                                    <p class="card-text" style="font-size: 14px;">
+                                        Started @campaign.StartedOn.ToShortDateString() @campaign.StartedOn.ToShortTimeString()</p>
                                 </div>
-                                <button class="delete-campaign-button rounded" @onclick='() => ShowCampaignDeleteModal(campaign)' @onclick:stopPropagation>
+                                <button class="delete-campaign-button rounded"
+                                        @onclick='() => ShowCampaignDeleteModal(campaign)' @onclick:stopPropagation>
                                     <i class="bi bi-trash3 text-danger"></i>
                                 </button>
                             </button>
                         }
                     </div>
-                    <p class="text-muted" id="campaigns-count">Found @(Campaigns.Count) campaign@(Campaigns.Count == 1 ? "" : "s").</p>
+                    <p class="text-muted" id="campaigns-count">
+                        Found @(Campaigns.Count) campaign@(Campaigns.Count == 1 ? "" : "s").</p>
                 </div>
             </div>
             <div class="col rounded custom-gray-container">
                 <div class="m-3">
                     <h3 class="text-center mb-4">Starting Scenarios</h3>
-                    <div class="vstack overflow-auto form-text-black mb-1 scrollbar" style="max-height: 500px;" id="start-scenarios">
+                    <div class="vstack overflow-auto form-text-black mb-1 scrollbar" style="max-height: 500px;"
+                         id="start-scenarios">
                         @foreach (StartScenario scenario in StartScenarios)
                         {
-                            <Scenario ApplyScenario="ApplyStartingScenario" Title="@scenario.Title" Body="@scenario.Body"/>
+                            <Scenario ApplyScenario="ApplyStartingScenario" Title="@scenario.Title"
+                                      Body="@scenario.Body"/>
                         }
                     </div>
-                    <p class="text-muted" id="scenarios-count">Found @(StartScenarios.Count) scenario@(StartScenarios.Count == 1 ? "" : "s").</p>
+                    <p class="text-muted" id="scenarios-count">
+                        Found @(StartScenarios.Count) scenario@(StartScenarios.Count == 1 ? "" : "s").</p>
                 </div>
             </div>
             <div class="col-5 rounded custom-gray-container">
@@ -49,34 +57,46 @@
                     <h3 class="text-center mb-4">Create a Custom Campaign</h3>
                     <div class="form">
                         <div class="mb-3">
-                            <label for="inputCampaignTitle" class="form-label">Campaign Title<span class="required-keyword">(Required)</span></label>
-                            <input type="text" @bind="CampaignTitle" @oninput="UpdateCampaignTitleOnKeyPress" class="form-control" id="inputCampaignTitle" data-toggle="tooltip" data-placement="top" title="Campaign title is required.">
+                            <label for="inputCampaignTitle" class="form-label">Campaign Title<span
+                                    class="required-keyword">(Required)</span></label>
+                            <input type="text" @bind="CampaignTitle" @oninput="UpdateCampaignTitleOnKeyPress"
+                                   class="form-control" id="inputCampaignTitle" data-toggle="tooltip"
+                                   data-placement="top" title="Campaign title is required.">
                             @if (string.IsNullOrWhiteSpace(CampaignTitle) && TestFields)
                             {
-                                <div class="alert-sm alert-danger alert-inside-input mt-1 p-2 rounded" role="alert" id="campaign-title-alert">
+                                <div class="alert-sm alert-danger alert-inside-input mt-1 p-2 rounded" role="alert"
+                                     id="campaign-title-alert">
                                     Campaign title is required.
                                 </div>
                             }
                         </div>
                         <div class="mb-3">
-                            <label for="inputCharacterName" class="form-label">Character Name<span class="required-keyword">(Required)</span></label>
-                            <input type="text" @bind="CharacterName" @oninput="UpdateCharacterNameOnKeyPress" class="form-control" id="inputCharacterName" data-toggle="tooltip" data-placement="top" title="Character name is required."/>
+                            <label for="inputCharacterName" class="form-label">Character Name<span
+                                    class="required-keyword">(Required)</span></label>
+                            <input type="text" @bind="CharacterName" @oninput="UpdateCharacterNameOnKeyPress"
+                                   class="form-control" id="inputCharacterName" data-toggle="tooltip"
+                                   data-placement="top" title="Character name is required."/>
                             @if (string.IsNullOrWhiteSpace(CharacterName) && TestFields)
                             {
-                                <div class="alert-sm alert-danger alert-inside-input mt-1 p-2 rounded" role="alert" id="character-name-alert">
+                                <div class="alert-sm alert-danger alert-inside-input mt-1 p-2 rounded" role="alert"
+                                     id="character-name-alert">
                                     Character name is required.
                                 </div>
                             }
                         </div>
                         <div class="mb-3">
                             <label for="inputCharacterDescription" class="form-label">Character Description</label>
-                            <textarea class="form-control scrollbar" style="resize: none;" @bind="CharacterDescription" id="inputCharacterDescription" rows="2"></textarea>
+                            <textarea class="form-control scrollbar" style="resize: none;" @bind="CharacterDescription"
+                                      id="inputCharacterDescription" rows="2"></textarea>
                         </div>
                         <div class="mb-3">
                             <label for="inputCustomStartScenario" class="form-label">Custom Start Scenario</label>
-                            <textarea class="form-control scrollbar" style="resize: none;" @bind="StartScenario" id="inputCustomStartScenario" rows="@TextAreaRows"></textarea>
+                            <textarea class="form-control scrollbar" style="resize: none;" @bind="StartScenario"
+                                      id="inputCustomStartScenario" rows="@TextAreaRows"></textarea>
                         </div>
-                        <button class="btn btn-primary" style="width: 100%" @onclick="CreateAndStartCampaign" id="create-campaign-button">Create Campaign</button>
+                        <button class="btn btn-primary" style="width: 100%" @onclick="CreateAndStartCampaign"
+                                id="create-campaign-button">Create Campaign
+                        </button>
                     </div>
                 </div>
             </div>

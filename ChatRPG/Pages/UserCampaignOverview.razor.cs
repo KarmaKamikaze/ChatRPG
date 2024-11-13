@@ -6,10 +6,8 @@ using ChatRPG.Data.Models;
 using ChatRPG.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.JSInterop;
 using Environment = ChatRPG.Data.Models.Environment;
 using CampaignModel = ChatRPG.Data.Models.Campaign;
 
@@ -18,19 +16,19 @@ namespace ChatRPG.Pages;
 public partial class UserCampaignOverview : ComponentBase
 {
     private User? User { get; set; } = null;
-    private List<CampaignModel> Campaigns { get; set; } = new();
-    private List<StartScenario> StartScenarios { get; set; } = new();
+    private List<CampaignModel> Campaigns { get; set; } = [];
+    private List<StartScenario> StartScenarios { get; set; } = [];
     private bool TestFields { get; set; }
     private int TextAreaRows { get; set; } = 6;
 
-    [Required][BindProperty] private string CampaignTitle { get; set; } = "";
-    [Required][BindProperty] private string CharacterName { get; set; } = "";
+    [Required] [BindProperty] private string CampaignTitle { get; set; } = "";
+    [Required] [BindProperty] private string CharacterName { get; set; } = "";
     [BindProperty] private string CharacterDescription { get; set; } = "";
     [BindProperty] private string StartScenario { get; set; } = null!;
 
     [Inject] private AuthenticationStateProvider? AuthProvider { get; set; }
     [Inject] private UserManager<User>? UserManager { get; set; }
-    [Inject] private IPersistenceService? PersisterService { get; set; }
+    [Inject] private IPersistenceService? PersistenceService { get; set; }
     [Inject] private ICampaignMediatorService? CampaignMediatorService { get; set; }
     [Inject] private NavigationManager? NavMan { get; set; }
 
@@ -41,9 +39,9 @@ public partial class UserCampaignOverview : ComponentBase
         AuthenticationState authState = await AuthProvider!.GetAuthenticationStateAsync();
         User = await UserManager!.GetUserAsync(authState.User)
                ?? throw new AuthenticationException("User is not authorized");
-        Campaigns = await PersisterService!.GetCampaignsForUser(User);
+        Campaigns = await PersistenceService!.GetCampaignsForUser(User);
         Campaigns.Reverse(); // Reverse to display latest campaign first
-        StartScenarios = await PersisterService.GetStartScenarios();
+        StartScenarios = await PersistenceService.GetStartScenarios();
     }
 
     private async Task CreateAndStartCampaign()
@@ -62,10 +60,11 @@ public partial class UserCampaignOverview : ComponentBase
 
         CampaignModel campaign = new(User, CampaignTitle, StartScenario);
         Environment environment = new(campaign, "Start location", "The place where it all began");
-        Character player = new(campaign, environment, CharacterType.Humanoid, CharacterName, CharacterDescription, true);
+        Character player = new(campaign, environment, CharacterType.Humanoid, CharacterName, CharacterDescription,
+            true);
         campaign.Environments.Add(environment);
         campaign.Characters.Add(player);
-        await PersisterService!.SaveAsync(campaign);
+        await PersistenceService!.SaveAsync(campaign);
         LaunchCampaign(campaign.Id);
     }
 
@@ -96,7 +95,7 @@ public partial class UserCampaignOverview : ComponentBase
 
     private async Task ModalClosed()
     {
-        Campaigns = await PersisterService!.GetCampaignsForUser(User!);
+        Campaigns = await PersistenceService!.GetCampaignsForUser(User!);
         Campaigns.Reverse(); // Reverse to display latest campaign first
         StateHasChanged();
     }
@@ -138,17 +137,16 @@ public partial class UserCampaignOverview : ComponentBase
         if (!string.IsNullOrWhiteSpace(CampaignTitle) && !string.IsNullOrWhiteSpace(CharacterName))
         {
             TextAreaRows = 6;
-            StateHasChanged();
         }
         else if (!string.IsNullOrWhiteSpace(CampaignTitle) || !string.IsNullOrWhiteSpace(CharacterName))
         {
             TextAreaRows = 4;
-            StateHasChanged();
         }
         else
         {
             TextAreaRows = 2;
-            StateHasChanged();
         }
+
+        StateHasChanged();
     }
 }
