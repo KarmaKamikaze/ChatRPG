@@ -19,7 +19,7 @@ public class ToolUtilities(IConfiguration configuration)
 
     public async Task<Character?> FindCharacter(Campaign campaign, string input, string instruction)
     {
-        var provider = new OpenAiProvider(configuration.GetSection("ApiKeys")?.GetValue<string>("OpenAI")!);
+        var provider = new OpenAiProvider(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
         var llm = new Gpt4OmniModel(provider)
         {
             Settings = new OpenAiChatSettings() { UseStreaming = false }
@@ -27,7 +27,7 @@ public class ToolUtilities(IConfiguration configuration)
 
         // Add system prompt and construct LLM query
         var query = new StringBuilder();
-        query.Append(configuration.GetSection("SystemPrompts")?.GetValue<string>("FindCharacter")!
+        query.Append(configuration.GetSection("SystemPrompts").GetValue<string>("FindCharacter")!
             .Replace("{instruction}", instruction));
 
         query.Append($"\n\nThe story up until now: {campaign.GameSummary}");

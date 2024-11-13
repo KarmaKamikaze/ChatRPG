@@ -22,7 +22,7 @@ public class ReActLlmClient : IReActLlmClient
         _configuration = configuration;
         _reActPrompt = _configuration.GetSection("SystemPrompts").GetValue<string>("ReAct")!;
         _provider = new OpenAiProvider(_configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
-        _narratorDebugMode = _configuration.GetValue<bool>("NarrativeChainDebug")!;
+        _narratorDebugMode = _configuration.GetValue<bool>("NarrativeChainDebug");
     }
 
     public async Task<string> GetChatCompletionAsync(Campaign campaign, string actionPrompt, string input)

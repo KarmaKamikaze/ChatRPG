@@ -2,7 +2,8 @@
 
 <div style="position: relative">
     <div class="progress health-bar">
-        <div class="progress-bar bg-danger" role="progressbar" style="@($"width: {Percentage}%");" aria-valuenow="@CurrentHealth" aria-valuemin="0" aria-valuemax="@MaxHealth"></div>
+        <div class="progress-bar bg-danger" role="progressbar" style="@($"width: {Percentage}%");"
+             aria-valuenow="@CurrentHealth" aria-valuemin="0" aria-valuemax="@MaxHealth"></div>
     </div>
     <div class="health-bar-text fw-bold">@($"{CurrentHealth}/{MaxHealth}")</div>
 </div>

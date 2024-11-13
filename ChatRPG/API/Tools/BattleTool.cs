@@ -38,8 +38,9 @@ public class BattleTool(
     {
         try
         {
-            var battleInput = JsonSerializer.Deserialize<BattleInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
-                              throw new JsonException("Failed to deserialize");
+            var battleInput =
+                JsonSerializer.Deserialize<BattleInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
+                throw new JsonException("Failed to deserialize");
             var instruction = configuration.GetSection("SystemPrompts").GetValue<string>("BattleInstruction")!;
 
             if (!battleInput.IsValid(out var errors))
@@ -127,7 +128,7 @@ public class BattleTool(
         string hitSeverity)
     {
         var resultString = string.Empty;
-        Random rand = new Random();
+        var rand = new Random();
         var doesAttackHit = rand.NextDouble() <= HitChance[hitChance];
 
         if (doesAttackHit)
