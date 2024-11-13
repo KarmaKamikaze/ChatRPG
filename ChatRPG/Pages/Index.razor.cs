@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace ChatRPG.Pages;
 
+[SuppressMessage("ReSharper", "UnusedType.Global")]
 public partial class Index : IDisposable
 {
-    private readonly string _fullTitleText = "ChatRPG";
+    private const string FullTitleText = "ChatRPG";
     private string _titleDisplayText = "";
     private bool _cursorVisible = true;
     private CancellationTokenSource? _cts;
@@ -39,9 +42,9 @@ public partial class Index : IDisposable
     /// <returns>A task representing the asynchronous animation process.</returns>
     private async Task TypingAnimateAsync(CancellationToken cancellationToken)
     {
-        for (int i = 0; i <= _fullTitleText.Length; i++)
+        for (var i = 0; i <= FullTitleText.Length; i++)
         {
-            _titleDisplayText = _fullTitleText.Substring(0, i);
+            _titleDisplayText = FullTitleText.Substring(0, i);
             await Task.Delay(100, cancellationToken); // Adjust the typing delay as needed
             await InvokeAsync(StateHasChanged);
         }

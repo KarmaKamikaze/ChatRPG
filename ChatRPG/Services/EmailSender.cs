@@ -5,28 +5,22 @@ using MimeKit.Text;
 
 namespace ChatRPG.Services;
 
-public class EmailSender : IEmailSender
+public class EmailSender(IConfiguration configuration, ILogger<EmailSender> logger) : IEmailSender
 {
-    private readonly string? _senderEmail;
-    private readonly string? _senderPassword;
-    private readonly ILogger<EmailSender> _logger;
+    private readonly string? _senderEmail = configuration.GetSection("EmailServiceInfo").GetValue<string>("Email");
 
-    public EmailSender(IConfiguration configuration, ILogger<EmailSender> logger)
-    {
-        _logger = logger;
-        _senderEmail = configuration.GetSection("EmailServiceInfo").GetValue<string>("Email");
-        _senderPassword = configuration.GetSection("EmailServiceInfo").GetValue<string>("Password");
-    }
+    private readonly string? _senderPassword =
+        configuration.GetSection("EmailServiceInfo").GetValue<string>("Password");
 
     public async Task SendEmailAsync(string email, string subject, string htmlMessage)
     {
         if (_senderEmail == null || _senderPassword == null)
         {
-            _logger.LogError("Missing 'Email' credentials in appsettings");
+            logger.LogError("Missing 'Email' credentials in appsettings");
             return;
         }
 
-        MimeMessage mail = new MimeMessage();
+        var mail = new MimeMessage();
         mail.From.Add(new MailboxAddress("ChatRPG", _senderEmail));
         mail.To.Add(new MailboxAddress(email, email));
         mail.Subject = subject;
@@ -37,7 +31,7 @@ public class EmailSender : IEmailSender
 
         try
         {
-            SmtpClient smtpClient = new SmtpClient();
+            var smtpClient = new SmtpClient();
             await smtpClient.ConnectAsync("smtp.gmail.com", 0, true);
             await smtpClient.AuthenticateAsync(_senderEmail, _senderPassword);
             await smtpClient.SendAsync(mail);
@@ -45,7 +39,7 @@ public class EmailSender : IEmailSender
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to send email");
+            logger.LogError(e, "Failed to send email");
         }
     }
 }

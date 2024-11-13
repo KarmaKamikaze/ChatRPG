@@ -28,13 +28,6 @@ public class GameInputHandler
 
         IConfigurationSection sysPromptSec = configuration.GetRequiredSection("SystemPrompts");
         _systemPrompts.Add(SystemPromptType.Initial, sysPromptSec.GetValue("Initial", "")!);
-        _systemPrompts.Add(SystemPromptType.CombatHitHit, sysPromptSec.GetValue("CombatHitHit", "")!);
-        _systemPrompts.Add(SystemPromptType.CombatHitMiss, sysPromptSec.GetValue("CombatHitMiss", "")!);
-        _systemPrompts.Add(SystemPromptType.CombatMissHit, sysPromptSec.GetValue("CombatMissHit", "")!);
-        _systemPrompts.Add(SystemPromptType.CombatMissMiss, sysPromptSec.GetValue("CombatMissMiss", "")!);
-        _systemPrompts.Add(SystemPromptType.CombatOpponentDescription,
-            sysPromptSec.GetValue("CombatOpponentDescription", "")!);
-        _systemPrompts.Add(SystemPromptType.HurtOrHeal, sysPromptSec.GetValue("DoActionHurtOrHeal", "")!);
         _systemPrompts.Add(SystemPromptType.DoAction, sysPromptSec.GetValue("DoAction", "")!);
         _systemPrompts.Add(SystemPromptType.SayAction, sysPromptSec.GetValue("SayAction", "")!);
     }

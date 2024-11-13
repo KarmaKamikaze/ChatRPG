@@ -20,8 +20,9 @@ public class UpdateEnvironmentTool(
     {
         try
         {
-            var updateEnvironmentInput = JsonSerializer.Deserialize<EnvironmentInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
-                                         throw new JsonException("Failed to deserialize");
+            var updateEnvironmentInput =
+                JsonSerializer.Deserialize<EnvironmentInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
+                throw new JsonException("Failed to deserialize");
 
             if (updateEnvironmentInput.Name.IsNullOrEmpty())
             {

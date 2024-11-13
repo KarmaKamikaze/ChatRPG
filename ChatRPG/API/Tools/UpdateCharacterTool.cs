@@ -19,8 +19,9 @@ public class UpdateCharacterTool(
     {
         try
         {
-            var updateCharacterInput = JsonSerializer.Deserialize<CharacterInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
-                                       throw new JsonException("Failed to deserialize");
+            var updateCharacterInput =
+                JsonSerializer.Deserialize<CharacterInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
+                throw new JsonException("Failed to deserialize");
             if (updateCharacterInput.Name.IsNullOrEmpty())
             {
                 return Task.FromResult("No character name was provided. Please provide a name for the character.");

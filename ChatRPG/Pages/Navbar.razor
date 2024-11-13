@@ -16,14 +16,17 @@
             </a>
             <div class="d-sm-inline-flex flex-sm-row-reverse">
                 <div class="hstack">
-                    <button @onclick='() => NavMan.NavigateTo("/", forceLoad: true)' class="btn btn-in" id="dashboard-button"
+                    <button @onclick='() => NavMan.NavigateTo("/", forceLoad: true)' class="btn btn-in"
+                            id="dashboard-button"
                             style="@(!_isHidden ? "display:block;" : "display:none;")">
                         <span class="btn-in-span"></span>Dashboard
                     </button>
-                    <button @onclick='() => NavMan.NavigateTo("Manage", forceLoad: true)' class="btn btn-in" id="manage-button">
+                    <button @onclick='() => NavMan.NavigateTo("Manage", forceLoad: true)' class="btn btn-in"
+                            id="manage-button">
                         <span class="btn-in-span"></span>@Username
                     </button>
-                    <button @onclick='() => NavMan.NavigateTo("Logout", forceLoad: true)' class="btn btn-in" id="logout-button">
+                    <button @onclick='() => NavMan.NavigateTo("Logout", forceLoad: true)' class="btn btn-in"
+                            id="logout-button">
                         <span class="btn-in-span"></span>Log Out
                     </button>
                 </div>

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using ChatRPG.Services;
 using ChatRPG.Data.Models;
 using ChatRPG.Services.Events;
@@ -10,24 +11,25 @@ using OpenAiGptMessage = ChatRPG.API.OpenAiGptMessage;
 
 namespace ChatRPG.Pages;
 
+[SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
 public partial class CampaignPage
 {
     private string? _loggedInUsername;
     private IJSObjectReference? _scrollJsScript;
     private IJSObjectReference? _detectScrollBarJsScript;
-    private bool _hasScrollBar = false;
-    private List<OpenAiGptMessage> _conversation = new();
+    private bool _hasScrollBar;
+    private List<OpenAiGptMessage> _conversation = [];
     private string _userInput = "";
     private bool _isWaitingForResponse;
     private bool _isArchiving;
     private const string BottomId = "bottom-id";
     private Campaign? _campaign;
-    private List<Character> _npcList = new();
+    private List<Character> _npcList = [];
     private Environment? _currentLocation;
     private Character? _mainCharacter;
     private UserPromptType _activeUserPromptType = UserPromptType.Do;
     private string _userInputPlaceholder = InputPlaceholder[UserPromptType.Do];
-    private bool _pageInitialized = false;
+    private bool _pageInitialized;
 
     private static readonly Dictionary<UserPromptType, string> InputPlaceholder = new()
     {
@@ -52,7 +54,7 @@ public partial class CampaignPage
     /// <returns>A task that represents the asynchronous initialization process.</returns>
     protected override async Task OnInitializedAsync()
     {
-        AuthenticationState authenticationState = await AuthenticationStateProvider!.GetAuthenticationStateAsync();
+        var authenticationState = await AuthenticationStateProvider!.GetAuthenticationStateAsync();
         _loggedInUsername = authenticationState.User.Identity?.Name;
         if (_loggedInUsername is null || !CampaignMediatorService!.UserCampaignDict.ContainsKey(_loggedInUsername!))
         {
@@ -103,7 +105,7 @@ public partial class CampaignPage
 
     private async Task InitializeCampaign()
     {
-        string content = $"The player is {_campaign!.Player.Name}, described as \"{_campaign.Player.Description}\".";
+        var content = $"The player is {_campaign!.Player.Name}, described as \"{_campaign.Player.Description}\".";
         if (_campaign.StartScenario != null)
         {
             content += "\n" + _campaign.StartScenario;
@@ -205,7 +207,7 @@ public partial class CampaignPage
     /// <param name="eventArgs">The arguments for this event, including the text chunk and whether the streaming is done.</param>
     private void OnChatCompletionChunkReceived(object? sender, ChatCompletionChunkReceivedEventArgs eventArgs)
     {
-        OpenAiGptMessage message = _conversation.LastOrDefault(new OpenAiGptMessage(MessageRole.Assistant, ""));
+        var message = _conversation.LastOrDefault(new OpenAiGptMessage(MessageRole.Assistant, ""));
         if (eventArgs.IsStreamingDone)
         {
             _isWaitingForResponse = false;
@@ -223,24 +225,26 @@ public partial class CampaignPage
 
     private async void OnCampaignUpdated()
     {
-        _isArchiving = false;
-        await InvokeAsync(UpdateStatsUi);
+        // Catch any error in an async void method to prevent crashing the app
+        try
+        {
+            _isArchiving = false;
+            await InvokeAsync(UpdateStatsUi);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"An error occurred when updating the stats UI: {e.Message}");
+        }
     }
 
     private void OnPromptTypeChange(UserPromptType type)
     {
-        switch (type)
+        _userInputPlaceholder = type switch
         {
-            case UserPromptType.Do:
-                _userInputPlaceholder = InputPlaceholder[UserPromptType.Do];
-                break;
-            case UserPromptType.Say:
-                _userInputPlaceholder = InputPlaceholder[UserPromptType.Say];
-                break;
-            default:
-                _userInputPlaceholder = InputPlaceholder[UserPromptType.Do];
-                break;
-        }
+            UserPromptType.Do => InputPlaceholder[UserPromptType.Do],
+            UserPromptType.Say => InputPlaceholder[UserPromptType.Say],
+            _ => InputPlaceholder[UserPromptType.Do]
+        };
 
         StateHasChanged();
     }
