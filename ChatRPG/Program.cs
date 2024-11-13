@@ -25,12 +25,9 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddBlazoredModal();
 
-HttpMessageHandlerFactory httpMessageHandlerFactory = new HttpMessageHandlerFactory(configuration);
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<User>>()
-    .AddSingleton(httpMessageHandlerFactory)
-    .AddSingleton<IHttpClientFactory, HttpClientFactory>()
-    .AddSingleton<IOpenAiLlmClient, OpenAiLlmClient>()
-    .AddTransient<IPersistenceService, EfPersistenceService>()
+    .AddTransient<IReActLlmClient, ReActLlmClient>()
+    .AddScoped<IPersistenceService, EfPersistenceService>()
     .AddTransient<IEmailSender, EmailSender>()
     .AddTransient<GameInputHandler>()
     .AddTransient<GameStateManager>()

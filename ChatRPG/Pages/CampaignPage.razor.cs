@@ -1,4 +1,3 @@
-using ChatRPG.Data;
 using ChatRPG.Services;
 using ChatRPG.Data.Models;
 using ChatRPG.Services.Events;
@@ -6,7 +5,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
-using OpenAI_API.Chat;
 using Environment = ChatRPG.Data.Models.Environment;
 using OpenAiGptMessage = ChatRPG.API.OpenAiGptMessage;
 
@@ -15,15 +13,13 @@ namespace ChatRPG.Pages;
 public partial class CampaignPage
 {
     private string? _loggedInUsername;
-    private bool _shouldSave;
     private IJSObjectReference? _scrollJsScript;
     private IJSObjectReference? _detectScrollBarJsScript;
     private bool _hasScrollBar = false;
-    private FileUtility? _fileUtil;
     private List<OpenAiGptMessage> _conversation = new();
     private string _userInput = "";
     private bool _isWaitingForResponse;
-    private OpenAiGptMessage? _latestPlayerMessage;
+    private bool _isArchiving;
     private const string BottomId = "bottom-id";
     private Campaign? _campaign;
     private List<Character> _npcList = new();
@@ -31,19 +27,18 @@ public partial class CampaignPage
     private Character? _mainCharacter;
     private UserPromptType _activeUserPromptType = UserPromptType.Do;
     private string _userInputPlaceholder = InputPlaceholder[UserPromptType.Do];
+    private bool _pageInitialized = false;
 
     private static readonly Dictionary<UserPromptType, string> InputPlaceholder = new()
     {
         { UserPromptType.Do, "What do you do?" },
-        { UserPromptType.Say, "What do you say?" },
-        { UserPromptType.Attack, "How do you attack?" }
+        { UserPromptType.Say, "What do you say?" }
     };
 
     private string SpinnerContainerStyle => _isWaitingForResponse
         ? "margin-top: -25px; margin-bottom: -60px;"
         : "margin-top: 20px; margin-bottom: 60px;";
 
-    [Inject] private IConfiguration? Configuration { get; set; }
     [Inject] private IJSRuntime? JsRuntime { get; set; }
     [Inject] private AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
     [Inject] private IPersistenceService? PersistenceService { get; set; }
@@ -71,7 +66,7 @@ public partial class CampaignPage
         {
             _npcList = _campaign!.Characters.Where(c => !c.IsPlayer).ToList();
             _npcList.Reverse();
-            _currentLocation = _campaign.Environments.LastOrDefault();
+            _currentLocation = _campaign.Player.Environment;
             _mainCharacter = _campaign.Player;
 
             _conversation = _campaign.Messages.OrderBy(m => m.Timestamp)
@@ -79,14 +74,10 @@ public partial class CampaignPage
                 .ToList();
         }
 
-        if (_loggedInUsername != null) _fileUtil = new FileUtility(_loggedInUsername);
-        _shouldSave = Configuration!.GetValue<bool>("SaveConversationsToFile");
         GameInputHandler!.ChatCompletionReceived += OnChatCompletionReceived;
         GameInputHandler!.ChatCompletionChunkReceived += OnChatCompletionChunkReceived;
-        if (_conversation.Count == 0)
-        {
-            InitializeCampaign();
-        }
+        GameInputHandler!.CampaignUpdated += OnCampaignUpdated;
+        _pageInitialized = true;
     }
 
     /// <summary>
@@ -103,9 +94,14 @@ public partial class CampaignPage
                 await JsRuntime!.InvokeAsync<IJSObjectReference>("import", "./js/detectScrollBar.js");
             await ScrollToElement(BottomId); // scroll down to latest message
         }
+
+        if (_pageInitialized && _conversation.Count == 0)
+        {
+            await InitializeCampaign();
+        }
     }
 
-    private void InitializeCampaign()
+    private async Task InitializeCampaign()
     {
         string content = $"The player is {_campaign!.Player.Name}, described as \"{_campaign.Player.Description}\".";
         if (_campaign.StartScenario != null)
@@ -114,10 +110,19 @@ public partial class CampaignPage
         }
 
         _isWaitingForResponse = true;
-        OpenAiGptMessage message = new(ChatMessageRole.System, content);
-        _conversation.Add(message);
-        GameInputHandler?.HandleInitialPrompt(_campaign, _conversation);
-        UpdateStatsUi();
+
+        try
+        {
+            await GameInputHandler!.HandleInitialPrompt(_campaign, content);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"An error occurred when generating the response: {e.Message}");
+            _conversation.Add(new OpenAiGptMessage(MessageRole.System,
+                "An error occurred when generating the response \uD83D\uDCA9. " +
+                "Please try again by reloading the campaign."));
+            _isWaitingForResponse = false;
+        }
     }
 
     /// <summary>
@@ -143,14 +148,23 @@ public partial class CampaignPage
         }
 
         _isWaitingForResponse = true;
-        OpenAiGptMessage userInput = new(ChatMessageRole.User, _userInput, _activeUserPromptType);
+        OpenAiGptMessage userInput = new(MessageRole.User, _userInput, _activeUserPromptType);
         _conversation.Add(userInput);
-        _latestPlayerMessage = userInput;
         _userInput = string.Empty;
         await ScrollToElement(BottomId);
-        await GameInputHandler!.HandleUserPrompt(_campaign, _conversation);
-        _conversation.RemoveAll(m => m.Role.Equals(ChatMessageRole.System));
-        UpdateStatsUi();
+        try
+        {
+            await GameInputHandler!.HandleUserPrompt(_campaign, _activeUserPromptType, userInput.Content);
+            _conversation.RemoveAll(m => m.Role.Equals(MessageRole.System));
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"An error occurred when generating the response: {e.Message}");
+            _conversation.Add(new OpenAiGptMessage(MessageRole.System,
+                "An error occurred when generating the response \uD83D\uDCA9. Please try again."));
+            _campaign = await PersistenceService!.LoadFromCampaignIdAsync(_campaign.Id); // Rollback campaign
+            _isWaitingForResponse = false;
+        }
     }
 
     /// <summary>
@@ -175,11 +189,11 @@ public partial class CampaignPage
     private void OnChatCompletionReceived(object? sender, ChatCompletionReceivedEventArgs eventArgs)
     {
         _conversation.Add(eventArgs.Message);
-        UpdateSaveFile(eventArgs.Message.Content);
         Task.Run(() => ScrollToElement(BottomId));
         if (eventArgs.Message.Content != string.Empty)
         {
             _isWaitingForResponse = false;
+            _isArchiving = true;
             StateHasChanged();
         }
     }
@@ -191,11 +205,11 @@ public partial class CampaignPage
     /// <param name="eventArgs">The arguments for this event, including the text chunk and whether the streaming is done.</param>
     private void OnChatCompletionChunkReceived(object? sender, ChatCompletionChunkReceivedEventArgs eventArgs)
     {
-        OpenAiGptMessage message = _conversation.LastOrDefault(new OpenAiGptMessage(ChatMessageRole.Assistant, ""));
+        OpenAiGptMessage message = _conversation.LastOrDefault(new OpenAiGptMessage(MessageRole.Assistant, ""));
         if (eventArgs.IsStreamingDone)
         {
             _isWaitingForResponse = false;
-            UpdateSaveFile(message.Content);
+            _isArchiving = true;
             StateHasChanged();
         }
         else if (eventArgs.Chunk is not null)
@@ -207,11 +221,10 @@ public partial class CampaignPage
         Task.Run(() => ScrollToElement(BottomId));
     }
 
-    private void UpdateSaveFile(string asstMessage)
+    private async void OnCampaignUpdated()
     {
-        if (!_shouldSave || _fileUtil == null || string.IsNullOrEmpty(asstMessage)) return;
-        MessagePair messagePair = new MessagePair(_latestPlayerMessage?.Content ?? "", asstMessage);
-        Task.Run(() => _fileUtil.UpdateSaveFileAsync(messagePair));
+        _isArchiving = false;
+        await InvokeAsync(UpdateStatsUi);
     }
 
     private void OnPromptTypeChange(UserPromptType type)
@@ -223,9 +236,6 @@ public partial class CampaignPage
                 break;
             case UserPromptType.Say:
                 _userInputPlaceholder = InputPlaceholder[UserPromptType.Say];
-                break;
-            case UserPromptType.Attack:
-                _userInputPlaceholder = InputPlaceholder[UserPromptType.Attack];
                 break;
             default:
                 _userInputPlaceholder = InputPlaceholder[UserPromptType.Do];
@@ -243,9 +253,8 @@ public partial class CampaignPage
     /// </summary>
     private void UpdateStatsUi()
     {
-        _npcList = _campaign!.Characters.Where(c => !c.IsPlayer).ToList();
-        _npcList.Reverse(); // Show the most newly encountered npc first
-        _currentLocation = _campaign!.Environments.LastOrDefault();
+        _npcList = _campaign!.Characters.Where(c => !c.IsPlayer).OrderByDescending(c => c.Id).ToList();
+        _currentLocation = _campaign!.Player.Environment;
         _mainCharacter = _campaign!.Player;
         StateHasChanged();
     }

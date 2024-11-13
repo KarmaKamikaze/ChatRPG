@@ -1,6 +1,5 @@
 ﻿@page "/Campaign"
 @using OpenAiGptMessage = ChatRPG.API.OpenAiGptMessage
-@using OpenAI_API.Chat
 @using ChatRPG.Data.Models
 
 <PageTitle>Campaign - @_campaign?.Title</PageTitle>
@@ -21,31 +20,37 @@
                         </div>
                     </div>
                 </div>
-                <div class="mt-3 mx-4">
-                    <h3 class="text-center mb-3">Location</h3>
-                    <div class="card card-dim mb-2 text-black text-center scrollbar" style="max-height: 20vh; overflow-y: auto">
-                        <div class="card-body col-12">
-                            <h5 class="card-title" id="location-name">@_currentLocation?.Name</h5>
-                            <hr/>
-                            <p class="card-text text-start" id="location-description">@_currentLocation?.Description</p>
+                @if (_currentLocation != null)
+                {
+                    <div class="mt-3 mx-4">
+                        <h3 class="text-center mb-3">Location</h3>
+                        <div class="card card-dim mb-2 text-black text-center scrollbar" style="max-height: 20vh; overflow-y: auto">
+                            <div class="card-body col-12">
+                                <h5 class="card-title" id="location-name">@_currentLocation?.Name</h5>
+                                <hr/>
+                                <p class="card-text text-start" id="location-description">@_currentLocation?.Description</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="mt-3 mx-4 mb-3">
-                    <h3 class="text-center mb-3">Characters</h3>
-                    <div class="scrollbar" style="max-height: 25vh; overflow-y: auto">
-                        @foreach (Character character in _npcList)
-                        {
-                            <div class="card card-dim mb-2 text-black text-center">
-                                <div class="card-body col-12">
-                                    <h5 class="card-title" id="character-list-name">@character.Name</h5>
-                                    <hr/>
-                                    <p class="card-text text-start" id="character-list-description">@character.Description</p>
+                }
+                @if (_npcList.Any())
+                {
+                    <div class="mt-3 mx-4 mb-3">
+                        <h3 class="text-center mb-3">Characters</h3>
+                        <div class="scrollbar" style="max-height: 25vh; overflow-y: auto">
+                            @foreach (Character character in _npcList)
+                            {
+                                <div class="card card-dim mb-2 text-black text-center">
+                                    <div class="card-body col-12">
+                                        <h5 class="card-title" id="character-list-name">@character.Name</h5>
+                                        <hr/>
+                                        <p class="card-text text-start" id="character-list-description">@character.Description</p>
+                                    </div>
                                 </div>
-                            </div>
-                        }
+                            }
+                        </div>
                     </div>
-                </div>
+                }
             </div>
         </div>
 
@@ -55,7 +60,7 @@
             </div>
 
             <div class="conversation-text">
-                @foreach (OpenAiGptMessage message in _conversation.Where(m => !m.Role.Equals(ChatMessageRole.System)))
+                @foreach (OpenAiGptMessage message in _conversation)
                 {
                     <OpenAiGptMessageComponent Message="@message"/>
                 }
@@ -71,12 +76,11 @@
 
             <div class="mt-4">
                 <div class="col-1" style="margin-left: 10px;">
-                    <RadzenSelectBar Size="ButtonSize.Small" @bind-Value=@_activeUserPromptType TValue="UserPromptType"
+                    <RadzenSelectBar Size="ButtonSize.Small" @bind-Value="@_activeUserPromptType" TValue="UserPromptType"
                                      Change="OnPromptTypeChange" class="rz-shadow-6 prompt-selector">
                         <Items>
                             <RadzenSelectBarItem Text="Do" Value="UserPromptType.Do" class="rz-ripple" id="do-prompt"/>
                             <RadzenSelectBarItem Text="Say" Value="UserPromptType.Say" class="rz-ripple" id="say-prompt"/>
-                            <RadzenSelectBarItem Text="Attack" Value="UserPromptType.Attack" class="rz-ripple" id="attack-prompt"/>
                         </Items>
                     </RadzenSelectBar>
                 </div>
@@ -90,17 +94,10 @@
                         </button>
                     </div>
                 </div>
-
-                @if (_hasScrollBar)
-                {
-                    <button class="btn-scroll-to-top text-xl-center rounded" @onclick='() => ScrollToElement("campaign-title")'>
-                        <i class="bi bi-arrow-bar-up fs-3"></i>
-                    </button>
-                }
             </div>
         </div>
 
-        <div class="col player-info floating-stats rounded text-white">
+        <div class="col player-info floating-stats rounded text-white" style="position: relative;">
             <div class="sticky">
                 <div class="mx-4 mt-3">
                     <h3 class="text-center mb-4">@_mainCharacter?.Name</h3>
@@ -117,6 +114,22 @@
                     <HealthBar MaxHealth="_mainCharacter?.MaxHealth" CurrentHealth="_mainCharacter?.CurrentHealth"></HealthBar>
                 </div>
             </div>
+            <!-- RadzenStack fixed to the bottom of the outer div -->
+            <div style="position: absolute; bottom: 1rem; left: 0; right: 0; text-align: center;">
+                @if (_isArchiving)
+                {
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Wrap="FlexWrap.Wrap" Class="rz-m-12" Gap="0.5rem">
+                        <span style="font-size: 1.25rem;">Archiving campaign...</span>
+                        <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Light" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" Style="max-height: 28px; max-width: 28px;"/>
+                    </RadzenStack>
+                }
+            </div>
+            @if (_hasScrollBar)
+            {
+                <button class="btn-scroll-to-top text-xl-center rounded" @onclick='() => ScrollToElement("campaign-title")'>
+                    <i class="bi bi-arrow-bar-up fs-3"></i>
+                </button>
+            }
         </div>
     </div>
 </div>
@@ -125,6 +138,6 @@
 
 <footer class="footer pl-3 text-muted footer-formatting fixed-bottom custom-gray-container">
     <div class="container">
-        &copy; 2023 - ChatRPG
+        &copy; @DateTime.Now.Year - ChatRPG
     </div>
 </footer>

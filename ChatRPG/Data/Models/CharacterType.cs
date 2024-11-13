@@ -2,8 +2,9 @@
 
 public enum CharacterType
 {
+    SmallMonster,
     Humanoid,
-    SmallCreature,
-    LargeCreature,
-    Monster
+    MediumMonster,
+    LargeMonster,
+    BossMonster
 }
