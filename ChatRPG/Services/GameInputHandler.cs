@@ -247,19 +247,19 @@ public class GameInputHandler
             OnChatCompletionReceived(message);
 
             int chunks = 0;
-            Stopwatch stopwatch = Stopwatch.StartNew();
             await foreach (string chunk in _llmClient.GetStreamedChatCompletion(conversation, systemPrompt))
             {
                 OnChatCompletionChunkReceived(isStreamingDone: false, chunk);
                 chunks++;
             }
-            long tokensPerSec = chunks / (stopwatch.ElapsedMilliseconds / 1000);
-            _logger.LogWarning("Received {chunks} tokens in {ElapsedMilliseconds} ms ({tokensPerSec} tokens/sec)", chunks, stopwatch.ElapsedMilliseconds, tokensPerSec);
+            _logger.LogWarning("Received {Chunks} tokens", chunks);
             OnChatCompletionChunkReceived(isStreamingDone: true);
+            var updateStopwatch = Stopwatch.StartNew();
             _gameStateManager.UpdateStateFromMessage(campaign, message);
             await _gameStateManager.SaveCurrentState(campaign);
-            stopwatch.Stop();
-            _logger.LogWarning("Time elapsed since user input: {ElapsedMilliseconds} ms", stopwatch.ElapsedMilliseconds);
+            updateStopwatch.Stop();
+            _logger.LogWarning("Time elapsed for updating campaign: {ElapsedMilliseconds} ms",
+                updateStopwatch.ElapsedMilliseconds);
         }
         else
         {
