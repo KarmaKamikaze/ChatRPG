@@ -47,7 +47,7 @@ public partial class CampaignPage
     [Inject] private IConfiguration? Configuration { get; set; }
     [Inject] private IJSRuntime? JsRuntime { get; set; }
     [Inject] private AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
-    [Inject] private IPersisterService? PersisterService { get; set; }
+    [Inject] private IPersistenceService? PersistenceService { get; set; }
     [Inject] private ICampaignMediatorService? CampaignMediatorService { get; set; }
     [Inject] private GameInputHandler? GameInputHandler { get; set; }
     [Inject] private NavigationManager? NavMan { get; set; }
@@ -66,7 +66,7 @@ public partial class CampaignPage
             NavMan!.NavigateTo("/", forceLoad: true);
         }
 
-        _campaign = await PersisterService!.LoadFromCampaignIdAsync(
+        _campaign = await PersistenceService!.LoadFromCampaignIdAsync(
             CampaignMediatorService!.UserCampaignDict[_loggedInUsername!]);
 
         if (_campaign != null)

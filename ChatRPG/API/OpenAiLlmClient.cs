@@ -6,7 +6,7 @@ namespace ChatRPG.API;
 
 public class OpenAiLlmClient : IOpenAiLlmClient
 {
-    private const string Model = "gpt-4";
+    private const string Model = "gpt-4o";
     private const double Temperature = 0.7;
 
     private readonly OpenAIAPI _openAiApi;
