@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using ChatRPG.API;
 using ChatRPG.Data.Models;
 using ChatRPG.Pages;
@@ -85,18 +86,32 @@ public class GameInputHandler
         {
             OpenAiGptMessage message = new(MessageRole.Assistant, "");
             OnChatCompletionReceived(message);
+            var chunks = 0;
+            var messageStopwatch = Stopwatch.StartNew();
 
             await foreach (var chunk in _llmClient.GetStreamedChatCompletionAsync(campaign, actionPrompt, input))
             {
                 OnChatCompletionChunkReceived(isStreamingDone: false, chunk);
+                chunks++;
             }
+            messageStopwatch.Stop();
+            var tokensPerSec = chunks / (messageStopwatch.ElapsedMilliseconds / 1000);
+            _logger.LogWarning(
+                "Received {Chunks} tokens in {ElapsedMilliseconds} ms ({TokensPerSec} tokens/sec)", chunks,
+                messageStopwatch.ElapsedMilliseconds, tokensPerSec);
 
             OnChatCompletionChunkReceived(isStreamingDone: true);
 
             _ = Task.Run(async () =>
             {
+                var archivistStopwatch = Stopwatch.StartNew();
                 await SaveInteraction(campaign, input, message.Content);
                 _autoResetEvent.Set();
+                archivistStopwatch.Stop();
+                _logger.LogWarning("Time elapsed for archivist: {ElapsedMilliseconds} ms",
+                    archivistStopwatch.ElapsedMilliseconds);
+                _logger.LogWarning("Time elapsed since user input: {ElapsedMilliseconds} ms",
+                    (messageStopwatch.ElapsedMilliseconds + archivistStopwatch.ElapsedMilliseconds));
             });
         }
         else
