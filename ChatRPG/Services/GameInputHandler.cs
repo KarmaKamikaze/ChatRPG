@@ -245,6 +245,7 @@ public class GameInputHandler
         {
             OpenAiGptMessage message = new(ChatMessageRole.Assistant, "");
             OnChatCompletionReceived(message);
+
             int chunks = 0;
             Stopwatch stopwatch = Stopwatch.StartNew();
             await foreach (string chunk in _llmClient.GetStreamedChatCompletion(conversation, systemPrompt))
@@ -252,12 +253,13 @@ public class GameInputHandler
                 OnChatCompletionChunkReceived(isStreamingDone: false, chunk);
                 chunks++;
             }
-            stopwatch.Stop();
             long tokensPerSec = chunks / (stopwatch.ElapsedMilliseconds / 1000);
             _logger.LogWarning("Received {chunks} tokens in {ElapsedMilliseconds} ms ({tokensPerSec} tokens/sec)", chunks, stopwatch.ElapsedMilliseconds, tokensPerSec);
             OnChatCompletionChunkReceived(isStreamingDone: true);
             _gameStateManager.UpdateStateFromMessage(campaign, message);
             await _gameStateManager.SaveCurrentState(campaign);
+            stopwatch.Stop();
+            _logger.LogWarning("Time elapsed since user input: {ElapsedMilliseconds} ms", stopwatch.ElapsedMilliseconds);
         }
         else
         {
@@ -267,6 +269,5 @@ public class GameInputHandler
             _gameStateManager.UpdateStateFromMessage(campaign, message);
             await _gameStateManager.SaveCurrentState(campaign);
         }
-
     }
 }
