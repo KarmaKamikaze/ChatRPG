@@ -31,7 +31,8 @@ builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuth
     .AddTransient<IEmailSender, EmailSender>()
     .AddTransient<GameInputHandler>()
     .AddTransient<GameStateManager>()
-    .AddSingleton<ICampaignMediatorService, CampaignMediatorService>();
+    .AddSingleton<ICampaignMediatorService, CampaignMediatorService>()
+    .AddScoped<JsInteropService>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -86,7 +87,21 @@ else
 
 app.UseHttpsRedirection();
 
-app.UseStaticFiles();
+if (app.Environment.IsDevelopment())
+{
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        OnPrepareResponse = ctx =>
+        {
+            ctx.Context.Response.Headers.Append("Cache-Control", "no-cache, no-store");
+            ctx.Context.Response.Headers.Append("Expires", "0");
+        }
+    });
+}
+else
+{
+    app.UseStaticFiles();
+}
 
 app.UseRouting();
 

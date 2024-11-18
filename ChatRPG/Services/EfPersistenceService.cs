@@ -68,6 +68,7 @@ public class EfPersistenceService(ILogger<EfPersistenceService> logger, Applicat
             .Include(campaign => campaign.Messages)
             .Include(campaign => campaign.Environments)
             .Include(campaign => campaign.Characters)
+            .AsSplitQuery()
             .FirstAsync();
     }
 
@@ -77,6 +78,7 @@ public class EfPersistenceService(ILogger<EfPersistenceService> logger, Applicat
         return await dbContext.Campaigns
             .Where(campaign => campaign.User.Equals(user))
             .Include(campaign => campaign.Characters.Where(c => c.IsPlayer))
+            .AsSplitQuery()
             .ToListAsync();
     }
 
