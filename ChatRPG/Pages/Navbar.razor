@@ -16,6 +16,11 @@
             </a>
             <div class="d-sm-inline-flex flex-sm-row-reverse">
                 <div class="hstack">
+                    <button @onclick='() => NavMan.NavigateTo("/", forceLoad: true)' class="btn btn-in"
+                            id="dashboard-button"
+                            style="@(!_isHidden ? "display:block;" : "display:none;")">
+                        <span class="btn-in-span"></span>Dashboard
+                    </button>
                     <button @onclick='() => NavMan.NavigateTo("Manage", forceLoad: true)' class="btn btn-in" id="manage-button">
                         <span class="btn-in-span"></span>@Username
                     </button>
@@ -29,8 +34,31 @@
 </header>
 
 @code {
+    private bool _isHidden;
 
     [Parameter, EditorRequired]
     public string Username { get; set; } = null!;
+
+    protected override void OnInitialized()
+    {
+        NavMan.LocationChanged += HandleLocationChanged;
+        UpdateVisibility();
+    }
+
+    private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        UpdateVisibility();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void UpdateVisibility()
+    {
+        _isHidden = NavMan.Uri.TrimEnd('/') == NavMan.BaseUri.TrimEnd('/');
+    }
+
+    public void Dispose()
+    {
+        NavMan.LocationChanged -= HandleLocationChanged;
+    }
 
 }

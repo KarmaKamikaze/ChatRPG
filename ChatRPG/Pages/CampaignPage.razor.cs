@@ -31,6 +31,7 @@ public partial class CampaignPage
     private Character? _mainCharacter;
     private UserPromptType _activeUserPromptType = UserPromptType.Do;
     private string _userInputPlaceholder = InputPlaceholder[UserPromptType.Do];
+    private bool _pageInitialized;
 
     private static readonly Dictionary<UserPromptType, string> InputPlaceholder = new()
     {
@@ -44,7 +45,7 @@ public partial class CampaignPage
         : "margin-top: 20px; margin-bottom: 60px;";
 
     [Inject] private IConfiguration? Configuration { get; set; }
-    [Inject] private IJSRuntime? JsRuntime { get; set; }
+    [Inject] private JsInteropService? JsService { get; set; }
     [Inject] private AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
     [Inject] private IPersistenceService? PersistenceService { get; set; }
     [Inject] private ICampaignMediatorService? CampaignMediatorService { get; set; }
@@ -83,10 +84,7 @@ public partial class CampaignPage
         _shouldSave = Configuration!.GetValue<bool>("SaveConversationsToFile");
         GameInputHandler!.ChatCompletionReceived += OnChatCompletionReceived;
         GameInputHandler!.ChatCompletionChunkReceived += OnChatCompletionChunkReceived;
-        if (_conversation.Count == 0)
-        {
-            InitializeCampaign();
-        }
+        _pageInitialized = true;
     }
 
     /// <summary>
@@ -98,14 +96,18 @@ public partial class CampaignPage
     {
         if (firstRender)
         {
-            _scrollJsScript ??= await JsRuntime!.InvokeAsync<IJSObjectReference>("import", "./js/scroll.js");
-            _detectScrollBarJsScript ??=
-                await JsRuntime!.InvokeAsync<IJSObjectReference>("import", "./js/detectScrollBar.js");
+            _scrollJsScript ??= await JsService!.GetScrollModuleAsync();
+            _detectScrollBarJsScript ??= await JsService!.GetDetectScrollBarModuleAsync();
             await ScrollToElement(BottomId); // scroll down to latest message
+        }
+
+        if (_pageInitialized && _conversation.Count == 0)
+        {
+            await InitializeCampaign();
         }
     }
 
-    private void InitializeCampaign()
+    private async Task InitializeCampaign()
     {
         string content = $"The player is {_campaign!.Player.Name}, described as \"{_campaign.Player.Description}\".";
         if (_campaign.StartScenario != null)
@@ -116,7 +118,7 @@ public partial class CampaignPage
         _isWaitingForResponse = true;
         OpenAiGptMessage message = new(ChatMessageRole.System, content);
         _conversation.Add(message);
-        GameInputHandler?.HandleInitialPrompt(_campaign, _conversation);
+        await GameInputHandler?.HandleInitialPrompt(_campaign, _conversation)!;
         UpdateStatsUi();
     }
 
