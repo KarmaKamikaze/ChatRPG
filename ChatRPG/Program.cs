@@ -31,7 +31,8 @@ builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuth
     .AddTransient<IEmailSender, EmailSender>()
     .AddTransient<GameInputHandler>()
     .AddTransient<GameStateManager>()
-    .AddSingleton<ICampaignMediatorService, CampaignMediatorService>();
+    .AddSingleton<ICampaignMediatorService, CampaignMediatorService>()
+    .AddScoped<JsInteropService>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
