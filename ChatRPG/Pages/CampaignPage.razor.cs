@@ -41,7 +41,7 @@ public partial class CampaignPage
         ? "margin-top: -25px; margin-bottom: -60px;"
         : "margin-top: 20px; margin-bottom: 60px;";
 
-    [Inject] private IJSRuntime? JsRuntime { get; set; }
+    [Inject] private JsInteropService? JsService { get; set; }
     [Inject] private AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
     [Inject] private IPersistenceService? PersistenceService { get; set; }
     [Inject] private ICampaignMediatorService? CampaignMediatorService { get; set; }
@@ -66,10 +66,7 @@ public partial class CampaignPage
 
         if (_campaign != null)
         {
-            _npcList = _campaign!.Characters.Where(c => !c.IsPlayer).ToList();
-            _npcList.Reverse();
-            _currentLocation = _campaign.Player.Environment;
-            _mainCharacter = _campaign.Player;
+            UpdateStatsUi();
 
             _conversation = _campaign.Messages.OrderBy(m => m.Timestamp)
                 .Select(OpenAiGptMessage.FromMessage)
@@ -91,9 +88,8 @@ public partial class CampaignPage
     {
         if (firstRender)
         {
-            _scrollJsScript ??= await JsRuntime!.InvokeAsync<IJSObjectReference>("import", "./js/scroll.js");
-            _detectScrollBarJsScript ??=
-                await JsRuntime!.InvokeAsync<IJSObjectReference>("import", "./js/detectScrollBar.js");
+            _scrollJsScript ??= await JsService!.GetScrollModuleAsync();
+            _detectScrollBarJsScript ??= await JsService!.GetDetectScrollBarModuleAsync();
             await ScrollToElement(BottomId); // scroll down to latest message
         }
 

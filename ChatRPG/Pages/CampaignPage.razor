@@ -40,7 +40,13 @@
                         <div class="scrollbar" style="max-height: 25vh; overflow-y: auto">
                             @foreach (Character character in _npcList)
                             {
-                                <div class="card card-dim mb-2 text-black text-center">
+                                <div class="card card-dim mb-2 text-black text-center position-relative">
+                                    @if (character.CurrentHealth <= 0)
+                                    {
+                                    <div class="skull-icon">
+                                        <i class="fas fa-skull"></i>
+                                    </div>
+                                    }
                                     <div class="card-body col-12">
                                         <h5 class="card-title" id="character-list-name">@character.Name</h5>
                                         <hr/>
