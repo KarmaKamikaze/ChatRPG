@@ -66,8 +66,7 @@ public partial class CampaignPage
 
         if (_campaign != null)
         {
-            _npcList = _campaign!.Characters.Where(c => !c.IsPlayer).ToList();
-            _npcList.Reverse();
+            _npcList = _campaign!.Characters.Where(c => !c.IsPlayer).OrderByDescending(c => c.Id).ToList();
             _currentLocation = _campaign.Player.Environment;
             _mainCharacter = _campaign.Player;
 

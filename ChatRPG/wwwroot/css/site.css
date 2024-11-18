@@ -435,3 +435,11 @@ div.sticky {
     color: #ffffff;
     font-size: 175%;
 }
+
+.skull-icon {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 1.2rem; /* Adjust icon size */
+    color: #333;
+}
