@@ -11,7 +11,7 @@ namespace ChatRPG.API.Tools;
 public class ToolUtilities(IConfiguration configuration)
 {
     private const int IncludedPreviousMessages = 4;
-    private bool ShouldIncludePreviousMessages = configuration.GetValue<bool>("ShouldSummarize");
+    private readonly bool _shouldIncludePreviousMessages = configuration.GetValue<bool>("ShouldSummarize");
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
