@@ -33,7 +33,7 @@ public class ToolUtilities(IConfiguration configuration)
 
         query.Append($"\n\nThe story up until now: {campaign.GameSummary}");
 
-        if (ShouldIncludePreviousMessages)
+        if (_shouldIncludePreviousMessages)
         {
             var content = campaign.Messages.TakeLast(IncludedPreviousMessages).Select(m => m.Content);
             query.Append(
