@@ -12,7 +12,7 @@ public class ToolUtilities(IConfiguration configuration)
 {
     private const int IncludedPreviousMessages = 4;
     private bool ShouldIncludePreviousMessages = configuration.GetValue<bool>("ShouldSummarize");
-    
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true
@@ -23,7 +23,7 @@ public class ToolUtilities(IConfiguration configuration)
         var provider = new OpenAiProvider(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
         var llm = new Gpt4OmniModel(provider)
         {
-            Settings = new OpenAiChatSettings() { UseStreaming = false , Temperature = 0.1}
+            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.1 }
         };
 
         // Add system prompt and construct LLM query
@@ -36,7 +36,8 @@ public class ToolUtilities(IConfiguration configuration)
         if (ShouldIncludePreviousMessages)
         {
             var content = campaign.Messages.TakeLast(IncludedPreviousMessages).Select(m => m.Content);
-            query.Append("\n\nUse these previous messages as context. They only serve to give a hint of the current scenario:");
+            query.Append(
+                "\n\nUse these previous messages as context. They only serve to give a hint of the current scenario:");
             foreach (var message in content)
             {
                 query.Append($"\n {message}");
