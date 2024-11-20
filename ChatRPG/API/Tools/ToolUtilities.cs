@@ -11,7 +11,6 @@ namespace ChatRPG.API.Tools;
 public class ToolUtilities(IConfiguration configuration)
 {
     private const int IncludedPreviousMessages = 4;
-    private readonly bool _shouldIncludePreviousMessages = configuration.GetValue<bool>("ShouldSummarize");
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -23,7 +22,7 @@ public class ToolUtilities(IConfiguration configuration)
         var provider = new OpenAiProvider(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
         var llm = new Gpt4OmniModel(provider)
         {
-            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.1 }
+            Settings = new OpenAiChatSettings() { UseStreaming = false }
         };
 
         // Add system prompt and construct LLM query
@@ -33,23 +32,19 @@ public class ToolUtilities(IConfiguration configuration)
 
         query.Append($"\n\nThe story up until now: {campaign.GameSummary}");
 
-        if (_shouldIncludePreviousMessages)
+        var content = campaign.Messages.TakeLast(IncludedPreviousMessages).Select(m => m.Content);
+        query.Append("\n\nUse these previous messages as context:");
+        foreach (var message in content)
         {
-            var content = campaign.Messages.TakeLast(IncludedPreviousMessages).Select(m => m.Content);
-            query.Append(
-                "\n\nUse these previous messages as context. They only serve to give a hint of the current scenario:");
-            foreach (var message in content)
-            {
-                query.Append($"\n {message}");
-            }
+            query.Append($"\n {message}");
         }
 
-        query.Append("\n\nHere is the list of all characters present in the story:\n\n{\"characters\": [");
+        query.Append("\n\nHere is the list of all characters present in the story:\n\n{\"characters\": [\n");
 
         foreach (var character in campaign.Characters)
         {
             query.Append(
-                $"\n{{\n\"name\": \"{character.Name}\", \"description\": \"{character.Description}\", \"type\": \"{character.Type}\"\n}},");
+                $"{{\"name\": \"{character.Name}\", \"description\": \"{character.Description}\", \"type\": \"{character.Type}\"}},");
         }
 
         query.Length--; // Remove last comma
