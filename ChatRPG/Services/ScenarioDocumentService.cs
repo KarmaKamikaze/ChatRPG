@@ -21,7 +21,8 @@ public class ScenarioDocumentService
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("ConnectionStrings")
             .GetValue<string>("DefaultConnection"));
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI"));
-        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts").GetValue<string>("StartingScenario"));
+        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts")
+            .GetValue<string>("StartingScenario"));
         _connectionString = configuration.GetSection("ConnectionStrings")
             .GetValue<string>("DefaultConnection")!;
         _openAiKey = configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!;
@@ -48,7 +49,6 @@ public class ScenarioDocumentService
 
     public async Task<string> GenerateStartingScenario(int campaignId)
     {
-
         var provider = new OpenAiProvider(_openAiKey);
         var embeddingModel = new TextEmbeddingV3SmallModel(provider);
         var llm = new Gpt4OmniModel(provider)
@@ -72,7 +72,5 @@ public class ScenarioDocumentService
         var response = await chain.RunAsync("text");
 
         return response ?? "System: I'm sorry, I couldn't find any relevant scenarios.";
-
     }
-
 }

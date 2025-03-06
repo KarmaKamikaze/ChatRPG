@@ -126,6 +126,7 @@ a, .btn-link {
 .message {
     color: rgb(0, 0, 0);
     margin: 10px 0;
+    white-space: pre-line; /* Preserve line breaks */
 }
 
 .message-player {
@@ -442,4 +443,8 @@ div.sticky {
     right: 5px;
     font-size: 1.2rem; /* Adjust icon size */
     color: #333;
+}
+
+.card-text {
+    white-space: pre-line; /* Preserve line breaks */
 }

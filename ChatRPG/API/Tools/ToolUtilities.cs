@@ -31,18 +31,7 @@ public class ToolUtilities(IConfiguration configuration)
         query.Append(configuration.GetSection("SystemPrompts").GetValue<string>("FindCharacter")!
             .Replace("{instruction}", instruction));
 
-        query.Append($"\n\nThe story up until now: {campaign.GameSummary}");
-
-        if (_shouldIncludePreviousMessages)
-        {
-            var content = campaign.Messages.TakeLast(IncludedPreviousMessages).Select(m => m.Content);
-            query.Append(
-                "\n\nUse these previous messages as context. They only serve to give a hint of the current scenario:");
-            foreach (var message in content)
-            {
-                query.Append($"\n {message}");
-            }
-        }
+        query.Append(ConstructSummary(campaign, _shouldIncludePreviousMessages));
 
         query.Append("\n\nHere is the list of all characters present in the story:\n\n{\"characters\": [");
 
@@ -102,4 +91,23 @@ public class ToolUtilities(IConfiguration configuration)
 
         return text;
     }
+
+    public static string ConstructSummary(Campaign campaign, bool shouldIncludePreviousMessages)
+    {
+        var result = $"\n\nThe story up until now: {campaign.GameSummary}";
+
+        if (shouldIncludePreviousMessages)
+        {
+            var content = campaign.Messages.TakeLast(IncludedPreviousMessages).Select(m => m.Content);
+            result += "\n\nUse these previous messages as context. They only serve to give a hint of the current scenario:";
+            foreach (var message in content)
+            {
+                result += $"\n {message}";
+            }
+        }
+
+        return result;
+    }
+
+
 }

@@ -12,10 +12,11 @@ namespace ChatRPG.API.Tools;
 public class SearchScenarioTool(
     IConfiguration configuration,
     Campaign campaign,
-    string instruction,
     string name,
     string? description = null) : AgentTool(name, description)
 {
+    private readonly bool _shouldIncludePreviousMessages = configuration.GetValue<bool>("ShouldSummarize");
+
     public override async Task<string> ToolTask(string input, CancellationToken token = new CancellationToken())
     {
         var provider = new OpenAiProvider(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
@@ -31,11 +32,12 @@ public class SearchScenarioTool(
         var vectorCollection = await vectorDatabase.GetCollectionAsync("collection-" + campaign.Id, token);
 
         var prompt = new StringBuilder();
-        prompt.Append(configuration.GetSection("SystemPrompts").GetValue<string>("SearchScenario")!
-            .Replace("{instruction}", instruction));
+        var summary = ToolUtilities.ConstructSummary(campaign, _shouldIncludePreviousMessages);
+        prompt.Append(configuration.GetSection("SystemPrompts").GetValue<string>("SearchScenario"))!.Replace(
+            "{summary}", summary);
 
         var chain = Set(input, "input")
-                    | RetrieveSimilarDocuments(vectorCollection, embeddingModel, amount: 20)
+                    | RetrieveSimilarDocuments(vectorCollection, embeddingModel, inputKey: "input", amount: 20)
                     | CombineDocuments(outputKey: "context")
                     | Template(prompt.ToString())
                     | LLM(llm.UseConsoleForDebug()); // TODO: Remove debug mode
