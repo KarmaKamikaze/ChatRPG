@@ -4,9 +4,6 @@ using Blazored.Modal;
 using Blazored.Modal.Services;
 using ChatRPG.Data.Models;
 using ChatRPG.Services;
-using LangChain.Databases.Postgres;
-using LangChain.Providers.OpenAI;
-using LangChain.Providers.OpenAI.Predefined;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
@@ -29,19 +26,40 @@ public partial class UserCampaignOverview : ComponentBase
     private byte[]? UploadedFile { get; set; }
     private string FileUploadError { get; set; } = string.Empty;
 
-    [Required] [BindProperty] private string CampaignTitle { get; set; } = "";
-    [Required] [BindProperty] private string CharacterName { get; set; } = "";
-    [BindProperty] private string CharacterDescription { get; set; } = "";
-    [BindProperty] private string StartScenario { get; set; } = null!;
+    [Required]
+    [BindProperty]
+    private string CampaignTitle { get; set; } = "";
 
-    [Inject] private AuthenticationStateProvider? AuthProvider { get; set; }
-    [Inject] private UserManager<User>? UserManager { get; set; }
-    [Inject] private IPersistenceService? PersistenceService { get; set; }
-    [Inject] private ICampaignMediatorService? CampaignMediatorService { get; set; }
-    [Inject] private NavigationManager? NavMan { get; set; }
-    [Inject] private ScenarioDocumentService? ScenarioDocumentService { get; set; }
+    [Required]
+    [BindProperty]
+    private string CharacterName { get; set; } = "";
 
-    [CascadingParameter] public IModalService? ConfirmDeleteModal { get; set; }
+    [BindProperty]
+    private string CharacterDescription { get; set; } = "";
+
+    [BindProperty]
+    private string StartScenario { get; set; } = null!;
+
+    [Inject]
+    private AuthenticationStateProvider? AuthProvider { get; set; }
+
+    [Inject]
+    private UserManager<User>? UserManager { get; set; }
+
+    [Inject]
+    private IPersistenceService? PersistenceService { get; set; }
+
+    [Inject]
+    private ICampaignMediatorService? CampaignMediatorService { get; set; }
+
+    [Inject]
+    private NavigationManager? NavMan { get; set; }
+
+    [Inject]
+    private ScenarioDocumentService? ScenarioDocumentService { get; set; }
+
+    [CascadingParameter]
+    public IModalService? ConfirmDeleteModal { get; set; }
 
     protected override async Task OnInitializedAsync()
     {

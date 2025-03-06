@@ -41,12 +41,23 @@ public partial class CampaignPage
         ? "margin-top: -25px; margin-bottom: -60px;"
         : "margin-top: 20px; margin-bottom: 60px;";
 
-    [Inject] private JsInteropService? JsService { get; set; }
-    [Inject] private AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
-    [Inject] private IPersistenceService? PersistenceService { get; set; }
-    [Inject] private ICampaignMediatorService? CampaignMediatorService { get; set; }
-    [Inject] private GameInputHandler? GameInputHandler { get; set; }
-    [Inject] private NavigationManager? NavMan { get; set; }
+    [Inject]
+    private JsInteropService? JsService { get; set; }
+
+    [Inject]
+    private AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
+
+    [Inject]
+    private IPersistenceService? PersistenceService { get; set; }
+
+    [Inject]
+    private ICampaignMediatorService? CampaignMediatorService { get; set; }
+
+    [Inject]
+    private GameInputHandler? GameInputHandler { get; set; }
+
+    [Inject]
+    private NavigationManager? NavMan { get; set; }
 
     /// <summary>
     /// Initializes the Campaign page component by setting up configuration parameters.
