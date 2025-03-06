@@ -138,6 +138,9 @@ public class ReActLlmClient : IReActLlmClient
             "most once.");
         tools.Add(battleTool);
 
+        var searchScenarioTool = new SearchScenarioTool(_configuration, campaign, "TODO: Narrator-specific instruction", "searchscenariotool", "");
+        tools.Add(searchScenarioTool);
+
         return tools;
     }
 }

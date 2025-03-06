@@ -127,6 +127,11 @@ dotnet ef database update
 
 The database used in the connection string should now be up-to-date and ready for use.
 
+#### Installing pgvector Extension
+To use our vector-based search features, you must install the `pgvector` extension in your PostgreSQL database.
+
+Follow the instructions on the official [pgvector GitHub page](https://github.com/pgvector/pgvector) to install the extension.
+
 #### Making changes to the data model
 
 Internally, EF uses the migration scripts in `/ChatRPG/Data/Migrations/` to create the data model (tables, constraints,

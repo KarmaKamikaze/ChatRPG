@@ -4,8 +4,12 @@ using Blazored.Modal;
 using Blazored.Modal.Services;
 using ChatRPG.Data.Models;
 using ChatRPG.Services;
+using LangChain.Databases.Postgres;
+using LangChain.Providers.OpenAI;
+using LangChain.Providers.OpenAI.Predefined;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Environment = ChatRPG.Data.Models.Environment;
@@ -20,9 +24,13 @@ public partial class UserCampaignOverview : ComponentBase
     private List<StartScenario> StartScenarios { get; set; } = [];
     private bool TestFields { get; set; }
     private int TextAreaRows { get; set; } = 6;
+    private bool IsOpenWorld { get; set; } = true;
+    private bool IsProcessingPdfFile { get; set; } = false;
+    private byte[]? UploadedFile { get; set; }
+    private string FileUploadError { get; set; } = string.Empty;
 
-    [Required][BindProperty] private string CampaignTitle { get; set; } = "";
-    [Required][BindProperty] private string CharacterName { get; set; } = "";
+    [Required] [BindProperty] private string CampaignTitle { get; set; } = "";
+    [Required] [BindProperty] private string CharacterName { get; set; } = "";
     [BindProperty] private string CharacterDescription { get; set; } = "";
     [BindProperty] private string StartScenario { get; set; } = null!;
 
@@ -31,6 +39,7 @@ public partial class UserCampaignOverview : ComponentBase
     [Inject] private IPersistenceService? PersistenceService { get; set; }
     [Inject] private ICampaignMediatorService? CampaignMediatorService { get; set; }
     [Inject] private NavigationManager? NavMan { get; set; }
+    [Inject] private ScenarioDocumentService? ScenarioDocumentService { get; set; }
 
     [CascadingParameter] public IModalService? ConfirmDeleteModal { get; set; }
 
@@ -64,7 +73,18 @@ public partial class UserCampaignOverview : ComponentBase
             true);
         campaign.Environments.Add(environment);
         campaign.Characters.Add(player);
-        await PersistenceService!.SaveAsync(campaign);
+        await PersistenceService!.SaveAsync(campaign); // Save the campaign ID to the database
+
+        if (!IsOpenWorld)
+        {
+            // Upload campaign documents to vector database
+            // UploadedFile should not be able to be null since the button is disabled if it is
+            await ScenarioDocumentService!.StoreScenarioEmbedding(campaign.Id, UploadedFile!);
+
+            campaign.StartScenario = await ScenarioDocumentService.GenerateStartingScenario(campaign.Id);
+            await PersistenceService!.SaveAsync(campaign);
+        }
+
         LaunchCampaign(campaign.Id);
     }
 
@@ -148,5 +168,39 @@ public partial class UserCampaignOverview : ComponentBase
         }
 
         StateHasChanged();
+    }
+
+    private void OnCampaignTypeChange(bool value)
+    {
+        IsOpenWorld = value;
+        IsProcessingPdfFile = false;
+        FileUploadError = string.Empty;
+        UploadedFile = null;
+    }
+
+    private async Task HandleScenarioFileUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (!file.ContentType.Equals("application/pdf", StringComparison.OrdinalIgnoreCase))
+        {
+            FileUploadError = "Only PDF files are allowed.";
+            UploadedFile = null;
+        }
+        else
+        {
+            IsProcessingPdfFile = true;
+            FileUploadError = string.Empty;
+
+            try
+            {
+                using var memoryStream = new MemoryStream();
+                await file.OpenReadStream(maxAllowedSize: long.MaxValue).CopyToAsync(memoryStream);
+                UploadedFile = memoryStream.ToArray();
+            }
+            finally
+            {
+                IsProcessingPdfFile = false;
+            }
+        }
     }
 }

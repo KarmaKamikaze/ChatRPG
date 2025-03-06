@@ -19,7 +19,7 @@ public class Campaign
     }
 
     public int Id { get; private set; }
-    public string? StartScenario { get; private set; }
+    public string? StartScenario { get; set; }
     public User User { get; private set; } = null!;
     public string Title { get; private set; } = null!;
     public DateTime StartedOn { get; private set; }
