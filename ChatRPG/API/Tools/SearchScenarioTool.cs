@@ -28,8 +28,8 @@ public class SearchScenarioTool(
 
         var vectorDatabase =
             new PostgresVectorDatabase(configuration.GetSection("ConnectionStrings")
-                .GetValue<string>("DefaultConnection")!, configuration.GetValue<string>("VectorDatabaseTable")!);
-        var vectorCollection = await vectorDatabase.GetCollectionAsync("collection-" + campaign.Id, token);
+                .GetValue<string>("DefaultConnection")!);
+        var vectorCollection = await vectorDatabase.GetCollectionAsync("~collection-" + campaign.Id, token);
 
         var prompt = new StringBuilder();
         var summary = ToolUtilities.ConstructSummary(campaign, _shouldIncludePreviousMessages);
