@@ -85,7 +85,7 @@ public class GameStateManager
         await chain.RunAsync("text");
     }
 
-    private List<AgentTool> CreateTools(Campaign campaign)
+    private static List<AgentTool> CreateTools(Campaign campaign)
     {
         var tools = new List<AgentTool>();
 
