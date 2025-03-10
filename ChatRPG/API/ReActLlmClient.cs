@@ -139,8 +139,8 @@ public class ReActLlmClient : IReActLlmClient
         tools.Add(battleTool);
 
         var searchScenarioTool = new SearchScenarioTool(_configuration, campaign, "searchscenariotool",
-            "This tool must be used whenever you are is unsure of what is available to the player in the " +
-            "current location, uncertain about what should happen next, or needs to reference existing details from " +
+            "This tool must be used whenever you are unsure of what is available to the player in the " +
+            "current location, uncertain about what should happen next, or need to reference existing details from " +
             "the adventure module to maintain consistency. The tool helps you retrieve structured information " +
             "about the game world, ensuring it adheres to the story's established details while still allowing for " +
             "player agency and exploration.\n" +
