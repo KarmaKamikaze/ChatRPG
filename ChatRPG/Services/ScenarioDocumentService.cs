@@ -67,7 +67,7 @@ public class ScenarioDocumentService
                     | RetrieveSimilarDocuments(vectorCollection, embeddingModel, inputKey: "instruction", amount: 20)
                     | CombineDocuments(outputKey: "context")
                     | Template(prompt.ToString())
-                    | LLM(llm.UseConsoleForDebug()); // TODO: Remove debug mode
+                    | LLM(llm);
 
         var response = await chain.RunAsync("text");
 
