@@ -2,7 +2,6 @@ using System.Text;
 using ChatRPG.Data.Models;
 using LangChain.Chains.StackableChains.Agents.Tools;
 using LangChain.Databases.Postgres;
-using LangChain.Providers;
 using LangChain.Providers.OpenAI;
 using LangChain.Providers.OpenAI.Predefined;
 using static LangChain.Chains.Chain;
@@ -40,7 +39,7 @@ public class SearchScenarioTool(
                     | RetrieveSimilarDocuments(vectorCollection, embeddingModel, inputKey: "input", amount: 20)
                     | CombineDocuments(outputKey: "context")
                     | Template(prompt.ToString())
-                    | LLM(llm.UseConsoleForDebug()); // TODO: Remove debug mode
+                    | LLM(llm);
 
         var response = await chain.RunAsync("text", cancellationToken: token);
 
