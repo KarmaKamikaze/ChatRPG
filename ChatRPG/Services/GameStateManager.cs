@@ -19,7 +19,6 @@ public class GameStateManager
     private readonly string _updateCampaignPrompt;
     private readonly bool _archivistDebugMode;
     private readonly bool _summarizeMessages;
-    private readonly IConfiguration _configuration;
 
     public GameStateManager(IConfiguration configuration, IPersistenceService persistenceService)
     {
@@ -31,7 +30,6 @@ public class GameStateManager
             configuration.GetSection("SystemPrompts").GetValue<string>("UpdateCampaignFromNarrative")!;
         _archivistDebugMode = configuration.GetValue<bool>("ArchivistChainDebug");
         _summarizeMessages = configuration.GetValue<bool>("ShouldSummarize");
-        _configuration = configuration;
         _persistenceService = persistenceService;
     }
 
