@@ -138,6 +138,47 @@ public class ReActLlmClient : IReActLlmClient
             "most once.");
         tools.Add(battleTool);
 
+        var searchScenarioTool = new SearchScenarioTool(_configuration, campaign, "searchscenariotool",
+            "This tool must be used whenever you are unsure of what is available to the player in the " +
+            "current location, uncertain about what should happen next, or need to reference existing details from " +
+            "the adventure module to maintain consistency. The tool helps you retrieve structured information " +
+            "about the game world, ensuring it adheres to the story's established details while still allowing for " +
+            "player agency and exploration.\n" +
+            "When to use this tool:\n" +
+            "- Unknown Details: If you do not have enough information about a location, NPC, quest, faction, or " +
+            "available actions, this tool must be used to find relevant context from the adventure module.\n" +
+            "- Player Agency & Story Consistency: You should follow the scenario structure but can adapt if minor " +
+            "details are missing. However, if key details exist in the adventure module, they must be used to shape " +
+            "the game world.\n" +
+            "- Keeping the Player on Track: If the player strays too far from the main story while exploring an area, " +
+            "the tool can be used to find details that naturally guide them back into the intended narrative without " +
+            "restricting their choices.\n" +
+            "- Exploration & Interaction: If the player takes an action related to an NPC, object, or location that has " +
+            "not been described yet, use this tool to determine what is relevant.\n" +
+            "Example Uses:\n" +
+            "Scenario 1 – Player in a Castle Hall\n" +
+            "Player Input: \"I want to talk to the ghost of the former king.\"\n" +
+            "You are unsure if a ghost exists in the castle hall. You call the tool with the input \"Is there a ghost " +
+            "of the former king in the castle hall?\" and retrieve details, learning " +
+            "that there is a suit of armor containing red eyes that greets the player as Ulemar, the Knight of the King.\n" +
+            "Scenario 2 – Exploring a Village\n" +
+            "Player Input: \"I enter a random house in the village. What do I see?\"\n" +
+            "You are unsure about the houses and call the tool with the input \"Tell me about the houses in the village.\"\n" +
+            "If the adventure module contains details about the house, the tool retrieves them.\n" +
+            "If the house is not mentioned, you may improvise a minor detail (e.g., \"A modest home with a " +
+            "fireplace and a wooden table\") while ensuring it does not contradict existing world details.\n" +
+            "Scenario 3 – Deviating from the Main Story\n" +
+            "Player Input: \"I leave the dungeon and wander into the forest.\"\n" +
+            "You are unsure what the player can find in the forest. You call the tool with the input \"Tell me about " +
+            "the forest. Are there any objectives there? Does anything happen when the player leaves the dungeon?\"\n" +
+            "If the adventure module has no information about the forest, you may allow limited exploration but " +
+            "eventually use the tool to reference details from the current chapter, nudging the player back toward " +
+            "the dungeon in a natural way.\n" +
+            "Use this tool as often as needed to maintain consistency, but allow for creative flexibility when small " +
+            "details are missing. Never fabricate major lore elements if the adventure module provides context. You " +
+            "can call this tool multiple times in a single narrative to ensure the story remains coherent and engaging.");
+        tools.Add(searchScenarioTool);
+
         return tools;
     }
 }

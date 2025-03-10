@@ -32,7 +32,8 @@ builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuth
     .AddTransient<GameInputHandler>()
     .AddTransient<GameStateManager>()
     .AddSingleton<ICampaignMediatorService, CampaignMediatorService>()
-    .AddScoped<JsInteropService>();
+    .AddScoped<JsInteropService>()
+    .AddScoped<ScenarioDocumentService>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -44,19 +45,22 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 WebApplication app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseMigrationsEndPoint();
+
+using IServiceScope scope = app.Services.CreateScope();
+ILogger<Program> logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+logger.LogInformation("Initializing database with test user");
+try
 {
-    app.UseMigrationsEndPoint();
+    ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-    using IServiceScope scope = app.Services.CreateScope();
-    ILogger<Program> logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-    logger.LogInformation("Initializing database with test user");
-    try
+    // Ensure pgvector extension is installed.
+    dbContext.Database.ExecuteSqlRaw("CREATE EXTENSION IF NOT EXISTS vector;");
+
+    dbContext.Database.Migrate();
+
+    if (app.Environment.IsDevelopment())
     {
-        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        dbContext.Database.Migrate();
-
         UserManager<User> userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
         const string username = "test";
         User? user = await userManager.FindByNameAsync(username);
@@ -70,20 +74,18 @@ if (app.Environment.IsDevelopment())
             };
             await userManager.CreateAsync(user, password: username);
         }
+    }
 
-        logger.LogInformation("Database was successfully initialized");
-    }
-    catch (Exception e)
-    {
-        logger.LogError(e, "An error occurred while initializing database");
-    }
+    logger.LogInformation("Database was successfully initialized");
 }
-else
+catch (Exception e)
 {
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    logger.LogError(e, "An error occurred while initializing database");
 }
+
+app.UseExceptionHandler("/Error");
+// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+app.UseHsts();
 
 app.UseHttpsRedirection();
 
