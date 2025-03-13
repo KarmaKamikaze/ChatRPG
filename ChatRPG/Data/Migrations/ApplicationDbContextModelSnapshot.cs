@@ -17,7 +17,7 @@ namespace ChatRPG.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("ProductVersion", "9.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -32,6 +32,9 @@ namespace ChatRPG.Data.Migrations
 
                     b.Property<string>("GameSummary")
                         .HasColumnType("text");
+
+                    b.Property<int?>("NarrativeGraphId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("StartScenario")
                         .HasColumnType("text");
@@ -51,11 +54,13 @@ namespace ChatRPG.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("NarrativeGraphId");
+
                     b.HasIndex("StartScenarioId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Campaigns");
+                    b.ToTable("Campaigns", (string)null);
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.Character", b =>
@@ -98,7 +103,7 @@ namespace ChatRPG.Data.Migrations
 
                     b.HasIndex("EnvironmentId");
 
-                    b.ToTable("Characters");
+                    b.ToTable("Characters", (string)null);
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.Environment", b =>
@@ -124,7 +129,7 @@ namespace ChatRPG.Data.Migrations
 
                     b.HasIndex("CampaignId");
 
-                    b.ToTable("Environments");
+                    b.ToTable("Environments", (string)null);
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.Message", b =>
@@ -152,7 +157,79 @@ namespace ChatRPG.Data.Migrations
 
                     b.HasIndex("CampaignId");
 
-                    b.ToTable("Message");
+                    b.ToTable("Message", (string)null);
+                });
+
+            modelBuilder.Entity("ChatRPG.Data.Models.NarrativeEdge", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.PrimitiveCollection<string[]>("Conditions")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<int>("EdgeStatus")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SourceNodeId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TargetNodeId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SourceNodeId");
+
+                    b.HasIndex("TargetNodeId");
+
+                    b.ToTable("NarrativeEdges", (string)null);
+                });
+
+            modelBuilder.Entity("ChatRPG.Data.Models.NarrativeGraph", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.HasKey("Id");
+
+                    b.ToTable("NarrativeGraphs", (string)null);
+                });
+
+            modelBuilder.Entity("ChatRPG.Data.Models.NarrativeNode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("GraphId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("NodeStatus")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("StoryContent")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GraphId");
+
+                    b.ToTable("NarrativeNodes", (string)null);
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.StartScenario", b =>
@@ -173,7 +250,7 @@ namespace ChatRPG.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("StartScenarios");
+                    b.ToTable("StartScenarios", (string)null);
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.User", b =>
@@ -378,6 +455,10 @@ namespace ChatRPG.Data.Migrations
 
             modelBuilder.Entity("ChatRPG.Data.Models.Campaign", b =>
                 {
+                    b.HasOne("ChatRPG.Data.Models.NarrativeGraph", "NarrativeGraph")
+                        .WithMany("Campaigns")
+                        .HasForeignKey("NarrativeGraphId");
+
                     b.HasOne("ChatRPG.Data.Models.StartScenario", null)
                         .WithMany("Campaigns")
                         .HasForeignKey("StartScenarioId");
@@ -385,6 +466,8 @@ namespace ChatRPG.Data.Migrations
                     b.HasOne("ChatRPG.Data.Models.User", "User")
                         .WithMany("Campaigns")
                         .HasForeignKey("UserId");
+
+                    b.Navigation("NarrativeGraph");
 
                     b.Navigation("User");
                 });
@@ -428,6 +511,36 @@ namespace ChatRPG.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Campaign");
+                });
+
+            modelBuilder.Entity("ChatRPG.Data.Models.NarrativeEdge", b =>
+                {
+                    b.HasOne("ChatRPG.Data.Models.NarrativeNode", "SourceNode")
+                        .WithMany("Edges")
+                        .HasForeignKey("SourceNodeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ChatRPG.Data.Models.NarrativeNode", "TargetNode")
+                        .WithMany()
+                        .HasForeignKey("TargetNodeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("SourceNode");
+
+                    b.Navigation("TargetNode");
+                });
+
+            modelBuilder.Entity("ChatRPG.Data.Models.NarrativeNode", b =>
+                {
+                    b.HasOne("ChatRPG.Data.Models.NarrativeGraph", "Graph")
+                        .WithMany()
+                        .HasForeignKey("GraphId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Graph");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -488,6 +601,16 @@ namespace ChatRPG.Data.Migrations
                     b.Navigation("Environments");
 
                     b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("ChatRPG.Data.Models.NarrativeGraph", b =>
+                {
+                    b.Navigation("Campaigns");
+                });
+
+            modelBuilder.Entity("ChatRPG.Data.Models.NarrativeNode", b =>
+                {
+                    b.Navigation("Edges");
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.StartScenario", b =>
