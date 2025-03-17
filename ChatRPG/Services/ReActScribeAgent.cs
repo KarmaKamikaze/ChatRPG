@@ -21,7 +21,8 @@ public class ReActScribeAgent
     public ReActScribeAgent(IConfiguration configuration)
     {
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI"));
-        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts").GetValue<string>("ScribeReActPrompt"));
+        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts")
+            .GetValue<string>("ScribeReActPrompt"));
         _configuration = configuration;
         _reActPrompt = _configuration.GetSection("SystemPrompts").GetValue<string>("ScribeReActPrompt")!;
         _provider = new OpenAiProvider(_configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
@@ -41,9 +42,10 @@ public class ReActScribeAgent
             Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.7 }
         };
 
-        for (var i = 0; i < documents.Count; i+=BatchSize)
+        for (var i = 0; i < documents.Count; i += BatchSize)
         {
-            var agent = new ReActAgentChain(_scribeDebugMode ? llm.UseConsoleForDebug() : llm, graph, reActPrompt: _reActPrompt);
+            var agent = new ReActAgentChain(_scribeDebugMode ? llm.UseConsoleForDebug() : llm, graph,
+                reActPrompt: _reActPrompt);
 
             var tools = CreateTools(graph);
             foreach (var tool in tools)
@@ -71,7 +73,4 @@ public class ReActScribeAgent
 
         return tools;
     }
-
-
-
 }

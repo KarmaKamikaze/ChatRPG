@@ -182,7 +182,7 @@ New input: {input}";
         {
             chain |= Set(_gameSummary, "summary");
         }
-        
+
         if (!string.IsNullOrEmpty(_narrativeGraph))
         {
             chain |= Set(_narrativeGraph, "graph");

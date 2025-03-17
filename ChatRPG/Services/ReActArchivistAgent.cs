@@ -70,7 +70,9 @@ public class ReActArchivistAgent
 
         environments.Append("\n]}");
 
-        var agent = new ReActAgentChain(_archivistDebugMode ? llm.UseConsoleForDebug() : llm, characters:characters.ToString(), campaign.Player.Name, environments.ToString(), campaign.GameSummary, _updateCampaignPrompt
+        var agent = new ReActAgentChain(_archivistDebugMode ? llm.UseConsoleForDebug() : llm,
+            characters: characters.ToString(), campaign.Player.Name, environments.ToString(), campaign.GameSummary,
+            _updateCampaignPrompt
         );
 
         var tools = CreateTools(campaign);
