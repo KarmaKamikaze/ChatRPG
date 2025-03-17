@@ -3,6 +3,7 @@ using System;
 using ChatRPG.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChatRPG.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250313085801_LinkGraphElements")]
+    partial class LinkGraphElements
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,7 +34,6 @@ namespace ChatRPG.Data.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("GameSummary")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int?>("NarrativeGraphId")
@@ -536,7 +538,7 @@ namespace ChatRPG.Data.Migrations
             modelBuilder.Entity("ChatRPG.Data.Models.NarrativeNode", b =>
                 {
                     b.HasOne("ChatRPG.Data.Models.NarrativeGraph", "Graph")
-                        .WithMany("Nodes")
+                        .WithMany()
                         .HasForeignKey("GraphId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -607,8 +609,6 @@ namespace ChatRPG.Data.Migrations
             modelBuilder.Entity("ChatRPG.Data.Models.NarrativeGraph", b =>
                 {
                     b.Navigation("Campaigns");
-
-                    b.Navigation("Nodes");
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.NarrativeNode", b =>

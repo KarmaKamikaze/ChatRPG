@@ -1,9 +1,13 @@
 ﻿using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ChatRPG.Data.Models;
 
 public class NarrativeEdge
 {
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions { WriteIndented = true };
+
     private NarrativeEdge()
     {
     }
@@ -15,10 +19,13 @@ public class NarrativeEdge
         TargetNode = targetNode;
     }
 
+    [JsonIgnore]
     public int Id { get; private set; }
     public ICollection<string> Conditions { get; private set; }
+    [JsonIgnore]
     public int SourceNodeId { get; private set; }
     public NarrativeNode SourceNode { get; private set; }
+    [JsonIgnore]
     public int TargetNodeId { get; private set; }
     public NarrativeNode TargetNode { get; private set; }
     public Status EdgeStatus { get; private set; } = Status.Unvisited;
@@ -27,6 +34,11 @@ public class NarrativeEdge
     {
         Unvisited,
         Visited
+    }
+
+    public string Serialize()
+    {
+        return JsonSerializer.Serialize(this, _jsonSerializerOptions);
     }
 
     public override string ToString()

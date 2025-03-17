@@ -1,9 +1,12 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ChatRPG.Data.Models;
 
 public class NarrativeNode
 {
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions { WriteIndented = true };
+
     private NarrativeNode()
     {
     }
@@ -15,7 +18,9 @@ public class NarrativeNode
         Graph = graph;
     }
 
+    [JsonIgnore]
     public int Id { get; private set; }
+    [JsonIgnore]
     public NarrativeGraph Graph { get; private set; } = null!;
     public string Name { get; private set; }
     public string StoryContent { get; set; }
@@ -29,15 +34,10 @@ public class NarrativeNode
         Completed
     }
 
-    public void AddCondition(List<string> conditions, NarrativeNode targetNode)
-    {
-        Edges.Add(new NarrativeEdge(conditions, this, targetNode));
-    }
-
     public string Serialize()
     {
-        return JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(this, _jsonSerializerOptions);
     }
 
-    public override string ToString() => $"{NodeStatus} Node({Id}): {StoryContent}";
+    public override string ToString() => $"{NodeStatus} Node({Id}) named [{Name}]: {StoryContent}";
 }

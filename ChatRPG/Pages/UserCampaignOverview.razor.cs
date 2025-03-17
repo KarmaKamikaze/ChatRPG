@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Security.Authentication;
+using Aspose.Pdf.Operators;
 using Blazored.Modal;
 using Blazored.Modal.Services;
 using ChatRPG.Data.Models;
@@ -58,6 +59,9 @@ public partial class UserCampaignOverview : ComponentBase
     [Inject]
     private ScenarioDocumentService? ScenarioDocumentService { get; set; }
 
+    [Inject]
+    private ReActScribeAgent? ReActScribeAgent { get; set; }
+
     [CascadingParameter]
     public IModalService? ConfirmDeleteModal { get; set; }
 
@@ -98,6 +102,8 @@ public partial class UserCampaignOverview : ComponentBase
             // Upload campaign documents to vector database
             // UploadedFile should not be able to be null since the button is disabled if it is
             await ScenarioDocumentService!.StoreScenarioEmbedding(campaign.Id, UploadedFile!);
+
+            var graph = await ReActScribeAgent!.ScribeNarrativeGraph(UploadedFile!);
 
             campaign.StartScenario = await ScenarioDocumentService.GenerateStartingScenario(campaign.Id);
             await PersistenceService!.SaveAsync(campaign);

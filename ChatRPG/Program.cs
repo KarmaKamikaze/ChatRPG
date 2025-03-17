@@ -26,11 +26,12 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddBlazoredModal();
 
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<User>>()
-    .AddTransient<IReActLlmClient, ReActLlmClient>()
+    .AddTransient<IReActLlmClient, ReActNarratorAgent>()
     .AddScoped<IPersistenceService, EfPersistenceService>()
     .AddTransient<IEmailSender, EmailSender>()
     .AddTransient<GameInputHandler>()
-    .AddTransient<GameStateManager>()
+    .AddTransient<ReActArchivistAgent>()
+    .AddTransient<ReActScribeAgent>()
     .AddSingleton<ICampaignMediatorService, CampaignMediatorService>()
     .AddScoped<JsInteropService>()
     .AddScoped<ScenarioDocumentService>();

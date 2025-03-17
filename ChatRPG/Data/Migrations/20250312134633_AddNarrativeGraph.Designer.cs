@@ -3,6 +3,7 @@ using System;
 using ChatRPG.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChatRPG.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250312134633_AddNarrativeGraph")]
+    partial class AddNarrativeGraph
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,7 +34,6 @@ namespace ChatRPG.Data.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("GameSummary")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int?>("NarrativeGraphId")
@@ -176,15 +178,10 @@ namespace ChatRPG.Data.Migrations
                     b.Property<int>("EdgeStatus")
                         .HasColumnType("integer");
 
-                    b.Property<int>("SourceNodeId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("TargetNodeId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SourceNodeId");
 
                     b.HasIndex("TargetNodeId");
 
@@ -212,9 +209,6 @@ namespace ChatRPG.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("GraphId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -227,8 +221,6 @@ namespace ChatRPG.Data.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("GraphId");
 
                     b.ToTable("NarrativeNodes");
                 });
@@ -516,32 +508,13 @@ namespace ChatRPG.Data.Migrations
 
             modelBuilder.Entity("ChatRPG.Data.Models.NarrativeEdge", b =>
                 {
-                    b.HasOne("ChatRPG.Data.Models.NarrativeNode", "SourceNode")
-                        .WithMany("Edges")
-                        .HasForeignKey("SourceNodeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("ChatRPG.Data.Models.NarrativeNode", "TargetNode")
-                        .WithMany()
+                        .WithMany("Conditions")
                         .HasForeignKey("TargetNodeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("SourceNode");
-
-                    b.Navigation("TargetNode");
-                });
-
-            modelBuilder.Entity("ChatRPG.Data.Models.NarrativeNode", b =>
-                {
-                    b.HasOne("ChatRPG.Data.Models.NarrativeGraph", "Graph")
-                        .WithMany("Nodes")
-                        .HasForeignKey("GraphId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Graph");
+                    b.Navigation("TargetNode");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -607,13 +580,11 @@ namespace ChatRPG.Data.Migrations
             modelBuilder.Entity("ChatRPG.Data.Models.NarrativeGraph", b =>
                 {
                     b.Navigation("Campaigns");
-
-                    b.Navigation("Nodes");
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.NarrativeNode", b =>
                 {
-                    b.Navigation("Edges");
+                    b.Navigation("Conditions");
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.StartScenario", b =>

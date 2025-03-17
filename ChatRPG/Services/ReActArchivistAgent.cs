@@ -12,7 +12,7 @@ using MessageRole = ChatRPG.Data.Models.MessageRole;
 
 namespace ChatRPG.Services;
 
-public class GameStateManager
+public class ReActArchivistAgent
 {
     private readonly OpenAiProvider _provider;
     private readonly IPersistenceService _persistenceService;
@@ -20,14 +20,14 @@ public class GameStateManager
     private readonly bool _archivistDebugMode;
     private readonly bool _summarizeMessages;
 
-    public GameStateManager(IConfiguration configuration, IPersistenceService persistenceService)
+    public ReActArchivistAgent(IConfiguration configuration, IPersistenceService persistenceService)
     {
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI"));
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts")
-            .GetValue<string>("UpdateCampaignFromNarrative"));
+            .GetValue<string>("ArchivistReActPrompt"));
         _provider = new OpenAiProvider(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
         _updateCampaignPrompt =
-            configuration.GetSection("SystemPrompts").GetValue<string>("UpdateCampaignFromNarrative")!;
+            configuration.GetSection("SystemPrompts").GetValue<string>("ArchivistReActPrompt")!;
         _archivistDebugMode = configuration.GetValue<bool>("ArchivistChainDebug");
         _summarizeMessages = configuration.GetValue<bool>("ShouldSummarize");
         _persistenceService = persistenceService;
@@ -70,8 +70,8 @@ public class GameStateManager
 
         environments.Append("\n]}");
 
-        var agent = new ReActAgentChain(_archivistDebugMode ? llm.UseConsoleForDebug() : llm, _updateCampaignPrompt,
-            characters.ToString(), campaign.Player.Name, environments.ToString(), gameSummary: campaign.GameSummary);
+        var agent = new ReActAgentChain(_archivistDebugMode ? llm.UseConsoleForDebug() : llm, characters:characters.ToString(), campaign.Player.Name, environments.ToString(), campaign.GameSummary, _updateCampaignPrompt
+        );
 
         var tools = CreateTools(campaign);
         foreach (var tool in tools)
@@ -153,7 +153,6 @@ public class GameStateManager
         }
         else
         {
-            campaign.GameSummary ??= string.Empty;
             campaign.GameSummary += string.Join("\n", newMessages.Select(m => m.Content)) + "\n";
         }
 

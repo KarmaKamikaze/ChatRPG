@@ -1,3 +1,4 @@
+using ChatRPG.API;
 using ChatRPG.API.Tools;
 using ChatRPG.Data.Models;
 using LangChain.Chains.StackableChains.Agents.Tools;
@@ -6,21 +7,21 @@ using LangChain.Providers.OpenAI;
 using LangChain.Providers.OpenAI.Predefined;
 using static LangChain.Chains.Chain;
 
-namespace ChatRPG.API;
+namespace ChatRPG.Services;
 
-public class ReActLlmClient : IReActLlmClient
+public class ReActNarratorAgent : IReActLlmClient
 {
     private readonly IConfiguration _configuration;
     private readonly OpenAiProvider _provider;
     private readonly string _reActPrompt;
     private readonly bool _narratorDebugMode;
 
-    public ReActLlmClient(IConfiguration configuration)
+    public ReActNarratorAgent(IConfiguration configuration)
     {
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI"));
-        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts").GetValue<string>("ReAct"));
+        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts").GetValue<string>("NarratorReActPrompt"));
         _configuration = configuration;
-        _reActPrompt = _configuration.GetSection("SystemPrompts").GetValue<string>("ReAct")!;
+        _reActPrompt = _configuration.GetSection("SystemPrompts").GetValue<string>("NarratorReActPrompt")!;
         _provider = new OpenAiProvider(_configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
         _narratorDebugMode = _configuration.GetValue<bool>("NarrativeChainDebug");
     }
@@ -32,8 +33,8 @@ public class ReActLlmClient : IReActLlmClient
             Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.7 }
         };
 
-        var agent = new ReActAgentChain(_narratorDebugMode ? llm.UseConsoleForDebug() : llm, _reActPrompt,
-            actionPrompt: actionPrompt, campaign.GameSummary);
+        var agent = new ReActAgentChain(_narratorDebugMode ? llm.UseConsoleForDebug() : llm, actionPrompt: actionPrompt,
+            campaign.GameSummary, _reActPrompt);
         var tools = CreateTools(campaign);
         foreach (var tool in tools)
         {
@@ -53,8 +54,8 @@ public class ReActLlmClient : IReActLlmClient
         };
 
         var eventProcessor = new LlmEventProcessor(llm);
-        var agent = new ReActAgentChain(_narratorDebugMode ? llm.UseConsoleForDebug() : llm, _reActPrompt,
-            actionPrompt: actionPrompt, campaign.GameSummary);
+        var agent = new ReActAgentChain(_narratorDebugMode ? llm.UseConsoleForDebug() : llm, actionPrompt: actionPrompt,
+            campaign.GameSummary, _reActPrompt);
         var tools = CreateTools(campaign);
         foreach (var tool in tools)
         {
