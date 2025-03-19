@@ -30,6 +30,7 @@ public sealed class ReActAgentChain : BaseStackableChain
     private readonly string _characters = string.Empty;
     private readonly string _environments = string.Empty;
     private readonly string _narrativeGraph = string.Empty;
+    private readonly string _graphExtensionSummary = string.Empty;
 
     public string DefaultPrompt = @"Assistant is a large language model trained by OpenAI.
 
@@ -154,12 +155,14 @@ New input: {input}";
     public ReActAgentChain(
         IChatModel model,
         NarrativeGraph graph,
+        string graphExtensionSummary,
         string? reActPrompt = null,
         string inputKey = "input",
         string outputKey = "text",
         int maxActions = 20) : this(model, reActPrompt, inputKey, outputKey, maxActions)
     {
         _narrativeGraph = graph.Serialize();
+        _graphExtensionSummary = graphExtensionSummary;
     }
 
     private void InitializeChain()
@@ -186,6 +189,7 @@ New input: {input}";
         if (!string.IsNullOrEmpty(_narrativeGraph))
         {
             chain |= Set(_narrativeGraph, "graph");
+            chain |= Set(_graphExtensionSummary, "summary");
         }
 
         chain = chain
