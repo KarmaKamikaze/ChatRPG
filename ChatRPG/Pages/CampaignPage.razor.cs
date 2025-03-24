@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using ChatRPG.Services;
 using ChatRPG.Data.Models;
 using ChatRPG.Services.Events;
+using ChatRPG.Visualization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -88,6 +89,8 @@ public partial class CampaignPage
         GameInputHandler!.ChatCompletionChunkReceived += OnChatCompletionChunkReceived;
         GameInputHandler!.CampaignUpdated += OnCampaignUpdated;
         _pageInitialized = true;
+
+        GraphVisualization.SaveToPngFile(_campaign!.NarrativeGraph!);
     }
 
     /// <summary>

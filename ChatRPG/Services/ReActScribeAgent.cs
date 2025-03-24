@@ -95,23 +95,35 @@ public class ReActScribeAgent
             "\"targetnodename\": \"the name of the target node that should be connected using this edge. " +
             "This node can already exist in the graph or it can be this node, if this node is the target \" } ] } " +
             "Each edge must include a list of conditions (which may be empty if no prerequisites exist) and " +
-            "connect either from or to an existing node to maintain coherence in the narrative structure.\n\n " +
+            "connect either from or to an existing node to maintain coherence in the narrative structure. " +
+            "These conditions must be formulated as short easy-to-answer questions.\n\n " +
             "Example Usage:\n " +
+            "Example 1: Gaining Information on The Abandoned Ruins\n " +
             "Scenario Context:\n " +
             "The player is currently at \"The Village of Eldermere\". A new story point is being introduced: " +
             "\"The Abandoned Ruins\", which contains an ancient shrine with hidden inscriptions. The player can " +
-            "only proceed if they have spoken to the village elder.\n " +
+            "only proceed if they have spoken to the village elder and removed a large boulder in the way.\n " +
             "Tool Call Example:\n " +
             "{ \"name\": \"The Abandoned Ruins\", \"storycontent\": \"A crumbling stone structure overgrown " +
             "with vines, hiding an ancient shrine with faded inscriptions. The air is thick with mystery, and a " +
             "sense of forgotten history lingers. Possible discoveries include ancient artifacts and hidden passages.\", " +
-            "\"edges\": [ { \"conditions\": [ \"Has the player spoken to the Village Elder?\" ], " +
+            "\"edges\": [ { \"conditions\": [ \"Has the player spoken to the Village Elder?\", \"Has the player removed the large boulder?\" ], " +
             "\"sourcenodename\": \"The Village of Eldermere\", \"targetnodename\": \"The Abandoned Ruins\" } ] } " +
             "Expected Outcome:\n " +
             "The tool returns an updated string representation of the graph, now including \"The Abandoned Ruins\" " +
-            "as a new node, connected to \"The Village of Eldermere\" via an edge with the condition " +
-            "\"Has the player spoken to the Village Elder?\" You can now verify the structure and ensure " +
-            "that traversal logic remains consistent with the scenario documents.");
+            "as a new node, connected to \"The Village of Eldermere\" via an edge with the conditions " +
+            "\"Has the player spoken to the Village Elder?\" and \"Has the player removed the large boulder?\" You can now verify the structure and ensure " +
+            "that traversal logic remains consistent with the scenario documents.\n " +
+            "Example 2: Entering the Forbidden Archives (No Conditions Required)\n " +
+            "A new node is added when the player discovers the Forbidden Archives, an ancient library containing lost knowledge. \n" +
+            "{ \"name\": \"Forbidden Archives\", \"storycontent\": \"A vast underground library filled with " +
+            "crumbling tomes, forbidden knowledge, and the echoes of long-forgotten scholars. " +
+            "Strange symbols glow faintly on the walls, hinting at secrets waiting to be uncovered.\", " +
+            "\"edges\": [ { \"conditions\": [], \"sourcenodename\": \"Grand Library\", \"targetnodename\": \"Forbidden Archives\" } ] } " +
+            "Outcome:\n " +
+            "- The Forbidden Archives is introduced as a new story node.\n " +
+            "- The Grand Library is directly connected to it without conditions, meaning the player can freely enter the archives.\n " +
+            "- The archives can now serve as a new exploration point with potential clues, puzzles, or hidden dangers.");
         tools.Add(addNodeTool);
 
         var addEdgeTool = new AddEdgeTool(graph, "addedgetool",
@@ -150,13 +162,57 @@ public class ReActScribeAgent
             "To enter the Royal Chamber, the player must have:\n " +
             "1. Met Sir Ivan, the Wizard, who provides the key to the chamber.\n " +
             "2. Defeated the Elite Guards stationed outside.\n " +
+            "3. Dispelled the magical barrier on the Royal Chamber doors." +
             "Input to AddEdgeTool:\n " +
             "{ \"sourcenodename\": \"Castle Courtyard\", \"targetnodename\": \"Royal Chamber\", \"conditions\": " +
-            "[ \"Has the player met Sir Ivan, the Wizard?\", \"Has the player defeated the Elite Guards?\" ] } " +
+            "[ \"Has the player been granted the key by Sir Ivan, the Wizard?\", \"Has the player defeated the Elite Guards?\", \"Has the player dispelled the magical barrier?\" ] } " +
             "Outcome:\n " +
             "- The Castle Courtyard is now connected to the Royal Chamber.\n " +
-            "- The player cannot enter until both conditions are fulfilled.");
+            "- The player cannot enter until all conditions are fulfilled.");
         tools.Add(addEdgeTool);
+
+        var addEndNodeTool = new AddEndNodeTool(graph, "addendnodetool",
+            "This tool must be used to add a new end node to the narrative graph. An end node represents " +
+            "a definitive conclusion to a story branch, meaning that once the player reaches this point, the " +
+            "story will end. This tool must be used whenever a branch of the story does not loop back to another " +
+            "plot point but instead results in a final outcome.\n " +
+            "There can be multiple possible endings in an adventure scenario, so this tool must be invoked " +
+            "whenever a narrative path leads to a conclusion instead of continuing forward. End nodes should be " +
+            "used to signify significant story resolutions, such as:\n " +
+            "- The player meeting their demise.\n " +
+            "- The player achieving victory.\n " +
+            "- The player failing or being trapped indefinitely.\n " +
+            "- Any other scenario where the player's journey logically concludes.\n" +
+            "Usage Format:\n " +
+            "The tool requires valid JSON input structured as follows:\n " +
+            "{ \"sourcenodename\": \"the name of the source node which already exists in the graph\", " +
+            "\"conditions\": [ \"condition that define if the ending is reached based on the player’s choices\" ] } " +
+            "The conditions list may be empty if the edge does not require prerequisites for traversal.\n" +
+            "Example Usage:\n " +
+            "Example 1: A Hero’s Victory\n " +
+            "If the player successfully defeats the Dark Lord and restores peace, the ending is triggered:\n " +
+            "{ \"sourcenodename\": \"Victory Over the Dark Lord\", " +
+            "\"conditions\": [ \"Has the player defeated the Dark Lord?\" ] } " +
+            "Outcome:\n " +
+            "- This ending is reached only if the player defeats the Dark Lord.\n " +
+            "Example 2: The Player’s Demise\n " +
+            "If the player fails to escape a collapsing dungeon:\n " +
+            "{ \"sourcenodename\": \"Buried Beneath the Ruins\", " +
+            "\"conditions\": [ \"Has the player failed to escape the ruins before time ran out?\" ] } " +
+            "Outcome:\n " +
+            "- The story ends when the player fails to escape the ruins.\n " +
+            "Example 3: The Ascension of the New King\n " +
+            "If the player successfully claims the throne by fulfilling multiple prerequisites:\n " +
+            "{ \"sourcenodename\": \"Ascension to the Throne\", " +
+            "\"conditions\": [ \"Has the player retrieved the Royal Crown?\", " +
+            "\"Has the player gained the support of the High Council?\", " +
+            "\"Has the player defeated the False Heir in battle?\" ] } " +
+            "Outcome:\n " +
+            "- This ending is only reached if the player has:\n " +
+            "\t - Retrieved the Royal Crown, signifying their right to rule.\n " +
+            "\t - Secured the High Council’s approval, ensuring political stability.\n " +
+            "\t - Defeated the False Heir, eliminating rival claims to the throne.");
+        tools.Add(addEndNodeTool);
 
         return tools;
     }

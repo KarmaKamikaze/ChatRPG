@@ -5,7 +5,6 @@ using LangChain.Providers.OpenAI;
 using LangChain.Providers.OpenAI.Predefined;
 using LangChain.DocumentLoaders;
 using LangChain.Extensions;
-using LangChain.Providers;
 using LangChain.Splitters.Text;
 using static LangChain.Chains.Chain;
 
@@ -64,7 +63,7 @@ public class ScenarioDocumentService
         var prompt = new StringBuilder();
         prompt.Append(_startingScenarioPrompt);
 
-        var chain = Set("Introduce the adventure that the player will embark on", outputKey: "instruction")
+        var chain = Set(CreateRagQuery(campaign), outputKey: "instruction")
                     | RetrieveSimilarDocuments(vectorCollection, embeddingModel, inputKey: "instruction", amount: 20)
                     | CombineDocuments(outputKey: "context")
                     | Template(prompt.ToString())
@@ -73,5 +72,22 @@ public class ScenarioDocumentService
         var response = await chain.RunAsync("text");
 
         return response ?? "System: I'm sorry, I couldn't find any relevant scenarios.";
+    }
+
+    private static string CreateRagQuery(Campaign campaign)
+    {
+        var ragQuery = new StringBuilder();
+        ragQuery.AppendLine("Introduce the adventure that the player will embark on.");
+
+        var startNode = campaign.NarrativeGraph!.GetStartNode();
+
+        foreach (var edge in startNode!.Edges)
+        {
+            ragQuery.AppendLine(string.Join(", ", edge.Conditions));
+            ragQuery.AppendLine(edge.TargetNodeName);
+            ragQuery.AppendLine(edge.TargetNode.StoryContent);
+        }
+
+        return ragQuery.ToString();
     }
 }

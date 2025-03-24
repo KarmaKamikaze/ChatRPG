@@ -36,6 +36,11 @@ public class NarrativeGraph
         return Nodes.FirstOrDefault(node => GetIncomingNodes(node).Count == 0);
     }
 
+    public List<NarrativeNode> GetNodesWithStatus(NarrativeNode.Status status)
+    {
+        return Nodes.Where(n => n.NodeStatus == status).ToList();
+    }
+
     public void InitializeStartNode()
     {
         Nodes.Add(new NarrativeNode("Start", "", this));

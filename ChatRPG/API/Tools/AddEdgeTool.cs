@@ -32,7 +32,7 @@ public class AddEdgeTool(
             return addEdgeErrorMessage ?? "Failed to add edge.";
         }
 
-        return $"The graph has been updated. From now on, use the updated graph::\n{graph.Serialize()}";
+        return $"The graph has been updated. From now on, use the updated graph:\n{graph.Serialize()}";
     }
 
     private static bool IsValidJson(AddEdgeInput jsonEdge, out string? errorMessage)
@@ -55,27 +55,7 @@ public class AddEdgeTool(
         existingNodes.TryGetValue(newEdge.SourceNodeName!, out var sourceNode);
         existingNodes.TryGetValue(newEdge.TargetNodeName!, out var targetNode);
 
-        var errorMessages = new List<string>();
-
-        if (targetNode is null)
-        {
-            errorMessages.Add($"Target node with name {newEdge.TargetNodeName} not found.");
-        }
-
-        if (sourceNode is null)
-        {
-            errorMessages.Add($"Source node with name {newEdge.SourceNodeName} not found.");
-        }
-        else if (sourceNode == targetNode)
-        {
-            errorMessages.Add($"Node {sourceNode.Name} cannot have an edge to itself.");
-        }
-        else if (targetNode is not null && sourceNode.Edges.Any(e => e.TargetNode == targetNode))
-        {
-            errorMessages.Add($"An edge already exists between {newEdge.SourceNodeName} and {newEdge.TargetNodeName}.");
-        }
-
-        if (!ToolUtilities.NodesValidForNewEdge(sourceNode, targetNode, newEdge, out errorMessages))
+        if (!ToolUtilities.NodesValidForNewEdge(sourceNode, targetNode, newEdge, out var errorMessages))
         {
             errorMessage =
                 $"Invalid input provided for the edge. " +

@@ -33,10 +33,15 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageReference Include="Radzen.Blazor" Version="6.2.4" />
     <PackageReference Include="RichardSzalay.MockHttp" Version="7.0.0" />
+    <PackageReference Include="Rubjerg.Graphviz" Version="2.0.2" />
   </ItemGroup>
 
   <ItemGroup>
     <InternalsVisibleTo Include="ChatRPGTests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Visualization\" />
   </ItemGroup>
 
 </Project>
