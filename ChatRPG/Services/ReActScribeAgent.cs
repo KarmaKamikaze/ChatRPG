@@ -114,7 +114,48 @@ public class ReActScribeAgent
             "that traversal logic remains consistent with the scenario documents.");
         tools.Add(addNodeTool);
 
-        var addEdgeTool = new AddEdgeTool(graph, "addedgetool", "Add an edge to the narrative graph");
+        var addEdgeTool = new AddEdgeTool(graph, "addedgetool",
+            "This tool must be used to add a new edge (connection) between two existing nodes in the " +
+            "narrative graph. This tool should be used when you determine that a new pathway should be " +
+            "established between two already-defined story points.\n\nEach edge represents a story-driven " +
+            "connection between two nodes, allowing the player to progress based on specific conditions. " +
+            "These conditions act as prerequisites that must be met before the player is allowed to traverse " +
+            "the edge. An edge must include:\n " +
+            "- A source node name, which is the starting point of the edge.\n " +
+            "- A target node name, which is the destination of the edge.\n " +
+            "- A list of conditions, which describe what the player must accomplish to traverse the edge.\n " +
+            "Conditions should be framed as easy-to-answer questions, verifying if the player has completed " +
+            "specific story requirements. These could be based on prior encounters, collected items, or " +
+            "completed quests, such as:\n " +
+            "- \"Has the player spoken to the village elder?\"\n " +
+            "- \"Has the player recovered the stolen artifact from the crypt?\"\n " +
+            "- \"Has the player defeated the guardian of the temple.\"\n " +
+            "After calling this tool, you will receive an updated string representation of the graph, showing " +
+            "the newly added edge and its connection between nodes. This allows you to verify relationships " +
+            "and ensure logical story progression.\n " +
+            "Usage Format:\n " +
+            "The tool requires valid JSON input structured as follows:\n " +
+            "{ \"conditions\": [ \"condition 1 for traversing the edge\", \"condition 2 for traversing the edge\" ], " +
+            "\"sourcenodename\": \"the name of the source node which already exists in the graph\", " +
+            "\"targetnodename\": \"the name of the target node which already exists in the graph\" } " +
+            "The conditions list may be empty if the edge does not require prerequisites for traversal.\n " +
+            "Example 1: Unlocking the Crypt\n " +
+            "In this scenario, the player must obtain the Rusted Key before they can enter the Ancient Crypt.\n " +
+            "Input to AddEdgeTool:\n " +
+            "{ \"sourcenodename\": \"Old Graveyard\", \"targetnodename\": \"Ancient Crypt\", \"conditions\": " +
+            "[ \"Has the player obtained the Rusted Key?\" ] } Outcome:\n " +
+            "- The Old Graveyard is now connected to the Ancient Crypt.\n " +
+            "- The player cannot enter the crypt until they have obtained the Rusted Key.\n " +
+            "Example 2: Gaining Access to the Royal Chamber\n " +
+            "To enter the Royal Chamber, the player must have:\n " +
+            "1. Met Sir Ivan, the Wizard, who provides the key to the chamber.\n " +
+            "2. Defeated the Elite Guards stationed outside.\n " +
+            "Input to AddEdgeTool:\n " +
+            "{ \"sourcenodename\": \"Castle Courtyard\", \"targetnodename\": \"Royal Chamber\", \"conditions\": " +
+            "[ \"Has the player met Sir Ivan, the Wizard?\", \"Has the player defeated the Elite Guards?\" ] } " +
+            "Outcome:\n " +
+            "- The Castle Courtyard is now connected to the Royal Chamber.\n " +
+            "- The player cannot enter until both conditions are fulfilled.");
         tools.Add(addEdgeTool);
 
         return tools;

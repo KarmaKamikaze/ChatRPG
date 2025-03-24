@@ -21,12 +21,16 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<NarrativeEdge>()
+            .Ignore(edge => edge.SourceNodeName)
+            .Ignore(edge => edge.TargetNodeName)
             .HasOne(edge => edge.TargetNode)
             .WithMany()
             .HasForeignKey(edge => edge.TargetNodeId)
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<NarrativeEdge>()
+            .Ignore(edge => edge.SourceNodeName)
+            .Ignore(edge => edge.TargetNodeName)
             .HasOne(edge => edge.SourceNode)
             .WithMany(node => node.Edges)
             .HasForeignKey(edge => edge.SourceNodeId)

@@ -75,10 +75,10 @@ public class AddEdgeTool(
             errorMessages.Add($"An edge already exists between {newEdge.SourceNodeName} and {newEdge.TargetNodeName}.");
         }
 
-        if (errorMessages.Count != 0)
+        if (!ToolUtilities.NodesValidForNewEdge(sourceNode, targetNode, newEdge, out errorMessages))
         {
             errorMessage =
-                $"Invalid input provided for the node. " +
+                $"Invalid input provided for the edge. " +
                 $"Please correct the following errors:\n{string.Join("\n", errorMessages)}";
             return false;
         }

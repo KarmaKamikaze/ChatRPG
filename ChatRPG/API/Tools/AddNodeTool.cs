@@ -71,26 +71,9 @@ public class AddNodeTool(
             sourceNode ??= edge.SourceNodeName == newNode.Name ? node : null;
             targetNode ??= edge.TargetNodeName == newNode.Name ? node : null;
 
-            if (targetNode is null)
+            if (ToolUtilities.NodesValidForNewEdge(sourceNode, targetNode, edge, out errorMessages))
             {
-                errorMessages.Add($"Target node with name {edge.TargetNodeName} not found.");
-            }
-
-            if (sourceNode is null)
-            {
-                errorMessages.Add($"Source node with name {edge.SourceNodeName} not found.");
-            }
-            else if (sourceNode == targetNode)
-            {
-                errorMessages.Add($"Node {sourceNode.Name} cannot have an edge to itself.");
-            }
-            else if (targetNode is not null && sourceNode.Edges.Any(e => e.TargetNode == targetNode))
-            {
-                errorMessages.Add($"An edge already exists between {edge.SourceNodeName} and {edge.TargetNodeName}.");
-            }
-            else if (targetNode is not null)
-            {
-                edgesToAdd.Add(new NarrativeEdge(edge.Conditions!, sourceNode, targetNode));
+                edgesToAdd.Add(new NarrativeEdge(edge.Conditions!, sourceNode!, targetNode!));
             }
         }
 

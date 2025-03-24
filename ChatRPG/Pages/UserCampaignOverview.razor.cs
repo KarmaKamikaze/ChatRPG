@@ -103,9 +103,9 @@ public partial class UserCampaignOverview : ComponentBase
             // UploadedFile should not be able to be null since the button is disabled if it is
             await ScenarioDocumentService!.StoreScenarioEmbedding(campaign.Id, UploadedFile!);
 
-            var graph = await ReActScribeAgent!.ScribeNarrativeGraph(UploadedFile!);
+            campaign.NarrativeGraph = await ReActScribeAgent!.ScribeNarrativeGraph(UploadedFile!);
 
-            campaign.StartScenario = await ScenarioDocumentService.GenerateStartingScenario(campaign.Id);
+            campaign.StartScenario = await ScenarioDocumentService.GenerateStartingScenario(campaign);
             await PersistenceService!.SaveAsync(campaign);
         }
 

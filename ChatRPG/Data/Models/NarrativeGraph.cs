@@ -10,8 +10,10 @@ public class NarrativeGraph
 
     [JsonIgnore]
     public int Id { get; private set; }
+
     [JsonIgnore]
     public ICollection<Campaign> Campaigns { get; private set; } = new List<Campaign>();
+
     public HashSet<NarrativeNode> Nodes { get; private set; } = [];
 
     public void AddNode(NarrativeNode node)
@@ -52,20 +54,27 @@ public class NarrativeGraph
     public override string ToString()
     {
         var startNode = GetStartNode();
-        var sb = new StringBuilder();
-        sb.Append(startNode != null
-            ? $"Start Node: {startNode}"
-            : "Warning: No start node found. Create a node with no incoming edges.");
-
-        foreach (var node in Nodes)
+        if (startNode == null)
         {
-            sb.Append(node);
-            foreach (var edge in node.Edges)
-            {
-                sb.Append($"  {edge}");
-            }
+            return "Warning: No start node found. Create a node with no incoming edges.";
         }
 
+        var sb = new StringBuilder();
+        sb.AppendLine($"Start Node: {startNode}\n");
+        var visited = new HashSet<NarrativeNode>();
+
+        Dfs(startNode);
         return sb.ToString();
+
+        void Dfs(NarrativeNode node)
+        {
+            if (!visited.Add(node)) return; // Skip if already visited
+            sb.AppendLine(node.ToString());
+            foreach (var edge in node.Edges)
+            {
+                sb.AppendLine($"  {edge}");
+                Dfs(edge.TargetNode); // Recursively visit adjacent nodes
+            }
+        }
     }
 }

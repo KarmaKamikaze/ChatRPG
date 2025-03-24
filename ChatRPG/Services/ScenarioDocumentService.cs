@@ -1,4 +1,5 @@
 using System.Text;
+using ChatRPG.Data.Models;
 using LangChain.Databases.Postgres;
 using LangChain.Providers.OpenAI;
 using LangChain.Providers.OpenAI.Predefined;
@@ -47,7 +48,7 @@ public class ScenarioDocumentService
                 chunkOverlap: 200)); // To pick the chunk overlap you need to estimate the size of the smallest piece of information. It may happen that one chunk ends with `Ron's hair` and the other one starts with `is red`.In this case, an embedding would miss important context, and not be generated properly. With overlap the end of the first chunk will appear in the beginning of the other, eliminating the problem.
     }
 
-    public async Task<string> GenerateStartingScenario(int campaignId)
+    public async Task<string> GenerateStartingScenario(Campaign campaign)
     {
         var provider = new OpenAiProvider(_openAiKey);
         var embeddingModel = new TextEmbeddingV3SmallModel(provider);
@@ -58,7 +59,7 @@ public class ScenarioDocumentService
 
         var vectorDatabase =
             new PostgresVectorDatabase(_connectionString);
-        var vectorCollection = await vectorDatabase.GetCollectionAsync("~collection-" + campaignId);
+        var vectorCollection = await vectorDatabase.GetCollectionAsync("~collection-" + campaign.Id);
 
         var prompt = new StringBuilder();
         prompt.Append(_startingScenarioPrompt);

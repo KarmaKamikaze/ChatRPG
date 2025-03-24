@@ -21,13 +21,25 @@ public class NarrativeEdge
 
     [JsonIgnore]
     public int Id { get; private set; }
+
     public ICollection<string> Conditions { get; private set; }
+
     [JsonIgnore]
     public int SourceNodeId { get; private set; }
+
+    public string SourceNodeName => SourceNode.Name;
+
+    [JsonIgnore]
     public NarrativeNode SourceNode { get; private set; }
+
     [JsonIgnore]
     public int TargetNodeId { get; private set; }
+
+    public string TargetNodeName => TargetNode.Name;
+
+    [JsonIgnore]
     public NarrativeNode TargetNode { get; private set; }
+
     public Status EdgeStatus { get; private set; } = Status.Unvisited;
 
     public enum Status
@@ -44,7 +56,7 @@ public class NarrativeEdge
     public override string ToString()
     {
         var sb = new StringBuilder();
-        sb.Append($"{EdgeStatus} Edge from {SourceNode.Id} to {TargetNode.Id} with conditions: ");
+        sb.Append($"{EdgeStatus} Edge from {SourceNodeName} to {TargetNodeName} with conditions: ");
         sb.Append(string.Join(", ", Conditions));
 
         return sb.ToString();

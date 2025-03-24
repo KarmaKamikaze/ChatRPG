@@ -99,7 +99,8 @@ public class ToolUtilities(IConfiguration configuration)
         if (shouldIncludePreviousMessages)
         {
             var content = campaign.Messages.TakeLast(IncludedPreviousMessages).Select(m => m.Content);
-            result += "\n\nUse these previous messages as context. They only serve to give a hint of the current scenario:";
+            result +=
+                "\n\nUse these previous messages as context. They only serve to give a hint of the current scenario:";
             foreach (var message in content)
             {
                 result += $"\n {message}";
@@ -109,5 +110,28 @@ public class ToolUtilities(IConfiguration configuration)
         return result;
     }
 
+    public static bool NodesValidForNewEdge(NarrativeNode? sourceNode, NarrativeNode? targetNode, AddEdgeInput newEdge,
+        out List<string> errorMessages)
+    {
+        errorMessages = [];
+        if (targetNode is null)
+        {
+            errorMessages.Add($"Target node with name {newEdge.TargetNodeName} not found.");
+        }
 
+        if (sourceNode is null)
+        {
+            errorMessages.Add($"Source node with name {newEdge.SourceNodeName} not found.");
+        }
+        else if (sourceNode == targetNode)
+        {
+            errorMessages.Add($"Node {sourceNode.Name} cannot have an edge to itself.");
+        }
+        else if (targetNode is not null && sourceNode.Edges.Any(e => e.TargetNode == targetNode))
+        {
+            errorMessages.Add($"An edge already exists between {newEdge.SourceNodeName} and {newEdge.TargetNodeName}.");
+        }
+
+        return errorMessages.Count == 0;
+    }
 }

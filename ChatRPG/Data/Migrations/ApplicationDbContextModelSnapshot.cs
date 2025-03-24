@@ -61,7 +61,7 @@ namespace ChatRPG.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Campaigns");
+                    b.ToTable("Campaigns", (string)null);
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.Character", b =>
@@ -104,7 +104,7 @@ namespace ChatRPG.Data.Migrations
 
                     b.HasIndex("EnvironmentId");
 
-                    b.ToTable("Characters");
+                    b.ToTable("Characters", (string)null);
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.Environment", b =>
@@ -130,7 +130,7 @@ namespace ChatRPG.Data.Migrations
 
                     b.HasIndex("CampaignId");
 
-                    b.ToTable("Environments");
+                    b.ToTable("Environments", (string)null);
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.Message", b =>
@@ -158,7 +158,7 @@ namespace ChatRPG.Data.Migrations
 
                     b.HasIndex("CampaignId");
 
-                    b.ToTable("Message");
+                    b.ToTable("Message", (string)null);
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.NarrativeEdge", b =>
@@ -188,7 +188,7 @@ namespace ChatRPG.Data.Migrations
 
                     b.HasIndex("TargetNodeId");
 
-                    b.ToTable("NarrativeEdges");
+                    b.ToTable("NarrativeEdges", (string)null);
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.NarrativeGraph", b =>
@@ -201,7 +201,7 @@ namespace ChatRPG.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("NarrativeGraphs");
+                    b.ToTable("NarrativeGraphs", (string)null);
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.NarrativeNode", b =>
@@ -230,7 +230,7 @@ namespace ChatRPG.Data.Migrations
 
                     b.HasIndex("GraphId");
 
-                    b.ToTable("NarrativeNodes");
+                    b.ToTable("NarrativeNodes", (string)null);
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.StartScenario", b =>
@@ -251,7 +251,7 @@ namespace ChatRPG.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("StartScenarios");
+                    b.ToTable("StartScenarios", (string)null);
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.User", b =>
