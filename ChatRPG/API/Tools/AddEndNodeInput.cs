@@ -3,7 +3,6 @@
 public class AddEndNodeInput
 {
     public string? SourceNodeName { get; set; }
-
     public List<string>? Conditions { get; set; }
 
     public bool IsValid(out List<string> validationErrors)

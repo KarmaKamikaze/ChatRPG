@@ -63,8 +63,8 @@ public class ScenarioDocumentService
         var prompt = new StringBuilder();
         prompt.Append(_startingScenarioPrompt);
 
-        var chain = Set(CreateRagQuery(campaign), outputKey: "instruction")
-                    | RetrieveSimilarDocuments(vectorCollection, embeddingModel, inputKey: "instruction", amount: 20)
+        var chain = Set(CreateRagQueryForStartingScenario(campaign), outputKey: "query")
+                    | RetrieveSimilarDocuments(vectorCollection, embeddingModel, inputKey: "query", amount: 20)
                     | CombineDocuments(outputKey: "context")
                     | Template(prompt.ToString())
                     | LLM(llm);
@@ -74,7 +74,7 @@ public class ScenarioDocumentService
         return response ?? "System: I'm sorry, I couldn't find any relevant scenarios.";
     }
 
-    private static string CreateRagQuery(Campaign campaign)
+    private static string CreateRagQueryForStartingScenario(Campaign campaign)
     {
         var ragQuery = new StringBuilder();
         ragQuery.AppendLine("Adventure Introduction.");

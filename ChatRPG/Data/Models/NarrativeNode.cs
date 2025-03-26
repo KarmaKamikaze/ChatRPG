@@ -25,7 +25,9 @@ public class NarrativeNode
     public NarrativeGraph Graph { get; private set; } = null!;
 
     public string Name { get; private set; }
+
     public string StoryContent { get; set; }
+    
     public ICollection<NarrativeEdge> Edges { get; private set; } = [];
 
     [JsonIgnore]

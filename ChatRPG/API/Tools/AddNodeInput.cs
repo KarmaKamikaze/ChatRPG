@@ -33,5 +33,4 @@ public class AddNodeInput
 
         return validationErrors.Count == 0;
     }
-
 }
