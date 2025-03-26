@@ -123,6 +123,10 @@ public class ToolUtilities(IConfiguration configuration)
         {
             errorMessages.Add($"Source node with name {newEdge.SourceNodeName} not found.");
         }
+        else if (sourceNode.Name == "End")
+        {
+            errorMessages.Add($"Node {sourceNode.Name} cannot have an edge to another node.");
+        }
         else if (sourceNode == targetNode)
         {
             errorMessages.Add($"Node {sourceNode.Name} cannot have an edge to itself.");
