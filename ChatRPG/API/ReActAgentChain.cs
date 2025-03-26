@@ -1,4 +1,5 @@
 using System.Globalization;
+using ChatRPG.Data.Models;
 using LangChain.Abstractions.Schema;
 using LangChain.Chains.HelperChains;
 using LangChain.Chains.StackableChains.Agents.Tools;
@@ -7,6 +8,8 @@ using LangChain.Memory;
 using LangChain.Providers;
 using LangChain.Schema;
 using static LangChain.Chains.Chain;
+using Message = LangChain.Providers.Message;
+using MessageRole = LangChain.Providers.MessageRole;
 
 namespace ChatRPG.API;
 
@@ -22,10 +25,12 @@ public sealed class ReActAgentChain : BaseStackableChain
     private readonly Dictionary<string, AgentTool> _tools = new();
     private bool _useCache;
     private string _userInput = string.Empty;
-    private readonly string _gameSummary;
+    private readonly string? _gameSummary;
     private readonly string _playerCharacter = string.Empty;
     private readonly string _characters = string.Empty;
     private readonly string _environments = string.Empty;
+    private readonly string _narrativeGraph = string.Empty;
+    private readonly string _graphExtensionSummary = string.Empty;
 
     public string DefaultPrompt = @"Assistant is a large language model trained by OpenAI.
 
@@ -76,7 +81,6 @@ New input: {input}";
     public ReActAgentChain(
         IChatModel model,
         string? reActPrompt = null,
-        string? gameSummary = null,
         string inputKey = "input",
         string outputKey = "text",
         int maxActions = 20)
@@ -85,7 +89,6 @@ New input: {input}";
         _model.Settings!.StopSequences = ["Observation", "[END]"];
         _reActPrompt = reActPrompt ?? DefaultPrompt;
         _maxActions = maxActions;
-        _gameSummary = gameSummary ?? string.Empty;
 
         InputKeys = [inputKey];
         OutputKeys = [outputKey];
@@ -111,32 +114,56 @@ New input: {input}";
 
     public ReActAgentChain(
         IChatModel model,
-        string reActPrompt,
-        string? actionPrompt = null,
-        string? gameSummary = null,
+        string gameSummary,
+        string? reActPrompt = null,
         string inputKey = "input",
         string outputKey = "text",
-        int maxActions = 20) : this(model, reActPrompt, gameSummary, inputKey, outputKey, maxActions)
+        int maxActions = 20) : this(model, reActPrompt, inputKey, outputKey, maxActions)
     {
-        _actionPrompt = actionPrompt ?? string.Empty;
+        _gameSummary = gameSummary;
     }
 
     public ReActAgentChain(
         IChatModel model,
-        string reActPrompt,
+        string actionPrompt,
+        string gameSummary,
+        string? reActPrompt = null,
+        string inputKey = "input",
+        string outputKey = "text",
+        int maxActions = 20) : this(model, gameSummary, reActPrompt, inputKey, outputKey, maxActions)
+    {
+        _actionPrompt = actionPrompt;
+    }
+
+    public ReActAgentChain(
+        IChatModel model,
         string characters,
         string playerCharacter,
         string environments,
-        string? gameSummary = null,
+        string gameSummary,
+        string? reActPrompt = null,
         string inputKey = "input",
         string outputKey = "text",
-        int maxActions = 20) : this(model, reActPrompt, gameSummary, inputKey, outputKey, maxActions)
+        int maxActions = 20) : this(model, gameSummary, reActPrompt, inputKey, outputKey, maxActions)
     {
         _characters = characters;
         _playerCharacter = playerCharacter;
         _environments = environments;
     }
 
+
+    public ReActAgentChain(
+        IChatModel model,
+        NarrativeGraph graph,
+        string graphExtensionSummary,
+        string? reActPrompt = null,
+        string inputKey = "input",
+        string outputKey = "text",
+        int maxActions = 20) : this(model, reActPrompt, inputKey, outputKey, maxActions)
+    {
+        _narrativeGraph = graph.Serialize();
+        _graphExtensionSummary = graphExtensionSummary;
+    }
 
     private void InitializeChain()
     {
@@ -149,12 +176,23 @@ New input: {input}";
             | Set(tools, "tools")
             | Set(toolNames, "tool_names");
 
-        chain = _characters == ""
+        chain = (string.IsNullOrEmpty(_characters) && !string.IsNullOrEmpty(_actionPrompt))
             ? chain | Set(_actionPrompt, "action")
-            : chain | Set(_characters, "characters") | Set(_environments, "environments") | Set(_playerCharacter, "player_character");
+            : chain | Set(_characters, "characters") | Set(_environments, "environments") |
+              Set(_playerCharacter, "player_character");
+
+        if (_gameSummary != null)
+        {
+            chain |= Set(_gameSummary, "summary");
+        }
+
+        if (!string.IsNullOrEmpty(_narrativeGraph))
+        {
+            chain |= Set(_narrativeGraph, "graph");
+            chain |= Set(_graphExtensionSummary, "summary");
+        }
 
         chain = chain
-                | Set(_gameSummary, "summary")
                 | LoadMemory(_conversationBufferMemory, "history")
                 | Template(_reActPrompt)
                 | LLM(_model).UseCache(_useCache)

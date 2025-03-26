@@ -9,17 +9,17 @@ public class GameInputHandler
 {
     private readonly ILogger<GameInputHandler> _logger;
     private readonly IReActLlmClient _llmClient;
-    private readonly GameStateManager _gameStateManager;
+    private readonly ReActArchivistAgent _reActArchivistAgent;
     private readonly bool _streamChatCompletions;
     private readonly Dictionary<SystemPromptType, string> _systemPrompts = new();
     private readonly AutoResetEvent _autoResetEvent = new(true);
 
     public GameInputHandler(ILogger<GameInputHandler> logger, IReActLlmClient llmClient,
-        GameStateManager gameStateManager, IConfiguration configuration)
+        ReActArchivistAgent reActArchivistAgent, IConfiguration configuration)
     {
         _logger = logger;
         _llmClient = llmClient;
-        _gameStateManager = gameStateManager;
+        _reActArchivistAgent = reActArchivistAgent;
         _streamChatCompletions = configuration.GetValue("StreamChatCompletions", true);
         if (configuration.GetValue("UseMocks", false))
         {
@@ -115,9 +115,9 @@ public class GameInputHandler
 
     private async Task SaveInteraction(Campaign campaign, string input, string response)
     {
-        await _gameStateManager.UpdateCampaignFromNarrative(campaign, input, response);
+        await _reActArchivistAgent.UpdateCampaignFromNarrative(campaign, input, response);
         OnCampaignUpdated();
-        await _gameStateManager.StoreMessagesInCampaign(campaign, input, response);
-        await _gameStateManager.SaveCurrentState(campaign);
+        await _reActArchivistAgent.StoreMessagesInCampaign(campaign, input, response);
+        await _reActArchivistAgent.SaveCurrentState(campaign);
     }
 }

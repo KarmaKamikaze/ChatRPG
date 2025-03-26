@@ -160,7 +160,7 @@
                             </div>
                             <div class="mb-3">
                                 <label for="inputScenarioPDF" class="form-label">Upload Scenario PDF</label>
-                                <InputFile class="form-control" OnChange="HandleScenarioFileUpload"/>
+                                <InputFile class="form-control" accept=".pdf" OnChange="HandleScenarioFileUpload"/>
                                 @if (!string.IsNullOrEmpty(FileUploadError))
                                 {
                                     <div class="text-danger mt-2">@FileUploadError</div>

@@ -9,8 +9,8 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Environment = ChatRPG.Data.Models.Environment;
 using CampaignModel = ChatRPG.Data.Models.Campaign;
+using Environment = ChatRPG.Data.Models.Environment;
 
 namespace ChatRPG.Pages;
 
@@ -50,6 +50,9 @@ public partial class UserCampaignOverview : ComponentBase
     private IPersistenceService? PersistenceService { get; set; }
 
     [Inject]
+    private VisualizationService? VisualizationService { get; set; }
+
+    [Inject]
     private ICampaignMediatorService? CampaignMediatorService { get; set; }
 
     [Inject]
@@ -57,6 +60,9 @@ public partial class UserCampaignOverview : ComponentBase
 
     [Inject]
     private ScenarioDocumentService? ScenarioDocumentService { get; set; }
+
+    [Inject]
+    private ReActScribeAgent? ReActScribeAgent { get; set; }
 
     [CascadingParameter]
     public IModalService? ConfirmDeleteModal { get; set; }
@@ -99,8 +105,11 @@ public partial class UserCampaignOverview : ComponentBase
             // UploadedFile should not be able to be null since the button is disabled if it is
             await ScenarioDocumentService!.StoreScenarioEmbedding(campaign.Id, UploadedFile!);
 
-            campaign.StartScenario = await ScenarioDocumentService.GenerateStartingScenario(campaign.Id);
+            campaign.NarrativeGraph = await ReActScribeAgent!.ScribeNarrativeGraph(UploadedFile!);
+
+            campaign.StartScenario = await ScenarioDocumentService.GenerateStartingScenario(campaign);
             await PersistenceService!.SaveAsync(campaign);
+            VisualizationService!.VisualizeNarrativeGraphIfEnabled(campaign.NarrativeGraph);
         }
 
         LaunchCampaign(campaign.Id);

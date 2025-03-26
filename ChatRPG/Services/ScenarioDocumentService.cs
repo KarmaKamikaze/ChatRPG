@@ -1,10 +1,10 @@
 using System.Text;
+using ChatRPG.Data.Models;
 using LangChain.Databases.Postgres;
 using LangChain.Providers.OpenAI;
 using LangChain.Providers.OpenAI.Predefined;
 using LangChain.DocumentLoaders;
 using LangChain.Extensions;
-using LangChain.Providers;
 using LangChain.Splitters.Text;
 using static LangChain.Chains.Chain;
 
@@ -47,7 +47,7 @@ public class ScenarioDocumentService
                 chunkOverlap: 200)); // To pick the chunk overlap you need to estimate the size of the smallest piece of information. It may happen that one chunk ends with `Ron's hair` and the other one starts with `is red`.In this case, an embedding would miss important context, and not be generated properly. With overlap the end of the first chunk will appear in the beginning of the other, eliminating the problem.
     }
 
-    public async Task<string> GenerateStartingScenario(int campaignId)
+    public async Task<string> GenerateStartingScenario(Campaign campaign)
     {
         var provider = new OpenAiProvider(_openAiKey);
         var embeddingModel = new TextEmbeddingV3SmallModel(provider);
@@ -58,13 +58,13 @@ public class ScenarioDocumentService
 
         var vectorDatabase =
             new PostgresVectorDatabase(_connectionString);
-        var vectorCollection = await vectorDatabase.GetCollectionAsync("~collection-" + campaignId);
+        var vectorCollection = await vectorDatabase.GetCollectionAsync("~collection-" + campaign.Id);
 
         var prompt = new StringBuilder();
         prompt.Append(_startingScenarioPrompt);
 
-        var chain = Set("Introduce the adventure that the player will embark on", outputKey: "instruction")
-                    | RetrieveSimilarDocuments(vectorCollection, embeddingModel, inputKey: "instruction", amount: 20)
+        var chain = Set(CreateRagQueryForStartingScenario(campaign), outputKey: "query")
+                    | RetrieveSimilarDocuments(vectorCollection, embeddingModel, inputKey: "query", amount: 20)
                     | CombineDocuments(outputKey: "context")
                     | Template(prompt.ToString())
                     | LLM(llm);
@@ -72,5 +72,22 @@ public class ScenarioDocumentService
         var response = await chain.RunAsync("text");
 
         return response ?? "System: I'm sorry, I couldn't find any relevant scenarios.";
+    }
+
+    private static string CreateRagQueryForStartingScenario(Campaign campaign)
+    {
+        var ragQuery = new StringBuilder();
+        ragQuery.AppendLine("Adventure Introduction.");
+
+        var startNode = campaign.NarrativeGraph!.GetStartNode();
+
+        foreach (var edge in startNode!.Edges)
+        {
+            ragQuery.AppendLine(string.Join(", ", edge.Conditions));
+            ragQuery.AppendLine(edge.TargetNodeName);
+            ragQuery.AppendLine(edge.TargetNode.StoryContent);
+        }
+
+        return ragQuery.ToString();
     }
 }

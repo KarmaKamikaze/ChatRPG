@@ -151,7 +151,7 @@ UpgradeLog*.htm
 
 # Temp files when opening LibreOffice on ubuntu
 .~lock.*
- 
+
 # svn
 .svn
 
@@ -230,3 +230,4 @@ mail_config.xml
 # End of core ignore list, below put you custom 'per project' settings (patterns or path)
 #####
 Saves/
+Visualizations/
