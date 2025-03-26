@@ -89,8 +89,6 @@ public partial class CampaignPage
         GameInputHandler!.ChatCompletionChunkReceived += OnChatCompletionChunkReceived;
         GameInputHandler!.CampaignUpdated += OnCampaignUpdated;
         _pageInitialized = true;
-
-        GraphVisualization.SaveToPngFile(_campaign!.NarrativeGraph!);
     }
 
     /// <summary>

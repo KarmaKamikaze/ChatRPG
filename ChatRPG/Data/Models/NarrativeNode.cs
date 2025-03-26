@@ -20,12 +20,18 @@ public class NarrativeNode
 
     [JsonIgnore]
     public int Id { get; private set; }
+
     [JsonIgnore]
     public NarrativeGraph Graph { get; private set; } = null!;
+
     public string Name { get; private set; }
     public string StoryContent { get; set; }
     public ICollection<NarrativeEdge> Edges { get; private set; } = [];
-    public Status NodeStatus { get; private set; } = Status.Undiscovered;
+
+    [JsonIgnore]
+    public Status NodeStatus { get; set; } = Status.Undiscovered;
+
+    public string NodeStatusCategory => NodeStatus.ToString();
 
     public enum Status
     {

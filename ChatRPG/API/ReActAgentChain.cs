@@ -25,7 +25,7 @@ public sealed class ReActAgentChain : BaseStackableChain
     private readonly Dictionary<string, AgentTool> _tools = new();
     private bool _useCache;
     private string _userInput = string.Empty;
-    private readonly string _gameSummary = string.Empty;
+    private readonly string? _gameSummary;
     private readonly string _playerCharacter = string.Empty;
     private readonly string _characters = string.Empty;
     private readonly string _environments = string.Empty;
@@ -181,7 +181,7 @@ New input: {input}";
             : chain | Set(_characters, "characters") | Set(_environments, "environments") |
               Set(_playerCharacter, "player_character");
 
-        if (!string.IsNullOrEmpty(_gameSummary))
+        if (_gameSummary != null)
         {
             chain |= Set(_gameSummary, "summary");
         }

@@ -77,7 +77,7 @@ public class ScenarioDocumentService
     private static string CreateRagQuery(Campaign campaign)
     {
         var ragQuery = new StringBuilder();
-        ragQuery.AppendLine("Introduce the adventure that the player will embark on.");
+        ragQuery.AppendLine("Adventure Introduction.");
 
         var startNode = campaign.NarrativeGraph!.GetStartNode();
 

@@ -15,7 +15,7 @@ public class ReActScribeAgent
     private readonly OpenAiProvider _provider;
     private readonly string _reActPrompt;
     private readonly bool _scribeDebugMode;
-    private const int BatchSize = 10;
+    private const int BatchSize = 5;
 
     public ReActScribeAgent(IConfiguration configuration)
     {
@@ -37,7 +37,7 @@ public class ReActScribeAgent
 
         var llm = new Gpt4OmniModel(_provider)
         {
-            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.7 }
+            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.4 }
         };
 
         var previousGraphExtensionSummary =
@@ -85,7 +85,7 @@ public class ReActScribeAgent
             "showing the newly added node and its connections, allowing you to verify relationships " +
             "between story points and ensure correct structuring.\n\n " +
             "Usage Format:\n " +
-            "The tool requires valid JSON input structured as follows:\n " +
+            "Do not use markdown! The tool requires valid JSON input structured as follows:\n " +
             "{ \"name\": \"a unique name of the node based on the location or plot point within the scenario document\", " +
             "\"storycontent\": \"the story content of the relevant details such as a description of the plot " +
             "point/location, key NPCs, obstacles, or possible discoveries, etc.\", \"edges\": [ { \"conditions\": " +
@@ -94,7 +94,7 @@ public class ReActScribeAgent
             "This node can already exist in the graph or it can be this node, if this node is the source\", " +
             "\"targetnodename\": \"the name of the target node that should be connected using this edge. " +
             "This node can already exist in the graph or it can be this node, if this node is the target \" } ] } " +
-            "Each edge must include a list of conditions (which may be empty if no prerequisites exist) and " +
+            "Each edge must include a list of conditions and " +
             "connect either from or to an existing node to maintain coherence in the narrative structure. " +
             "These conditions must be formulated as short easy-to-answer questions.\n\n " +
             "Example Usage:\n " +
@@ -146,11 +146,10 @@ public class ReActScribeAgent
             "the newly added edge and its connection between nodes. This allows you to verify relationships " +
             "and ensure logical story progression.\n " +
             "Usage Format:\n " +
-            "The tool requires valid JSON input structured as follows:\n " +
+            "Do not use markdown! The tool requires valid JSON input structured as follows:\n " +
             "{ \"conditions\": [ \"condition 1 for traversing the edge\", \"condition 2 for traversing the edge\" ], " +
             "\"sourcenodename\": \"the name of the source node which already exists in the graph\", " +
-            "\"targetnodename\": \"the name of the target node which already exists in the graph\" } " +
-            "The conditions list may be empty if the edge does not require prerequisites for traversal.\n " +
+            "\"targetnodename\": \"the name of the target node which already exists in the graph\" }\n " +
             "Example 1: Unlocking the Crypt\n " +
             "In this scenario, the player must obtain the Rusted Key before they can enter the Ancient Crypt.\n " +
             "Input to AddEdgeTool:\n " +
@@ -184,10 +183,9 @@ public class ReActScribeAgent
             "- The player failing or being trapped indefinitely.\n " +
             "- Any other scenario where the player's journey logically concludes.\n" +
             "Usage Format:\n " +
-            "The tool requires valid JSON input structured as follows:\n " +
+            "Do not use markdown! The tool requires valid JSON input structured as follows:\n " +
             "{ \"sourcenodename\": \"the name of the source node which already exists in the graph\", " +
-            "\"conditions\": [ \"condition that define if the ending is reached based on the player’s choices\" ] } " +
-            "The conditions list may be empty if the edge does not require prerequisites for traversal.\n" +
+            "\"conditions\": [ \"condition that define if the ending is reached based on the player’s choices\" ] }\n" +
             "Example Usage:\n " +
             "Example 1: A Hero’s Victory\n " +
             "If the player successfully defeats the Dark Lord and restores peace, the ending is triggered:\n " +

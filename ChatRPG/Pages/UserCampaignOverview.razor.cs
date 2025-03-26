@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.Security.Authentication;
-using Aspose.Pdf.Operators;
 using Blazored.Modal;
 using Blazored.Modal.Services;
 using ChatRPG.Data.Models;
@@ -10,8 +9,8 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Environment = ChatRPG.Data.Models.Environment;
 using CampaignModel = ChatRPG.Data.Models.Campaign;
+using Environment = ChatRPG.Data.Models.Environment;
 
 namespace ChatRPG.Pages;
 
@@ -49,6 +48,9 @@ public partial class UserCampaignOverview : ComponentBase
 
     [Inject]
     private IPersistenceService? PersistenceService { get; set; }
+
+    [Inject]
+    private VisualizationService? VisualizationService { get; set; }
 
     [Inject]
     private ICampaignMediatorService? CampaignMediatorService { get; set; }
@@ -107,6 +109,7 @@ public partial class UserCampaignOverview : ComponentBase
 
             campaign.StartScenario = await ScenarioDocumentService.GenerateStartingScenario(campaign);
             await PersistenceService!.SaveAsync(campaign);
+            VisualizationService!.VisualizeNarrativeGraphIfEnabled(campaign.NarrativeGraph);
         }
 
         LaunchCampaign(campaign.Id);

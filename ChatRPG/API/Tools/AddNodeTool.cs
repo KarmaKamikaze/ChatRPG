@@ -33,7 +33,8 @@ public class AddNodeTool(
             return addNodeErrorMessage ?? "Failed to add node.";
         }
 
-        return $"The graph has been updated. From now on, use the updated graph:\n{graph.Serialize()}";
+        return $"The graph has been updated. Examine the graph to determine if additional edges should be " +
+               $"added based on the newly added node. From now on, use the updated graph:\n{graph.Serialize()}";
     }
 
     private static bool IsValidJson(AddNodeInput jsonNode, out string? errorMessage)

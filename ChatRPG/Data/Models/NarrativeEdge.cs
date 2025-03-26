@@ -40,7 +40,10 @@ public class NarrativeEdge
     [JsonIgnore]
     public NarrativeNode TargetNode { get; private set; }
 
+    [JsonIgnore]
     public Status EdgeStatus { get; private set; } = Status.Unvisited;
+
+    public string EdgeStatusCategory => EdgeStatus.ToString();
 
     public enum Status
     {

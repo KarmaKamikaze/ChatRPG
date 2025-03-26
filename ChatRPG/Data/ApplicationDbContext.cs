@@ -23,6 +23,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         modelBuilder.Entity<NarrativeEdge>()
             .Ignore(edge => edge.SourceNodeName)
             .Ignore(edge => edge.TargetNodeName)
+            .Ignore(edge => edge.EdgeStatusCategory)
             .HasOne(edge => edge.TargetNode)
             .WithMany()
             .HasForeignKey(edge => edge.TargetNodeId)
@@ -31,9 +32,13 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         modelBuilder.Entity<NarrativeEdge>()
             .Ignore(edge => edge.SourceNodeName)
             .Ignore(edge => edge.TargetNodeName)
+            .Ignore(edge => edge.EdgeStatusCategory)
             .HasOne(edge => edge.SourceNode)
             .WithMany(node => node.Edges)
             .HasForeignKey(edge => edge.SourceNodeId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<NarrativeNode>()
+            .Ignore(n => n.NodeStatusCategory);
     }
 }

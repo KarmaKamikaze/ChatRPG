@@ -34,7 +34,8 @@ builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuth
     .AddTransient<ReActScribeAgent>()
     .AddSingleton<ICampaignMediatorService, CampaignMediatorService>()
     .AddScoped<JsInteropService>()
-    .AddScoped<ScenarioDocumentService>();
+    .AddScoped<ScenarioDocumentService>()
+    .AddScoped<VisualizationService>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
