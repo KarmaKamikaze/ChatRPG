@@ -40,8 +40,4 @@
     <InternalsVisibleTo Include="ChatRPGTests" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Visualization\" />
-  </ItemGroup>
-
 </Project>
