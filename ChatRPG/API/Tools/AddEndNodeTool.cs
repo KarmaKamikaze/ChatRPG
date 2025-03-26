@@ -60,6 +60,20 @@ public class AddEndNodeTool(
 
         var endNode = graph.Nodes.FirstOrDefault(n => n.Name == "End");
 
+        // Check if an edge already exists between the source node and the end node
+        if (endNode != null && sourceNode.Edges.Any(e => e.TargetNodeName == endNode.Name))
+        {
+            errorMessage = $"An edge already exists between {sourceNode.Name} and {endNode.Name}.";
+            return false;
+        }
+
+        // Check if the source node is the end node
+        if (sourceNode == endNode)
+        {
+            errorMessage = $"Node {sourceNode.Name} cannot have an edge to itself.";
+            return false;
+        }
+
         if (endNode is null)
         {
             endNode = new NarrativeNode("End", "", graph);
