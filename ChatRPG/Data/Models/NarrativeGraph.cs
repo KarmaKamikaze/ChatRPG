@@ -43,7 +43,9 @@ public class NarrativeGraph
 
     public void InitializeStartNode()
     {
-        Nodes.Add(new NarrativeNode("Start", "", this));
+        var startNode = new NarrativeNode("Start", "", this);
+        startNode.NodeStatus = NarrativeNode.Status.Ongoing;
+        Nodes.Add(startNode);
     }
 
     public string Serialize()
