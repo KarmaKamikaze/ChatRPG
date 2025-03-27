@@ -13,15 +13,15 @@ public class ReActNarratorAgent : IReActLlmClient
 {
     private readonly IConfiguration _configuration;
     private readonly OpenAiProvider _provider;
-    private readonly string _reActPrompt;
+    private string? _reActPrompt;
     private readonly bool _narratorDebugMode;
 
     public ReActNarratorAgent(IConfiguration configuration)
     {
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI"));
-        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts").GetValue<string>("NarratorReActPrompt"));
+        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts")
+            .GetValue<string>("NarratorReActPrompt"));
         _configuration = configuration;
-        _reActPrompt = _configuration.GetSection("SystemPrompts").GetValue<string>("NarratorReActPrompt")!;
         _provider = new OpenAiProvider(_configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
         _narratorDebugMode = _configuration.GetValue<bool>("NarrativeChainDebug");
     }
@@ -33,8 +33,8 @@ public class ReActNarratorAgent : IReActLlmClient
             Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.7 }
         };
 
-        var agent = new ReActAgentChain(_narratorDebugMode ? llm.UseConsoleForDebug() : llm, actionPrompt: actionPrompt,
-            campaign.GameSummary, _reActPrompt);
+        var agent = SelectAgent(campaign, llm, actionPrompt);
+
         var tools = CreateTools(campaign);
         foreach (var tool in tools)
         {
@@ -54,8 +54,7 @@ public class ReActNarratorAgent : IReActLlmClient
         };
 
         var eventProcessor = new LlmEventProcessor(llm);
-        var agent = new ReActAgentChain(_narratorDebugMode ? llm.UseConsoleForDebug() : llm, actionPrompt: actionPrompt,
-            campaign.GameSummary, _reActPrompt);
+        var agent = SelectAgent(campaign, llm, actionPrompt);
         var tools = CreateTools(campaign);
         foreach (var tool in tools)
         {
@@ -181,5 +180,37 @@ public class ReActNarratorAgent : IReActLlmClient
         tools.Add(searchScenarioTool);
 
         return tools;
+    }
+
+    /// <summary>
+    /// Selects the appropriate ReActAgentChain based on if the campaign utilizes a NarrativeGraph.
+    /// </summary>
+    /// <param name="campaign">The campaign being played.</param>
+    /// <param name="llm">The OpenAI LLM model.</param>
+    /// <param name="actionPrompt">A specific prompt based on the action mode selected by the player.</param>
+    /// <returns>An agent that utilizes a NarrativeGraph if necessary.</returns>
+    private ReActAgentChain SelectAgent(Campaign campaign, Gpt4OmniModel llm, string actionPrompt)
+    {
+        // Create the ReActAgentChain with the campaign's NarrativeGraph if it exists, meaning the game is running in
+        // pre-defined scenarios. Otherwise, create the agent without the NarrativeGraph for open-world.
+        ReActAgentChain agent;
+        if (campaign.NarrativeGraph != null)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(_configuration.GetSection("SystemPrompts")
+                .GetValue<string>("NarratorWithGraphReActPrompt"));
+            _reActPrompt = _configuration.GetSection("SystemPrompts").GetValue<string>("NarratorWithGraphReActPrompt")!;
+            agent = new ReActAgentChain(_narratorDebugMode ? llm.UseConsoleForDebug() : llm, campaign.NarrativeGraph,
+                actionPrompt: actionPrompt, campaign.GameSummary, _reActPrompt);
+        }
+        else
+        {
+            ArgumentException.ThrowIfNullOrEmpty(_configuration.GetSection("SystemPrompts")
+                .GetValue<string>("NarratorReActPrompt"));
+            _reActPrompt = _configuration.GetSection("SystemPrompts").GetValue<string>("NarratorReActPrompt")!;
+            agent = new ReActAgentChain(_narratorDebugMode ? llm.UseConsoleForDebug() : llm, actionPrompt: actionPrompt,
+                campaign.GameSummary, _reActPrompt);
+        }
+
+        return agent;
     }
 }
