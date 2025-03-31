@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using ChatRPG.API.Tools.InputModels;
 using ChatRPG.Data.Models;
 using LangChain.Chains.StackableChains.Agents.Tools;
 
@@ -18,21 +19,32 @@ public class AddEndNodeTool(
     {
         await Task.Yield();
 
-        var addEndNodeInput =
-            JsonSerializer.Deserialize<AddEndNodeInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
-            throw new JsonException("Failed to deserialize");
-
-        if (!IsValidJson(addEndNodeInput, out var jsonValidationError))
+        try
         {
-            return jsonValidationError ?? "Invalid JSON input.";
-        }
+            var addEndNodeInput =
+                JsonSerializer.Deserialize<AddEndNodeInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
+                throw new JsonException("Failed to deserialize");
 
-        if (!TryAddEndNode(graph, addEndNodeInput, out var addEndNodeErrorMessage))
+            if (!IsValidJson(addEndNodeInput, out var jsonValidationError))
+            {
+                return jsonValidationError ?? "Invalid JSON input.";
+            }
+
+            if (!TryAddEndNode(graph, addEndNodeInput, out var addEndNodeErrorMessage))
+            {
+                return addEndNodeErrorMessage ?? "Failed to add edge to end node.";
+            }
+
+            return $"The graph has been updated. From now on, use the updated graph:\n{graph.Serialize()}";
+        }
+        catch (JsonException ex)
         {
-            return addEndNodeErrorMessage ?? "Failed to add edge to end node.";
+            return $"Failed to deserialize the input. Please ensure the input is valid JSON. Error: {ex.Message}";
         }
-
-        return $"The graph has been updated. From now on, use the updated graph:\n{graph.Serialize()}";
+        catch (Exception ex)
+        {
+            return $"An unexpected error occurred: {ex.Message}";
+        }
     }
 
     private static bool IsValidJson(AddEndNodeInput jsonNode, out string? errorMessage)

@@ -1,0 +1,21 @@
+﻿@inject Radzen.DialogService DialogService
+
+<RadzenCard>
+    <h3>@Title</h3>
+    <p>@Message</p>
+    <RadzenProgressBar Value="@ProgressValue" Max="100" ShowValue="true"/>
+</RadzenCard>
+
+@code {
+
+    private RenderFragment DialogFragment()
+    {
+        return
+            @<RadzenCard>
+                <h3>@Title</h3>
+                <p>@Message</p>
+                <RadzenProgressBar Value="@ProgressValue" Max="100" ShowValue="true"/>
+            </RadzenCard>;
+    }
+
+}

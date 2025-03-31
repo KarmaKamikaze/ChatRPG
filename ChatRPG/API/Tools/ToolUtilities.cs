@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using ChatRPG.API.Response;
+using ChatRPG.API.Tools.InputModels;
 using ChatRPG.Data.Models;
 using LangChain.Providers;
 using LangChain.Providers.OpenAI;

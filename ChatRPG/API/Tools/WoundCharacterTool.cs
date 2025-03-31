@@ -1,6 +1,7 @@
 using ChatRPG.Data.Models;
 using LangChain.Chains.StackableChains.Agents.Tools;
 using System.Text.Json;
+using ChatRPG.API.Tools.InputModels;
 using JsonSerializerOptions = System.Text.Json.JsonSerializerOptions;
 
 namespace ChatRPG.API.Tools;

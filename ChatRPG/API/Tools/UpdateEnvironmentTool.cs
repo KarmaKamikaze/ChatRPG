@@ -1,4 +1,5 @@
 using System.Text.Json;
+using ChatRPG.API.Tools.InputModels;
 using ChatRPG.Data.Models;
 using LangChain.Chains.StackableChains.Agents.Tools;
 using Microsoft.IdentityModel.Tokens;

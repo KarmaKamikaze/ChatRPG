@@ -81,6 +81,11 @@ public static class GraphVisualization
                         throw new ArgumentOutOfRangeException();
                 }
             }
+
+            if (node.Name == "End")
+            {
+                newNode.SetAttribute("shape", "doublecircle");
+            }
         }
 
         foreach (var node in graph.Nodes)

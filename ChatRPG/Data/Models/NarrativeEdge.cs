@@ -41,7 +41,7 @@ public class NarrativeEdge
     public NarrativeNode TargetNode { get; private set; }
 
     [JsonIgnore]
-    public Status EdgeStatus { get; private set; } = Status.Unvisited;
+    public Status EdgeStatus { get; set; } = Status.Unvisited;
 
     public string EdgeStatusCategory => EdgeStatus.ToString();
 

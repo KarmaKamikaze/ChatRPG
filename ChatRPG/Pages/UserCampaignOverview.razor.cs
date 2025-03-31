@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Radzen;
+using Radzen.Blazor;
 using CampaignModel = ChatRPG.Data.Models.Campaign;
 using Environment = ChatRPG.Data.Models.Environment;
 
@@ -25,6 +27,7 @@ public partial class UserCampaignOverview : ComponentBase
     private bool IsProcessingPdfFile { get; set; } = false;
     private byte[]? UploadedFile { get; set; }
     private string FileUploadError { get; set; } = string.Empty;
+    private double ProgressValue { get; set; } = 0;
 
     [Required]
     [BindProperty]
@@ -63,6 +66,9 @@ public partial class UserCampaignOverview : ComponentBase
 
     [Inject]
     private ReActScribeAgent? ReActScribeAgent { get; set; }
+
+    [Inject]
+    private DialogService? DialogService { get; set; }
 
     [CascadingParameter]
     public IModalService? ConfirmDeleteModal { get; set; }
@@ -105,7 +111,18 @@ public partial class UserCampaignOverview : ComponentBase
             // UploadedFile should not be able to be null since the button is disabled if it is
             await ScenarioDocumentService!.StoreScenarioEmbedding(campaign.Id, UploadedFile!);
 
-            campaign.NarrativeGraph = await ReActScribeAgent!.ScribeNarrativeGraph(UploadedFile!);
+            var dialogTask = OpenScribeDialog();
+            var progress = new Progress<int>(value =>
+            {
+                ProgressValue = value;
+                DialogService!.Refresh();
+                if (value == 100)
+                {
+                    DialogService.Close();
+                }
+            });
+            campaign.NarrativeGraph = await ReActScribeAgent!.ScribeNarrativeGraph(UploadedFile!, progress);
+            await dialogTask;
 
             campaign.StartScenario = await ScenarioDocumentService.GenerateStartingScenario(campaign);
             await PersistenceService!.SaveAsync(campaign);
@@ -229,5 +246,17 @@ public partial class UserCampaignOverview : ComponentBase
                 IsProcessingPdfFile = false;
             }
         }
+    }
+
+    private Task<dynamic> OpenScribeDialog()
+    {
+        return DialogService!.OpenAsync("Processing...", rf => ScribeDialogFragment(),
+            new DialogOptions
+            {
+                Width = "600px",
+                CloseDialogOnOverlayClick = false,
+                CloseDialogOnEsc = false,
+                ShowClose = false
+            });
     }
 }

@@ -27,7 +27,7 @@ public class ReActScribeAgent
         _scribeDebugMode = configuration.GetValue<bool>("ScribeChainDebug");
     }
 
-    public async Task<NarrativeGraph> ScribeNarrativeGraph(byte[] uploadedFile)
+    public async Task<NarrativeGraph> ScribeNarrativeGraph(byte[] uploadedFile, IProgress<int>? progress = null)
     {
         var graph = new NarrativeGraph();
         graph.InitializeStartNode();
@@ -61,6 +61,10 @@ public class ReActScribeAgent
             previousGraphExtensionSummary = await chain.RunAsync("text") ??
                                             $"No summary generated for the previous graph extension session. " +
                                             $"Here is the last summary available: {previousGraphExtensionSummary}";
+
+            // Report progress
+            var progressValue = (int)((i + BatchSize) / (double)documents.Count * 100);
+            progress?.Report(Math.Min(progressValue, 100));
         }
 
         return graph;
