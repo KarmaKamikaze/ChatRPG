@@ -4,7 +4,7 @@ public class UpdateGraphInput
 {
     public string? SourceNodeName { get; set; }
     public string? TargetNodeName { get; set; }
-    
+
     public bool IsValid(out List<string> validationErrors)
     {
         validationErrors = [];
