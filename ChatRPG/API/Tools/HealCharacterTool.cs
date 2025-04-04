@@ -31,7 +31,7 @@ public class HealCharacterTool(
         {
             var healInput = JsonSerializer.Deserialize<HealInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
                             throw new JsonException("Failed to deserialize");
-            
+
             var character = await utilities.FindCharacter(campaign, healInput.Input!, instruction);
 
             if (character is null)

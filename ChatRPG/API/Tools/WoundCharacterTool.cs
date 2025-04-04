@@ -31,8 +31,8 @@ public class WoundCharacterTool(
         try
         {
             var woundInput = JsonSerializer.Deserialize<WoundInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
-                              throw new JsonException("Failed to deserialize");
-            
+                             throw new JsonException("Failed to deserialize");
+
             var character = await utilities.FindCharacter(campaign, woundInput.Input!, instruction);
 
             if (character is null)
