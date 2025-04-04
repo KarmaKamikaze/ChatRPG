@@ -7,7 +7,7 @@ using JsonSerializerOptions = System.Text.Json.JsonSerializerOptions;
 namespace ChatRPG.API.Tools;
 
 public class WoundCharacterTool(
-    IConfiguration configuration,
+    string instruction,
     Campaign campaign,
     ToolUtilities utilities,
     string name,
@@ -32,8 +32,7 @@ public class WoundCharacterTool(
         {
             var woundInput = JsonSerializer.Deserialize<WoundInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
                               throw new JsonException("Failed to deserialize");
-
-            var instruction = configuration.GetSection("SystemPrompts").GetValue<string>("WoundCharacterInstruction")!;
+            
             var character = await utilities.FindCharacter(campaign, woundInput.Input!, instruction);
 
             if (character is null)

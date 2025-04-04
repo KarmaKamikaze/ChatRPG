@@ -13,6 +13,8 @@ namespace ChatRPG.API.Tools;
 public class UpdateGraphTool(
     IConfiguration configuration,
     Campaign campaign,
+    string playerInput,
+    string narratorResponse,
     string name,
     string? description = null) : AgentTool(name, description)
 {
@@ -156,7 +158,8 @@ public class UpdateGraphTool(
     }
 
 
-    private NarrativeEdge? ValidateEdge(NarrativeNode sourceNode, NarrativeNode targetNode, out string? errorMessage)
+    private static NarrativeEdge? ValidateEdge(NarrativeNode sourceNode, NarrativeNode targetNode,
+        out string? errorMessage)
     {
         var edge = sourceNode.Edges.FirstOrDefault(e => e.TargetNode == targetNode);
         if (edge is null)
@@ -191,7 +194,8 @@ public class UpdateGraphTool(
             var query = new StringBuilder();
             query.Append(configuration.GetSection("SystemPrompts").GetValue<string>("CheckGraphUpdateConditions")!
                 .Replace("{graph}", campaign.NarrativeGraph!.Serialize())
-                .Replace("{summary}", ToolUtilities.ConstructSummary(campaign, _shouldIncludePreviousMessages))
+                .Replace("{summary}", ToolUtilities.ConstructSummary(campaign, _shouldIncludePreviousMessages)
+                                      + $"\n {playerInput} \n {narratorResponse}")
                 .Replace("{edge}", edge.Serialize())
                 .Replace("{history}", previousAttemptHistory));
 

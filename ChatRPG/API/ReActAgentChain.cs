@@ -165,6 +165,24 @@ New input: {input}";
         _environments = environments;
     }
 
+    public ReActAgentChain(
+        IChatModel model,
+        NarrativeGraph graph,
+        string characters,
+        string playerCharacter,
+        string environments,
+        string gameSummary,
+        string? reActPrompt = null,
+        string inputKey = "input",
+        string outputKey = "text",
+        int maxActions = 20) : this(model, gameSummary, reActPrompt, inputKey, outputKey, maxActions)
+    {
+        _characters = characters;
+        _playerCharacter = playerCharacter;
+        _environments = environments;
+        _narrativeGraph = graph.Serialize();
+    }
+
 
     public ReActAgentChain(
         IChatModel model,
