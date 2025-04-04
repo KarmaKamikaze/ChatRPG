@@ -19,7 +19,7 @@ public class SearchScenarioTool : AgentTool
     private readonly bool _shouldIncludePreviousMessages;
     private readonly TextEmbeddingV3SmallModel _embeddingModel;
     private readonly Gpt4OmniModel _llm;
-    private IVectorCollection? _vectorCollection;
+    private IVectorCollection _vectorCollection = null!; // Initialized in CreateAsync
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -146,7 +146,7 @@ public class SearchScenarioTool : AgentTool
         var embeddings = new StringBuilder();
 
         var inputSimilarDocuments =
-            await _vectorCollection!.GetSimilarDocuments(_embeddingModel, input, amount: 10);
+            await _vectorCollection.GetSimilarDocuments(_embeddingModel, input, amount: 10);
         embeddings.Append($"Context for input: {inputSimilarDocuments.AsString()}\n");
 
         if (queryNode is not null)
@@ -158,7 +158,7 @@ public class SearchScenarioTool : AgentTool
                     .Select(e => e.Conditions));
 
             var queryNodeSimilarDocuments =
-                await _vectorCollection!.GetSimilarDocuments(_embeddingModel, query, amount: 10);
+                await _vectorCollection.GetSimilarDocuments(_embeddingModel, query, amount: 10);
             embeddings.Append($"Context for node {queryNode.Name}: {queryNodeSimilarDocuments.AsString()}\n");
 
             var viableParents = _campaign.NarrativeGraph!.GetIncomingNodes(queryNode)
@@ -176,7 +176,7 @@ public class SearchScenarioTool : AgentTool
                         .Select(e => e.Conditions));
 
                 var nodeSimilarDocuments =
-                    await _vectorCollection!.GetSimilarDocuments(_embeddingModel, parentQuery, amount: 10);
+                    await _vectorCollection.GetSimilarDocuments(_embeddingModel, parentQuery, amount: 10);
 
                 embeddings.Append($"Context for node {node.Name}: {nodeSimilarDocuments.AsString()}\n");
             }
