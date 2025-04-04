@@ -1,4 +1,4 @@
-namespace ChatRPG.API.Tools;
+namespace ChatRPG.API.Tools.InputModels;
 
 public class HealInput
 {

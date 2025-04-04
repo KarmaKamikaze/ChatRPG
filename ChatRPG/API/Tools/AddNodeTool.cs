@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using ChatRPG.API.Tools.InputModels;
 using ChatRPG.Data.Models;
 using LangChain.Chains.StackableChains.Agents.Tools;
 
@@ -19,22 +20,33 @@ public class AddNodeTool(
     {
         await Task.Yield();
 
-        var addNodeInput =
-            JsonSerializer.Deserialize<AddNodeInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
-            throw new JsonException("Failed to deserialize");
-
-        if (!IsValidJson(addNodeInput, out var jsonValidationError))
+        try
         {
-            return jsonValidationError ?? "Invalid JSON input.";
-        }
+            var addNodeInput =
+                JsonSerializer.Deserialize<AddNodeInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
+                throw new JsonException("Failed to deserialize");
 
-        if (!TryAddNode(graph, addNodeInput, out var addNodeErrorMessage))
+            if (!IsValidJson(addNodeInput, out var jsonValidationError))
+            {
+                return jsonValidationError ?? "Invalid JSON input.";
+            }
+
+            if (!TryAddNode(graph, addNodeInput, out var addNodeErrorMessage))
+            {
+                return addNodeErrorMessage ?? "Failed to add node.";
+            }
+
+            return $"The graph has been updated. Examine the graph to determine if additional edges should be " +
+                   $"added based on the newly added node. From now on, use the updated graph:\n{graph.Serialize()}";
+        }
+        catch (JsonException ex)
         {
-            return addNodeErrorMessage ?? "Failed to add node.";
+            return $"Failed to deserialize the input. Please ensure the input is valid JSON. Error: {ex.Message}";
         }
-
-        return $"The graph has been updated. Examine the graph to determine if additional edges should be " +
-               $"added based on the newly added node. From now on, use the updated graph:\n{graph.Serialize()}";
+        catch (Exception ex)
+        {
+            return $"An unexpected error occurred: {ex.Message}";
+        }
     }
 
     private static bool IsValidJson(AddNodeInput jsonNode, out string? errorMessage)

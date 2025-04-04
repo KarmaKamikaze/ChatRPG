@@ -178,3 +178,17 @@
         }
     }
 </div>
+
+@code {
+
+    private RenderFragment ScribeDialogFragment()
+    {
+        return
+            @<RadzenCard>
+                <h3>Generating Narrative Graph</h3>
+                <p>Please wait while we process the scenario document.</p>
+                <RadzenProgressBar Value="@ProgressValue" Max="100" ShowValue="true"/>
+            </RadzenCard>;
+    }
+
+}

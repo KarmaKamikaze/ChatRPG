@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using ChatRPG.API.Tools.InputModels;
 using ChatRPG.Data.Models;
 using LangChain.Chains.StackableChains.Agents.Tools;
 
@@ -18,21 +19,32 @@ public class AddEdgeTool(
     {
         await Task.Yield();
 
-        var addEdgeInput =
-            JsonSerializer.Deserialize<AddEdgeInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
-            throw new JsonException("Failed to deserialize");
-
-        if (!IsValidJson(addEdgeInput, out var jsonValidationError))
+        try
         {
-            return jsonValidationError ?? "Invalid JSON input.";
-        }
+            var addEdgeInput =
+                JsonSerializer.Deserialize<AddEdgeInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
+                throw new JsonException("Failed to deserialize");
 
-        if (!TryAddEdge(graph, addEdgeInput, out var addEdgeErrorMessage))
+            if (!IsValidJson(addEdgeInput, out var jsonValidationError))
+            {
+                return jsonValidationError ?? "Invalid JSON input.";
+            }
+
+            if (!TryAddEdge(graph, addEdgeInput, out var addEdgeErrorMessage))
+            {
+                return addEdgeErrorMessage ?? "Failed to add edge.";
+            }
+
+            return $"The graph has been updated. From now on, use the updated graph:\n{graph.Serialize()}";
+        }
+        catch (JsonException ex)
         {
-            return addEdgeErrorMessage ?? "Failed to add edge.";
+            return $"Failed to deserialize the input. Please ensure the input is valid JSON. Error: {ex.Message}";
         }
-
-        return $"The graph has been updated. From now on, use the updated graph:\n{graph.Serialize()}";
+        catch (Exception ex)
+        {
+            return $"An unexpected error occurred: {ex.Message}";
+        }
     }
 
     private static bool IsValidJson(AddEdgeInput jsonEdge, out string? errorMessage)

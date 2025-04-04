@@ -137,6 +137,20 @@ New input: {input}";
 
     public ReActAgentChain(
         IChatModel model,
+        NarrativeGraph graph,
+        string actionPrompt,
+        string gameSummary,
+        string? reActPrompt = null,
+        string inputKey = "input",
+        string outputKey = "text",
+        int maxActions = 20) : this(model, gameSummary, reActPrompt, inputKey, outputKey, maxActions)
+    {
+        _actionPrompt = actionPrompt;
+        _narrativeGraph = graph.Serialize();
+    }
+
+    public ReActAgentChain(
+        IChatModel model,
         string characters,
         string playerCharacter,
         string environments,
@@ -149,6 +163,24 @@ New input: {input}";
         _characters = characters;
         _playerCharacter = playerCharacter;
         _environments = environments;
+    }
+
+    public ReActAgentChain(
+        IChatModel model,
+        NarrativeGraph graph,
+        string characters,
+        string playerCharacter,
+        string environments,
+        string gameSummary,
+        string? reActPrompt = null,
+        string inputKey = "input",
+        string outputKey = "text",
+        int maxActions = 20) : this(model, gameSummary, reActPrompt, inputKey, outputKey, maxActions)
+    {
+        _characters = characters;
+        _playerCharacter = playerCharacter;
+        _environments = environments;
+        _narrativeGraph = graph.Serialize();
     }
 
 
@@ -170,7 +202,6 @@ New input: {input}";
         var toolNames = string.Join(",", _tools.Select(x => x.Key));
         var tools = string.Join("\n", _tools.Select(x => $"{x.Value.Name}, {x.Value.Description}"));
 
-
         var chain =
             Set(() => _userInput, "input")
             | Set(tools, "tools")
@@ -189,6 +220,10 @@ New input: {input}";
         if (!string.IsNullOrEmpty(_narrativeGraph))
         {
             chain |= Set(_narrativeGraph, "graph");
+        }
+
+        if (!string.IsNullOrEmpty(_graphExtensionSummary))
+        {
             chain |= Set(_graphExtensionSummary, "summary");
         }
 

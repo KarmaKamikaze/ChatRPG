@@ -27,9 +27,9 @@ public class GameInputHandler
         }
 
         IConfigurationSection sysPromptSec = configuration.GetRequiredSection("SystemPrompts");
-        _systemPrompts.Add(SystemPromptType.Initial, sysPromptSec.GetValue("Initial", "")!);
-        _systemPrompts.Add(SystemPromptType.DoAction, sysPromptSec.GetValue("DoAction", "")!);
-        _systemPrompts.Add(SystemPromptType.SayAction, sysPromptSec.GetValue("SayAction", "")!);
+        _systemPrompts.Add(SystemPromptType.Initial, sysPromptSec.GetValue("Initial", ""));
+        _systemPrompts.Add(SystemPromptType.DoAction, sysPromptSec.GetValue("DoAction", ""));
+        _systemPrompts.Add(SystemPromptType.SayAction, sysPromptSec.GetValue("SayAction", ""));
     }
 
     public event EventHandler<ChatCompletionReceivedEventArgs>? ChatCompletionReceived;
