@@ -1,3 +1,4 @@
+using System.Text;
 using ChatRPG.API;
 using ChatRPG.Data.Models;
 using ChatRPG.Pages;
@@ -9,16 +10,18 @@ public class GameInputHandler
 {
     private readonly ILogger<GameInputHandler> _logger;
     private readonly IReActLlmClient _llmClient;
+    private readonly ReActExaminerAgent _reActExaminerAgent;
     private readonly ReActArchivistAgent _reActArchivistAgent;
     private readonly bool _streamChatCompletions;
     private readonly Dictionary<SystemPromptType, string> _systemPrompts = new();
     private readonly AutoResetEvent _autoResetEvent = new(true);
 
     public GameInputHandler(ILogger<GameInputHandler> logger, IReActLlmClient llmClient,
-        ReActArchivistAgent reActArchivistAgent, IConfiguration configuration)
+        ReActExaminerAgent reActExaminerAgent, ReActArchivistAgent reActArchivistAgent, IConfiguration configuration)
     {
         _logger = logger;
         _llmClient = llmClient;
+        _reActExaminerAgent = reActExaminerAgent;
         _reActArchivistAgent = reActArchivistAgent;
         _streamChatCompletions = configuration.GetValue("StreamChatCompletions", true);
         if (configuration.GetValue("UseMocks", false))
@@ -56,13 +59,29 @@ public class GameInputHandler
 
     public async Task HandleUserPrompt(Campaign campaign, UserPromptType promptType, string userInput)
     {
+        // Check if the campaign is in a state that allows performing adherence checks
+        string? userInputWithAdherenceVerdict = null;
+        if (campaign.NarrativeGraph != null)
+        {
+            var verdict = await _reActExaminerAgent.ExaminePlayerInput(campaign, userInput);
+            userInputWithAdherenceVerdict = $"""
+                                             Player input: 
+                                             {userInput}
+
+                                             Adherence verdict: 
+                                             {verdict}
+                                             """;
+        }
+
         switch (promptType)
         {
             case UserPromptType.Do:
-                await GetResponseAndUpdateState(campaign, _systemPrompts[SystemPromptType.DoAction], userInput);
+                await GetResponseAndUpdateState(campaign, _systemPrompts[SystemPromptType.DoAction],
+                    userInputWithAdherenceVerdict ?? userInput);
                 break;
             case UserPromptType.Say:
-                await GetResponseAndUpdateState(campaign, _systemPrompts[SystemPromptType.SayAction], userInput);
+                await GetResponseAndUpdateState(campaign, _systemPrompts[SystemPromptType.SayAction],
+                    userInputWithAdherenceVerdict ?? userInput);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();

@@ -318,17 +318,18 @@ public class ReActNarratorAgent : IReActLlmClient
                 .GetValue<string>("NarratorWithGraphReActPrompt"));
             var reActPrompt = _configuration.GetSection("SystemPrompts")
                 .GetValue<string>("NarratorWithGraphReActPrompt")!;
-            return new ReActAgentChain(_narratorDebugMode ? llm.UseConsoleForDebug() : llm, campaign.NarrativeGraph,
-                actionPrompt: actionPrompt, ToolUtilities.ConstructSummary(campaign, _shouldIncludePreviousMessages),
-                reActPrompt);
+            return new ReActAgentChain(_narratorDebugMode ? llm.UseConsoleForDebug() : llm, reactPrompt: reActPrompt,
+                gameSummary: ToolUtilities.ConstructSummary(campaign, _shouldIncludePreviousMessages),
+                graph: campaign.NarrativeGraph, actionPrompt: actionPrompt);
         }
         else
         {
             ArgumentException.ThrowIfNullOrEmpty(_configuration.GetSection("SystemPrompts")
                 .GetValue<string>("NarratorReActPrompt"));
             var reActPrompt = _configuration.GetSection("SystemPrompts").GetValue<string>("NarratorReActPrompt")!;
-            return new ReActAgentChain(_narratorDebugMode ? llm.UseConsoleForDebug() : llm, actionPrompt: actionPrompt,
-                ToolUtilities.ConstructSummary(campaign, _shouldIncludePreviousMessages), reActPrompt);
+            return new ReActAgentChain(_narratorDebugMode ? llm.UseConsoleForDebug() : llm, reactPrompt: reActPrompt,
+                gameSummary: ToolUtilities.ConstructSummary(campaign, _shouldIncludePreviousMessages),
+                actionPrompt: actionPrompt);
         }
     }
 }
