@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Radzen;
-using Radzen.Blazor;
 using CampaignModel = ChatRPG.Data.Models.Campaign;
 using Environment = ChatRPG.Data.Models.Environment;
 
@@ -97,7 +96,7 @@ public partial class UserCampaignOverview : ComponentBase
             return;
         }
 
-        CampaignModel campaign = new(User, CampaignTitle, StartScenario);
+        CampaignModel campaign = new(User, CampaignTitle, StartScenario, IsOpenWorld);
         Environment environment = new(campaign, "Start location", "The place where it all began");
         Character player = new(campaign, environment, CharacterType.Humanoid, CharacterName, CharacterDescription,
             true);

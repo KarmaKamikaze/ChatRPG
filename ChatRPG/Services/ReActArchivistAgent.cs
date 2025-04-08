@@ -121,16 +121,16 @@ public class ReActArchivistAgent
                                               ### Expected Input Format:
                                               Input must be provided in **RAW JSON format** (do not use markdown):
 
-                                              {{
+                                              {
                                                 "name": "<character name>",
                                                 "description": "<new or updated character description>",
                                                 "type": "<character type>",
                                                 "state": "<character health state>"
-                                              }}
+                                              }
 
                                               - **name**: The character's name.
                                               - **description**: A detailed and engaging character description.
-                                              - **type**: One of the following values: {{
+                                              - **type**: One of the following values: {
                                               """);
 
         var characterTypes = Enum.GetNames<CharacterType>();
@@ -144,8 +144,8 @@ public class ReActArchivistAgent
         }
 
         updateCharacterToolDescription.Append("""
-                                              }}
-                                              - **state**: One of the following values: {{Dead, Unconscious, HeavilyWounded, LightlyWounded, Healthy}}
+                                              }
+                                              - **state**: One of the following values: {Dead, Unconscious, HeavilyWounded, LightlyWounded, Healthy}
 
                                               ---
 
@@ -178,11 +178,11 @@ public class ReActArchivistAgent
 
             ### **Tool Input Format**
             Input to this tool must be in the following **RAW JSON format**:
-            {{
+            {
                 "name": "<environment name>",
                 "description": "<new or updated environment description>",
                 "isPlayerHere": <true if the Player character is currently at this environment, false otherwise>
-            }}
+            }
 
             ### **Description of an Environment**
             - The **description** could cover:

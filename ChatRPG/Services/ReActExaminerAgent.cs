@@ -62,83 +62,86 @@ public class ReActExaminerAgent
             campaign,
             "searchscenariotool",
             """
-            This tool must be used whenever you are unsure of what is available to the player in the 
-            current location, uncertain about what should happen next, or need to reference existing details from 
-            the adventure module to maintain consistency. The tool helps you retrieve structured information 
-            about the game world, ensuring it adheres to the story's established details while still allowing for 
-            player agency and exploration.
+            This tool must be used whenever you are unsure whether the player's proposed action is plausible, allowed, 
+            or supported by the current scenario context—**before** any narrative is generated. It helps determine 
+            whether a given interaction is reasonable based on the player's current position in the story, what has 
+            been established so far, and what is possible within the structured world of the scenario document.
+
+            The tool returns structured information about the adventure module to help guide your decision-making. 
+            Use it to check what is available, what has been previously introduced, and whether the scenario supports 
+            the player's intended action.
 
             When to use this tool:
-            - **Unknown Details**: If you do not have enough information about a location, NPC, quest, faction, or 
-              available actions, this tool must be used to find relevant context from the adventure module.
-            - **Player Agency & Story Consistency**: You should follow the scenario structure but can adapt if minor 
-              details are missing. However, if key details exist in the adventure module, they must be used to shape 
-              the game world.
-            - **Keeping the Player on Track**: If the player strays too far from the main story while exploring an area, 
-              the tool can be used to find details that naturally guide them back into the intended narrative without 
-              restricting their choices.
+            - **Uncertainty About Player Actions**: Use this tool when the player takes an action and you are unsure 
+              if it’s possible or contextually supported by the scenario.
+            - **Lack of Information**: If you do not know enough about the location, NPCs, quests, items, or 
+              interactable objects in the current area, use this tool to retrieve relevant information before judging 
+              whether the player's action is deemed feasible.
+            - **Consistency With the Scenario Module**: If the scenario document might already contain important 
+              details that could support or block the player’s intent, consult this tool before proceeding.
+            - **Validation of Edge Traversal**: Use this tool to verify if a player’s action logically allows 
+               progression to another node in the story graph—e.g., if edge conditions might be fulfilled, which should 
+               be supported by the scenario document.
             - **Exploration & Interaction**: If the player takes an action related to an NPC, object, or location that has 
-              not been described yet, use this tool to determine what is relevant.
+              not been described yet, use this tool to determine if their action is feasible.
 
             ### Input Format:
             Do not use markdown! 
             The tool requires a search query string, where you can inquire about the scenario module.
-            Additionally, if relevant, you can provide the name of the node from the graph relating to the location that you 
-            wish to inquire about. That could be the node where the player currently is if you want to learn
+            Optionally, you may also provide a node name from the graph to help localize the search to a specific 
+            story location. That could be the node where the player currently is if you want to learn
             more about the location, or the node where the player has been previously if you need important details 
-            about a location that the player has already visited. If you inquire about a node that the player has yet 
-            to discover, be very careful to avoid revealing any details that the player has not yet encountered.
+            about a location that the player has already visited. Avoid leaking information about undiscovered nodes. 
+            If you inquire about a future location, be very careful not to reveal plot points or NPCs the player has 
+            not encountered yet.
             The input to this tool must be in the following RAW JSON format, where the "nodename" property is optional:
-            {{
+            {
                 "query": "<The search query string>",
                 "nodename": "<The name of the node in the graph>",
-            }}
+            }
 
             ### Example Uses:
 
-            #### Scenario 1 – Player in a Castle Hall
+            #### Scenario 1 – Castle Hall Inquiry
             **Player Input:** 'I want to talk to the ghost of the former king.'
 
-            You are unsure if a ghost exists in the castle hall. You call the tool with the input  
-            {{
+            You are unsure if the scenario supports the existence of a ghost in this area. You call the tool with:  
+            {
                 "query": "Is there a ghost of the former king in the castle hall?",
                 "nodename": "Castle Hall",
-            }}
+            }
 
             You retrieve details, learning that there is a suit of armor containing red eyes that greets the player as Ulemar, 
             the Knight of the King.
 
-            #### Scenario 2 – Exploring a Village
+            #### Scenario 2 – Village House Exploration
             **Player Input:** 'I enter a random house in the village. What do I see?'
 
-            You are unsure about the houses and call the tool with the input  
-            {{
+            You’re unsure if the houses are detailed in the scenario. You call the tool with:  
+            {
                 "query": "Tell me about the houses in the village.",
                 "nodename": "Village Square",
-            }}
+            }
 
             If the adventure module contains details about the house, the tool retrieves them.  
-            If the house is not mentioned, you may improvise a minor detail (e.g.,  
-            'A modest home with a fireplace and a wooden table') while ensuring it does not contradict existing world details.
+            If the house is not mentioned, you may allow for minor furnishings, but do not invent major NPCs or plot points.
 
-            #### Scenario 3 – Deviating from the Main Story
+            #### Scenario 3 – Forest Departure
             **Player Input:** 'I leave the dungeon and wander into the forest.'
 
-            You are unsure what the player can find in the forest. Since you are searching for general information 
-            about an area that does not correlate with a specific node, you call the tool with the input  
-            {{
+            Unsure what happens in the forest, you call:   
+            {
                 "query": "Tell me about the forest. Are there any objectives there? Does anything happen when the player leaves the dungeon?",
-            }}
+            }
 
-            If the adventure module has no information about the forest, you may allow limited exploration but  
-            eventually use the tool to reference details from the current chapter, nudging the player back toward  
-            the dungeon in a natural way.
+            You retrieve information (if any) and make a decision about whether the player can go there yet or should 
+            be nudged back to the dungeon.
 
             ---
 
-            Use this tool as often as needed to maintain consistency, but allow for creative flexibility when small  
-            details are missing. Never fabricate major lore elements if the adventure module provides context. You  
-            can call this tool multiple times in a single narrative to ensure the story remains coherent and engaging.
+            Use this tool as often as needed to maintain scenario consistency, validate potential actions, and confirm 
+            whether the world logic supports the player's intent. Always prioritize established scenario content over 
+            invention unless explicitly allowed.
             """);
         tools.Add(searchScenarioTool);
 
@@ -148,106 +151,115 @@ public class ReActExaminerAgent
             playerInput,
             "updategraphtool",
             """
-            This tool evaluates whether the player can advance along an edge in the **narrative graph** 
-            by checking the conditions between two given nodes. If all conditions are met, the tool updates the graph accordingly.
+            This tool is used to evaluate whether the player can progress to a new story point by checking the 
+            conditions of a potential transition between two plot nodes in the **narrative graph**.
 
-            ### Conditions for Use:
+            The agent should use this tool **whenever the player’s current input suggests a possible advancement** 
+            in the story. If the action is deemed feasible and consistent with the plot and scenario, the agent 
+            may query the graph to see if any edges leading to new nodes can be activated based on the current 
+            state and fulfilled conditions.
+
+            The tool checks if all required conditions are satisfied for the transition. If so, it updates the graph to 
+            reflect the new story state, unlocking the next part of the adventure.
+
+            > **Important:** Only use this tool after first determining that the player's input is reasonable and aligns 
+            > with the scenario’s established logic. When in doubt, it is often better to check than to miss a valid progression opportunity.
+
+            ### When to Use:
+            - The player's action appears to fulfill narrative conditions that may open a new path in the story.
+            - You are **unsure** if the input enables progression and needs to verify the edge conditions.
+            - A decision must be made about whether to **update the graph** before passing control to the narrative-generating agent.
+
+            ### Requirements:
             - There must be an **edge** between the two nodes.
             - The **source node** must be marked as **ongoing** or **completed**.
             - The **target node** must be **undiscovered**.
 
-            ### Use Cases:
-            - When the agent suspects the player **may be able to progress** in the adventure.
-            - Before updating the graph, to **validate whether all edge conditions are fulfilled**.
-            - If traversal is **allowed**, the tool will:
-              - Mark the **source node** as **completed**.
-              - Set the **target node** as **ongoing**.
-              - Flag the **edge** as **visited**.
+            If traversal is allowed, the tool:
+            - Marks the **source node** as **completed**
+            - Marks the **target node** as **ongoing**
+            - Marks the **edge** as **visited**
 
             ---
 
             ### **Expected Input Format:**
-            Input must be provided in **RAW JSON format** (do not use markdown):
-            {{
-                ""sourcenodename"": ""<name of the source node>"",
-                ""targetnodename"": ""<name of the target node>""
-            }}
+            Use **RAW JSON format** (do not use markdown):
+            {
+                "sourcenodename": "<name of the source node>",
+                "targetnodename": "<name of the target node>"
+            }
 
             - **sourcenodename**: The current location or plot point the player is at.
-            - **targetnodename**: The next location or plot point the player wants to reach.
+            - **targetnodename**: The potential next location or plot point the player might reach.
 
             ---
 
             ### **Tool Output:**
+
             #### **If traversal is NOT allowed:**
-            - The tool returns a string listing each **edge condition** and its **evaluation result**.
+            Returns a string showing each edge condition and whether it was met.
             
               **Example:**
               `"condition_1: true condition_2: false"`
 
-            - If any condition is **false**, traversal is not yet possible, and the agent should **not** update the graph.
+            If any condition is false, the graph remains unchanged and cannot be updated for this node pair yet.
 
-            #### **If all conditions are met:**
-            - The tool **updates the graph** and confirms the update by showing the modified graph.
+            #### **If traversal is ALLOWED:**
+            The graph updates automatically:
+            - Source node becomes completed
+            - Target node becomes ongoing
+            - The updated graph is returned for reference
 
             ---
 
             ### **Example 1: Advancement Allowed**
-            #### **Scenario:**
-            The player is exploring an **Ancient Crypt**, attempting to access a **Hidden Chamber** requiring a special key.
+            **Scenario:**
+            The player inserts a special key into a locked door within the **Ancient Crypt**.
 
-            #### **Game Interaction:**
-            - **Player:**  
-            _"I insert the Ornate Crypt Key into the lock and push the heavy stone door open."_
+            **Player Input:**  
+            _"I insert the Ornate Crypt Key into the lock and push the door open."_
 
-            - **DM:**  
-            _"With a deep, grinding noise, the stone door slides aside, revealing a darkened chamber beyond.  
-            The air is thick with the scent of dust and decay, and you can just make out the shapes of sarcophagi  
-            lining the walls. The passage ahead is now open to you."_
-
-            #### **Agent Decision:**
-            The player has used the required key, fulfilling the condition for entering the **Hidden Chamber**.  
-            The agent calls the tool with:
-            {{
-                ""sourcenodename"": ""Ancient Crypt Entrance"",
-                ""targetnodename"": ""Hidden Chamber""
-            }}
+            The agent deems this input valid and feasible for story progression, so it calls the tool:
+            {
+                "sourcenodename": "Ancient Crypt Entrance",
+                "targetnodename": "Hidden Chamber"
+            }
 
             #### **Tool Output:**
             The graph updates successfully:
             A fully updated graph is returned because:
             `"Has the player used the Ornate Crypt Key?: true"`
 
-            - **Source node**: _Completed_
-            - **Target node**: _Ongoing_
-
             ---
 
             ### **Example 2: Advancement Blocked**
-            #### **Scenario:**
-            The player is at a **Ruined Bridge**, attempting to cross, but the game requires them to **reinforce the structure** first.
+            **Scenario:**
+            The player tries to cross a **Ruined Bridge** that must be reinforced first.
 
-            #### **Game Interaction:**
-            - **Player:**  
-              _"I step onto the old bridge, carefully testing its weight as I make my way across."_
+            **Player Input:**  
+            _"I walk across the bridge slowly, testing each step."_
 
-            - **DM:**  
-              _"The wooden planks creak and shift beneath your feet. Halfway across, you hear a loud snap as  
-              one of the supports gives way! You barely manage to scramble back to safety as the bridge  
-              shudders ominously. It doesn't look stable enough to cross."_
+            The agent doubts whether the bridge is ready. It calls the tool to check:
+            {
+                "sourcenodename": "Ruined Bridge",
+                "targetnodename": "Other Side of the Chasm"
+            }
 
-            #### **Agent Decision:**
-            The player has **not yet reinforced** the bridge, meaning traversal is **not possible**.  
-            The agent calls the tool with:
-            {{
-                ""sourcenodename"": ""Ruined Bridge"",
-                ""targetnodename"": ""Other Side of the Chasm""
-            }}
+            **Tool Output:**  
+            `"Has the player reinforced the bridge with sturdy materials?: false"`
 
-            #### **Tool Output:**
+            Since not all conditions are met, the graph is not updated.
+            The following conditions have been checked and the results are returned:
             `"Has the player defeated the guardian of the bridge?: true Has the player reinforced the bridge with sturdy materials?: false"`
 
-            Since **not all conditions are met**, the graph **is NOT updated**.
+            When the tool fails to update the graph, use the information to guide the player based on the failed 
+            conditions and requirements in a subtle way to avoid breaking immersion. Explain to the agent who generates 
+            the narrative how this may be achieved.
+
+            ---
+
+            Use this tool to keep the story logic consistent, support dynamic progression, and ensure players only 
+            unlock new plot points through meaningful, valid actions.
             """);
         tools.Add(updateGraphTool);
 

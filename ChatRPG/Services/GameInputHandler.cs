@@ -14,6 +14,7 @@ public class GameInputHandler
     private readonly ReActArchivistAgent _reActArchivistAgent;
     private readonly bool _streamChatCompletions;
     private readonly Dictionary<SystemPromptType, string> _systemPrompts = new();
+    private readonly Dictionary<SystemPromptType, string> _systemPromptsWithVerdict = new();
     private readonly AutoResetEvent _autoResetEvent = new(true);
 
     public GameInputHandler(ILogger<GameInputHandler> logger, IReActLlmClient llmClient,
@@ -33,6 +34,8 @@ public class GameInputHandler
         _systemPrompts.Add(SystemPromptType.Initial, sysPromptSec.GetValue("Initial", ""));
         _systemPrompts.Add(SystemPromptType.DoAction, sysPromptSec.GetValue("DoAction", ""));
         _systemPrompts.Add(SystemPromptType.SayAction, sysPromptSec.GetValue("SayAction", ""));
+        _systemPromptsWithVerdict.Add(SystemPromptType.DoAction, sysPromptSec.GetValue("DoActionWithVerdict", ""));
+        _systemPromptsWithVerdict.Add(SystemPromptType.SayAction, sysPromptSec.GetValue("SayActionWithVerdict", ""));
     }
 
     public event EventHandler<ChatCompletionReceivedEventArgs>? ChatCompletionReceived;
@@ -61,8 +64,10 @@ public class GameInputHandler
     {
         // Check if the campaign is in a state that allows performing adherence checks
         string? userInputWithAdherenceVerdict = null;
-        if (campaign.NarrativeGraph != null)
+        var relevantSystemPrompts = _systemPrompts;
+        if (!campaign.IsOpenWorld)
         {
+            relevantSystemPrompts = _systemPromptsWithVerdict;
             var verdict = await _reActExaminerAgent.ExaminePlayerInput(campaign, userInput);
             userInputWithAdherenceVerdict = $"""
                                              Player input: 
@@ -76,11 +81,11 @@ public class GameInputHandler
         switch (promptType)
         {
             case UserPromptType.Do:
-                await GetResponseAndUpdateState(campaign, _systemPrompts[SystemPromptType.DoAction],
+                await GetResponseAndUpdateState(campaign, relevantSystemPrompts[SystemPromptType.DoAction],
                     userInputWithAdherenceVerdict ?? userInput);
                 break;
             case UserPromptType.Say:
-                await GetResponseAndUpdateState(campaign, _systemPrompts[SystemPromptType.SayAction],
+                await GetResponseAndUpdateState(campaign, relevantSystemPrompts[SystemPromptType.SayAction],
                     userInputWithAdherenceVerdict ?? userInput);
                 break;
             default:
