@@ -1,4 +1,3 @@
-using System.Text;
 using ChatRPG.API;
 using ChatRPG.Data.Models;
 using ChatRPG.Pages;
@@ -63,30 +62,23 @@ public class GameInputHandler
     public async Task HandleUserPrompt(Campaign campaign, UserPromptType promptType, string userInput)
     {
         // Check if the campaign is in a state that allows performing adherence checks
-        string? userInputWithAdherenceVerdict = null;
+        string? userInputAdherenceVerdict = null;
         var relevantSystemPrompts = _systemPrompts;
         if (!campaign.IsOpenWorld)
         {
             relevantSystemPrompts = _systemPromptsWithVerdict;
-            var verdict = await _reActExaminerAgent.ExaminePlayerInput(campaign, userInput);
-            userInputWithAdherenceVerdict = $"""
-                                             Player input: 
-                                             {userInput}
-
-                                             Adherence verdict: 
-                                             {verdict}
-                                             """;
+            userInputAdherenceVerdict = await _reActExaminerAgent.ExaminePlayerInput(campaign, userInput);
         }
 
         switch (promptType)
         {
             case UserPromptType.Do:
                 await GetResponseAndUpdateState(campaign, relevantSystemPrompts[SystemPromptType.DoAction],
-                    userInputWithAdherenceVerdict ?? userInput);
+                    userInput, userInputAdherenceVerdict);
                 break;
             case UserPromptType.Say:
                 await GetResponseAndUpdateState(campaign, relevantSystemPrompts[SystemPromptType.SayAction],
-                    userInputWithAdherenceVerdict ?? userInput);
+                    userInput, userInputAdherenceVerdict);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -101,16 +93,29 @@ public class GameInputHandler
         _logger.LogInformation("Finished processing prompt");
     }
 
-    private async Task GetResponseAndUpdateState(Campaign campaign, string actionPrompt, string input)
+    private async Task GetResponseAndUpdateState(Campaign campaign, string actionPrompt, string input,
+        string? verdict = null)
     {
         _autoResetEvent.WaitOne();
+
+        var narratorInput = input;
+        if (!campaign.IsOpenWorld)
+        {
+            narratorInput = $"""
+                             Player input: 
+                             {input}
+                             Adherence verdict: 
+                             {verdict}
+                             """;
+        }
 
         if (_streamChatCompletions)
         {
             OpenAiGptMessage message = new(MessageRole.Assistant, "");
             OnChatCompletionReceived(message);
 
-            await foreach (var chunk in _llmClient.GetStreamedChatCompletionAsync(campaign, actionPrompt, input))
+            await foreach (var chunk in
+                           _llmClient.GetStreamedChatCompletionAsync(campaign, actionPrompt, narratorInput))
             {
                 OnChatCompletionChunkReceived(isStreamingDone: false, chunk);
             }
@@ -119,29 +124,29 @@ public class GameInputHandler
 
             _ = Task.Run(async () =>
             {
-                await SaveInteraction(campaign, input, message.Content);
+                await SaveInteraction(campaign, input, message.Content, verdict);
                 _autoResetEvent.Set();
             });
         }
         else
         {
-            var response = await _llmClient.GetChatCompletionAsync(campaign, actionPrompt, input);
+            var response = await _llmClient.GetChatCompletionAsync(campaign, actionPrompt, narratorInput);
             OpenAiGptMessage message = new(MessageRole.Assistant, response);
             OnChatCompletionReceived(message);
 
             _ = Task.Run(async () =>
             {
-                await SaveInteraction(campaign, input, message.Content);
+                await SaveInteraction(campaign, input, message.Content, verdict);
                 _autoResetEvent.Set();
             });
         }
     }
 
-    private async Task SaveInteraction(Campaign campaign, string input, string response)
+    private async Task SaveInteraction(Campaign campaign, string input, string response, string? verdict = null)
     {
         await _reActArchivistAgent.UpdateCampaignFromNarrative(campaign, input, response);
         OnCampaignUpdated();
-        await _reActArchivistAgent.StoreMessagesInCampaign(campaign, input, response);
+        await _reActArchivistAgent.StoreMessagesInCampaign(campaign, input, response, verdict);
         await _reActArchivistAgent.SaveCurrentState(campaign);
     }
 }

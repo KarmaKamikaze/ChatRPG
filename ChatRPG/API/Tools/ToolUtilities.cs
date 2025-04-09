@@ -6,6 +6,7 @@ using ChatRPG.Data.Models;
 using LangChain.Providers;
 using LangChain.Providers.OpenAI;
 using LangChain.Providers.OpenAI.Predefined;
+using MessageRole = ChatRPG.Data.Models.MessageRole;
 
 namespace ChatRPG.API.Tools;
 
@@ -99,12 +100,23 @@ public class ToolUtilities(IConfiguration configuration)
 
         if (shouldIncludePreviousMessages)
         {
-            var content = campaign.Messages.TakeLast(IncludedPreviousMessages).Select(m => m.Content);
+            var messages = campaign.Messages.TakeLast(IncludedPreviousMessages);
             result +=
                 "\n\nUse these previous messages as context. They only serve to give a hint of the current scenario:";
-            foreach (var message in content)
+            foreach (var message in messages)
             {
-                result += $"\n {message}";
+                if (message.Role == MessageRole.User)
+                {
+                    result += $"\nPlayer: {message.Content}";
+                    if (message.Verdict is not null)
+                    {
+                        result += $"\nAdherence verdict: {message.Verdict}";
+                    }
+                }
+                else
+                {
+                    result += $"\nGM: {message.Content}";
+                }
             }
         }
 

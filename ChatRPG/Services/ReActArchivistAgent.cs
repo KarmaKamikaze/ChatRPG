@@ -204,40 +204,51 @@ public class ReActArchivistAgent
         return tools;
     }
 
-    public async Task StoreMessagesInCampaign(Campaign campaign, string playerInput, string assistantOutput)
+    public async Task StoreMessagesInCampaign(
+        Campaign campaign,
+        string playerInput,
+        string narratorOutput,
+        string? examinerVerdict = null)
     {
-        var newMessages = new List<LangChain.Providers.Message>
-        {
-            new(playerInput.Trim(), LangChain.Providers.MessageRole.Human),
-            new(assistantOutput.Trim(), LangChain.Providers.MessageRole.Ai)
-        };
-
-        var summaryLlm = new Gpt4OmniModel(_provider)
-        {
-            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.4 }
-        };
-
         if (_summarizeMessages)
         {
+            var summaryLlm = new Gpt4OmniModel(_provider)
+            {
+                Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.4 }
+            };
+
+            var newMessages = new List<LangChain.Providers.Message>
+            {
+                new(playerInput.Trim(), LangChain.Providers.MessageRole.Human),
+                new(narratorOutput.Trim(), LangChain.Providers.MessageRole.Ai)
+            };
+
             campaign.GameSummary = await summaryLlm.SummarizeAsync(newMessages, campaign.GameSummary);
         }
         else
         {
-            campaign.GameSummary += string.Join("\n", newMessages.Select(m => m.Content)) + "\n";
-        }
-
-        foreach (var message in newMessages)
-        {
-            // Only add the message, if the list is empty.
-            // This is because if the list is empty, the input is the initial prompt. Not player input.
-            if (campaign.Messages.Count == 0 && message.Role == LangChain.Providers.MessageRole.Human)
+            // If the summary is not being generated, included each message as the summary.
+            campaign.GameSummary += $"Player: {playerInput.Trim()}\n";
+            if (!string.IsNullOrWhiteSpace(examinerVerdict))
             {
-                continue;
+                campaign.GameSummary += $"Scenario Adherence Verdict: {examinerVerdict.Trim()}\n";
             }
 
-            campaign.Messages.Add(new Message(campaign,
-                (message.Role == LangChain.Providers.MessageRole.Human ? MessageRole.User : MessageRole.Assistant),
-                message.Content.Trim()));
+            campaign.GameSummary += $"GM: {narratorOutput.Trim()}\n\n";
         }
+
+        var verdict = examinerVerdict != null ? new Verdict(campaign, examinerVerdict.Trim()) : null;
+
+        // Do not add the message if the list is empty, because the input is the initial prompt.
+        if (campaign.Messages.Count != 0)
+        {
+            campaign.Messages.Add(new Message(campaign,
+                MessageRole.User,
+                playerInput.Trim(), verdict));
+        }
+
+        campaign.Messages.Add(new Message(campaign,
+            MessageRole.Assistant,
+            narratorOutput.Trim()));
     }
 }

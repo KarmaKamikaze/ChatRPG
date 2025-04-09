@@ -66,6 +66,7 @@ public class EfPersistenceService(ILogger<EfPersistenceService> logger, Applicat
         var campaign = await dbContext.Campaigns
             .Where(campaign => campaign.Id == campaignId)
             .Include(campaign => campaign.Messages)
+            .ThenInclude(message => message.Verdict)
             .Include(campaign => campaign.Environments)
             .Include(campaign => campaign.Characters)
             .Include(campaign => campaign.NarrativeGraph)

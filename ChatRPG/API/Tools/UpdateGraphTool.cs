@@ -194,7 +194,7 @@ public class UpdateGraphTool(
             query.Append(configuration.GetSection("SystemPrompts").GetValue<string>("CheckGraphUpdateConditions")!
                 .Replace("{graph}", campaign.NarrativeGraph!.Serialize())
                 .Replace("{summary}", ToolUtilities.ConstructSummary(campaign, _shouldIncludePreviousMessages)
-                                      + $"\n {input}")
+                                      + $"\nPlayer: {input}")
                 .Replace("{edge}", edge.Serialize())
                 .Replace("{history}", previousAttemptHistory));
 
