@@ -4,7 +4,6 @@ using ChatRPG.Data.Models;
 using ChatRPG.Services.Events;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using Environment = ChatRPG.Data.Models.Environment;
 using OpenAiGptMessage = ChatRPG.API.OpenAiGptMessage;
@@ -12,14 +11,17 @@ using OpenAiGptMessage = ChatRPG.API.OpenAiGptMessage;
 namespace ChatRPG.Pages;
 
 [SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
-public partial class CampaignPage
+public partial class CampaignPage : IAsyncDisposable
 {
     private string? _loggedInUsername;
     private IJSObjectReference? _scrollJsScript;
     private IJSObjectReference? _detectScrollBarJsScript;
+    private IJSObjectReference? _autoResizeJsScript;
+    private DotNetObjectReference<CampaignPage>? _dotNetRef;
+    private ElementReference _textAreaRef;
+    private string _userInput = "";
     private bool _hasScrollBar;
     private List<OpenAiGptMessage> _conversation = [];
-    private string _userInput = "";
     private bool _isWaitingForResponse;
     private bool _isArchiving;
     private const string BottomId = "bottom-id";
@@ -101,6 +103,10 @@ public partial class CampaignPage
         {
             _scrollJsScript ??= await JsService!.GetScrollModuleAsync();
             _detectScrollBarJsScript ??= await JsService!.GetDetectScrollBarModuleAsync();
+            _autoResizeJsScript ??= await JsService!.GetAutoResizeModuleAsync();
+            _dotNetRef = DotNetObjectReference.Create(this);
+            var textAreaHandlerJsScript = await JsService!.GetTextAreaHandlerModuleAsync();
+            await textAreaHandlerJsScript!.InvokeVoidAsync("setupTextareaKeyHandler", _textAreaRef, _dotNetRef);
             await ScrollToElement(BottomId); // scroll down to latest message
         }
 
@@ -137,13 +143,11 @@ public partial class CampaignPage
     /// <summary>
     /// Handles the Enter key press event and sends the user input as a prompt to the LLM API.
     /// </summary>
-    /// <param name="e">A KeyboardEventArgs representing the keyboard event.</param>
-    private async Task EnterKeyHandler(KeyboardEventArgs e)
+    [JSInvokable("OnEnterPressed")]
+    public async Task OnEnterPressed(string currentInput)
     {
-        if (e.Code is "Enter" or "NumpadEnter")
-        {
-            await SendPrompt();
-        }
+        _userInput = currentInput;
+        await SendPrompt();
     }
 
     /// <summary>
@@ -268,5 +272,17 @@ public partial class CampaignPage
         _currentLocation = _campaign!.Player.Environment;
         _mainCharacter = _campaign!.Player;
         StateHasChanged();
+    }
+
+    private async Task ResizeTextArea()
+    {
+        await _autoResizeJsScript!.InvokeVoidAsync("autoResize", _textAreaRef);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await Task.Yield();
+        _dotNetRef?.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

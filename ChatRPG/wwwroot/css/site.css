@@ -464,3 +464,10 @@ div.sticky {
 .card-text {
   white-space: pre-line; /* Preserve line breaks */
 }
+
+.auto-resize-textarea {
+  overflow: hidden;
+  resize: none;
+  min-height: 30px;
+  max-height: 300px;
+}

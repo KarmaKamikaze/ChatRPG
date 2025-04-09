@@ -151,19 +151,20 @@ public class ReActExaminerAgent
             playerInput,
             "updategraphtool",
             """
-            This tool is used to evaluate whether the player can progress to a new story point by checking the 
+            This tool must be used to evaluate whether the player can progress to a new story point by checking the 
             conditions of a potential transition between two plot nodes in the **narrative graph**.
 
-            The agent should use this tool **whenever the player’s current input suggests a possible advancement** 
-            in the story. If the action is deemed feasible and consistent with the plot and scenario, the agent 
-            may query the graph to see if any edges leading to new nodes can be activated based on the current 
+            You should use this tool **whenever the player’s current input suggests a possible advancement** 
+            in the story. If you deem the action is feasible and consistent with the plot and scenario, you 
+            should query the graph to see if any edges leading to new nodes can be activated based on the current 
             state and fulfilled conditions.
 
             The tool checks if all required conditions are satisfied for the transition. If so, it updates the graph to 
             reflect the new story state, unlocking the next part of the adventure.
 
             > **Important:** Only use this tool after first determining that the player's input is reasonable and aligns 
-            > with the scenario’s established logic. When in doubt, it is often better to check than to miss a valid progression opportunity.
+            > with the scenario’s established logic, but before you give the final verdict in the final answer. 
+            > When in doubt, it is often better to check than to miss a valid progression opportunity.
 
             ### When to Use:
             - The player's action appears to fulfill narrative conditions that may open a new path in the story.

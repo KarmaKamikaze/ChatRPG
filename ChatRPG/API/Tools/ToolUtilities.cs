@@ -110,12 +110,12 @@ public class ToolUtilities(IConfiguration configuration)
                     result += $"\nPlayer: {message.Content}";
                     if (message.Verdict is not null)
                     {
-                        result += $"\nAdherence verdict: {message.Verdict}";
+                        result += $"\nAdherence verdict: {message.Verdict.Content}";
                     }
                 }
                 else
                 {
-                    result += $"\nGM: {message.Content}";
+                    result += $"\nGM: {message.Content}\n";
                 }
             }
         }
