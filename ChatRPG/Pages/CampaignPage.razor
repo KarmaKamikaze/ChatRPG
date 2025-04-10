@@ -104,7 +104,8 @@
                     <textarea
                         @ref="_textAreaRef"
                         @bind="_userInput"
-                        @oninput="ResizeTextArea"
+                        @bind:event="oninput"
+                        @bind:after="ResizeTextArea"
                         placeholder="@_userInputPlaceholder"
                         class="form-control user-prompt custom-text-field auto-resize-textarea"
                         disabled="@(_isWaitingForResponse || _campaign?.Player.CurrentHealth <= 0)">

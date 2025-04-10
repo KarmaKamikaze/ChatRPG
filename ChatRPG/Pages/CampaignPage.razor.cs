@@ -106,7 +106,7 @@ public partial class CampaignPage : IAsyncDisposable
             _autoResizeJsScript ??= await JsService!.GetAutoResizeModuleAsync();
             _dotNetRef = DotNetObjectReference.Create(this);
             var textAreaHandlerJsScript = await JsService!.GetTextAreaHandlerModuleAsync();
-            await textAreaHandlerJsScript!.InvokeVoidAsync("setupTextareaKeyHandler", _textAreaRef, _dotNetRef);
+            await textAreaHandlerJsScript.InvokeVoidAsync("setupTextareaKeyHandler", _textAreaRef, _dotNetRef);
             await ScrollToElement(BottomId); // scroll down to latest message
         }
 

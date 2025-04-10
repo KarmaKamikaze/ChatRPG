@@ -178,8 +178,8 @@ public class GameInputHandler
     private async Task SaveInteraction(Campaign campaign, string input, string response, string? verdict = null)
     {
         await _reActArchivistAgent.UpdateCampaignFromNarrative(campaign, input, response);
-        OnCampaignUpdated();
         await _reActArchivistAgent.StoreMessagesInCampaign(campaign, input, response, verdict);
         await _reActArchivistAgent.SaveCurrentState(campaign);
+        OnCampaignUpdated();
     }
 }
