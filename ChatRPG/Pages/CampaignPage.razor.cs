@@ -143,6 +143,7 @@ public partial class CampaignPage : IAsyncDisposable
     /// <summary>
     /// Handles the Enter key press event and sends the user input as a prompt to the LLM API.
     /// </summary>
+    /// <param name="currentInput">The current text contained within the textarea.</param>
     [JSInvokable("OnEnterPressed")]
     public async Task OnEnterPressed(string currentInput)
     {
