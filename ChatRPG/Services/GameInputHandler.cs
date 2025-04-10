@@ -93,20 +93,20 @@ public class GameInputHandler
         _logger.LogInformation("Finished processing prompt");
     }
 
-    private async Task GetResponseAndUpdateState(Campaign campaign, string actionPrompt, string input,
+    private async Task GetResponseAndUpdateState(Campaign campaign, string actionPrompt, string playerInput,
         string? verdict = null)
     {
         _autoResetEvent.WaitOne();
 
-        var narratorInput = input;
+        var input = playerInput;
         if (!campaign.IsOpenWorld)
         {
-            narratorInput = $"""
-                             Player input: 
-                             {input}
-                             Adherence verdict: 
-                             {verdict}
-                             """;
+            input = $"""
+                     Player input: 
+                     {playerInput}
+                     Adherence verdict: 
+                     {verdict}
+                     """;
         }
 
         if (_streamChatCompletions)
@@ -115,7 +115,7 @@ public class GameInputHandler
             OnChatCompletionReceived(message);
 
             await foreach (var chunk in
-                           _llmClient.GetStreamedChatCompletionAsync(campaign, actionPrompt, narratorInput))
+                           _llmClient.GetStreamedChatCompletionAsync(campaign, actionPrompt, input))
             {
                 OnChatCompletionChunkReceived(isStreamingDone: false, chunk);
             }
@@ -124,19 +124,19 @@ public class GameInputHandler
 
             _ = Task.Run(async () =>
             {
-                await SaveInteraction(campaign, input, message.Content, verdict);
+                await SaveInteraction(campaign, playerInput, message.Content, verdict);
                 _autoResetEvent.Set();
             });
         }
         else
         {
-            var response = await _llmClient.GetChatCompletionAsync(campaign, actionPrompt, narratorInput);
+            var response = await _llmClient.GetChatCompletionAsync(campaign, actionPrompt, input);
             OpenAiGptMessage message = new(MessageRole.Assistant, response);
             OnChatCompletionReceived(message);
 
             _ = Task.Run(async () =>
             {
-                await SaveInteraction(campaign, input, message.Content, verdict);
+                await SaveInteraction(campaign, playerInput, message.Content, verdict);
                 _autoResetEvent.Set();
             });
         }
