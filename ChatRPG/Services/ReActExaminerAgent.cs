@@ -38,7 +38,7 @@ public class ReActExaminerAgent
             Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.4 }
         };
 
-        var agent = new ReActAgentChain(_examinerDebugMode ? llm.UseConsoleForDebug() : llm, reactPrompt: _reactPrompt,
+        var agent = new ReActAgentChain(_examinerDebugMode ? llm.UseConsoleForDebug() : llm, reActPrompt: _reactPrompt,
             gameSummary: ToolUtilities.ConstructSummary(campaign, _shouldIncludePreviousMessages),
             graph: campaign.NarrativeGraph);
 

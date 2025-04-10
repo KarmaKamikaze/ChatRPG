@@ -46,7 +46,7 @@ public class ReActScribeAgent
         for (var i = 0; i < documents.Count; i += BatchSize)
         {
             var agent = new ReActAgentChain(model: _scribeDebugMode ? llm.UseConsoleForDebug() : llm,
-                reactPrompt: _reActPrompt, graph: graph, graphExtensionSummary: previousGraphExtensionSummary,
+                reActPrompt: _reActPrompt, graph: graph, graphExtensionSummary: previousGraphExtensionSummary,
                 maxActions: 50);
 
             var tools = CreateTools(graph);

@@ -84,7 +84,7 @@ public sealed class ReActAgentChain : BaseStackableChain
 
     public ReActAgentChain(
         IChatModel model,
-        string? reactPrompt = null,
+        string? reActPrompt = null,
         string? gameSummary = null,
         NarrativeGraph? graph = null,
         string? graphExtensionSummary = null,
@@ -98,7 +98,7 @@ public sealed class ReActAgentChain : BaseStackableChain
     {
         _model = model ?? throw new ArgumentNullException(nameof(model));
         _model.Settings!.StopSequences = ["Observation", "[END]"];
-        _reActPrompt = reactPrompt ?? DefaultPrompt;
+        _reActPrompt = reActPrompt ?? DefaultPrompt;
         _maxActions = maxActions;
 
         InputKeys = [inputKey];

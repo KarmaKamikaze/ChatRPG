@@ -68,7 +68,7 @@ public class ReActArchivistAgent
             Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.7 }
         };
 
-        var agent = new ReActAgentChain(_archivistDebugMode ? llm.UseConsoleForDebug() : llm, reactPrompt: _reActPrompt,
+        var agent = new ReActAgentChain(_archivistDebugMode ? llm.UseConsoleForDebug() : llm, reActPrompt: _reActPrompt,
             gameSummary: campaign.GameSummary, characters: characters.ToString(), playerCharacter: campaign.Player.Name,
             environments: environments.ToString());
 

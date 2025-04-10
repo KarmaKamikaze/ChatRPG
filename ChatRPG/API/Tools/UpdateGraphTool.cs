@@ -13,7 +13,7 @@ namespace ChatRPG.API.Tools;
 public class UpdateGraphTool(
     IConfiguration configuration,
     Campaign campaign,
-    string input,
+    string playerInput,
     string name,
     string? description = null) : AgentTool(name, description)
 {
@@ -194,7 +194,7 @@ public class UpdateGraphTool(
             query.Append(configuration.GetSection("SystemPrompts").GetValue<string>("CheckGraphUpdateConditions")!
                 .Replace("{graph}", campaign.NarrativeGraph!.Serialize())
                 .Replace("{summary}", ToolUtilities.ConstructSummary(campaign, _shouldIncludePreviousMessages)
-                                      + $"\nPlayer: {input}")
+                                      + $"\nPlayer input: {playerInput}")
                 .Replace("{edge}", edge.Serialize())
                 .Replace("{history}", previousAttemptHistory));
 
