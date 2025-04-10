@@ -12,7 +12,7 @@ namespace ChatRPG.Services;
 public class ReActExaminerAgent
 {
     private readonly IConfiguration _configuration;
-    private readonly OpenAiProvider _provider;
+    private readonly Gpt4OmniModel _llm;
     private readonly bool _examinerDebugMode;
     private readonly bool _shouldIncludePreviousMessages;
     private readonly string _reactPrompt;
@@ -24,7 +24,11 @@ public class ReActExaminerAgent
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts")
             .GetValue<string>("ExaminerReActPrompt"));
         _configuration = configuration;
-        _provider = new OpenAiProvider(_configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
+        var provider = new OpenAiProvider(_configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
+        _llm = new Gpt4OmniModel(provider)
+        {
+            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.4 }
+        };
         _reactPrompt = _configuration.GetSection("SystemPrompts").GetValue<string>("ExaminerReActPrompt")!;
         _examinerDebugMode = _configuration.GetValue<bool>("ExaminerChainDebug");
         _shouldIncludePreviousMessages = _configuration.GetValue<bool>("ShouldSummarize");
@@ -33,12 +37,8 @@ public class ReActExaminerAgent
 
     public async Task<string> ExaminePlayerInput(Campaign campaign, string playerInput)
     {
-        var llm = new Gpt4OmniModel(_provider)
-        {
-            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.4 }
-        };
-
-        var agent = new ReActAgentChain(_examinerDebugMode ? llm.UseConsoleForDebug() : llm, reActPrompt: _reactPrompt,
+        var agent = new ReActAgentChain(_examinerDebugMode ? _llm.UseConsoleForDebug() : _llm,
+            reActPrompt: _reactPrompt,
             gameSummary: ToolUtilities.ConstructSummary(campaign, _shouldIncludePreviousMessages),
             graph: campaign.NarrativeGraph);
 

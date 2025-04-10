@@ -12,7 +12,7 @@ namespace ChatRPG.Services;
 
 public class ReActScribeAgent
 {
-    private readonly OpenAiProvider _provider;
+    private readonly Gpt4OmniModel _llm;
     private readonly string _reActPrompt;
     private readonly bool _scribeDebugMode;
     private const int BatchSize = 5;
@@ -23,7 +23,11 @@ public class ReActScribeAgent
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts")
             .GetValue<string>("ScribeReActPrompt"));
         _reActPrompt = configuration.GetSection("SystemPrompts").GetValue<string>("ScribeReActPrompt")!;
-        _provider = new OpenAiProvider(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
+        var provider = new OpenAiProvider(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
+        _llm = new Gpt4OmniModel(provider)
+        {
+            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.4 }
+        };
         _scribeDebugMode = configuration.GetValue<bool>("ScribeChainDebug");
     }
 
@@ -35,17 +39,13 @@ public class ReActScribeAgent
         var pdfPig = new PdfPigPdfLoader();
         var documents = await pdfPig.LoadAsync(DataSource.FromBytes(uploadedFile));
 
-        var llm = new Gpt4OmniModel(_provider)
-        {
-            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.4 }
-        };
 
         var previousGraphExtensionSummary =
             $"The starting node \"{graph.GetStartNode()!.Name}\" has been added as the beginning of the story.";
 
         for (var i = 0; i < documents.Count; i += BatchSize)
         {
-            var agent = new ReActAgentChain(model: _scribeDebugMode ? llm.UseConsoleForDebug() : llm,
+            var agent = new ReActAgentChain(model: _scribeDebugMode ? _llm.UseConsoleForDebug() : _llm,
                 reActPrompt: _reActPrompt, graph: graph, graphExtensionSummary: previousGraphExtensionSummary,
                 maxActions: 50);
 
