@@ -12,6 +12,8 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<Campaign> Campaigns { get; private set; } = null!;
     public DbSet<Character> Characters { get; private set; } = null!;
     public DbSet<Environment> Environments { get; private set; } = null!;
+    public DbSet<Message> Messages { get; private set; } = null!;
+    public DbSet<Verdict> Verdicts { get; private set; } = null!;
     public DbSet<NarrativeGraph> NarrativeGraphs { get; private set; } = null!;
     public DbSet<NarrativeNode> NarrativeNodes { get; private set; } = null!;
     public DbSet<NarrativeEdge> NarrativeEdges { get; private set; } = null!;
@@ -40,5 +42,11 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
 
         modelBuilder.Entity<NarrativeNode>()
             .Ignore(n => n.NodeStatusCategory);
+
+        modelBuilder.Entity<Message>()
+            .HasOne(m => m.Verdict)
+            .WithOne()
+            .HasForeignKey<Message>("VerdictId")
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

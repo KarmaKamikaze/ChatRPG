@@ -3,6 +3,7 @@ using System;
 using ChatRPG.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChatRPG.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250408081640_AddIsOpenWorldOnCampaign")]
+    partial class AddIsOpenWorldOnCampaign
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -157,17 +160,11 @@ namespace ChatRPG.Data.Migrations
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("VerdictId")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CampaignId");
 
-                    b.HasIndex("VerdictId")
-                        .IsUnique();
-
-                    b.ToTable("Messages");
+                    b.ToTable("Message");
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.NarrativeEdge", b =>
@@ -325,28 +322,6 @@ namespace ChatRPG.Data.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("ChatRPG.Data.Models.Verdict", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CampaignId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CampaignId");
-
-                    b.ToTable("Verdicts");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -542,14 +517,7 @@ namespace ChatRPG.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ChatRPG.Data.Models.Verdict", "Verdict")
-                        .WithOne()
-                        .HasForeignKey("ChatRPG.Data.Models.Message", "VerdictId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.Navigation("Campaign");
-
-                    b.Navigation("Verdict");
                 });
 
             modelBuilder.Entity("ChatRPG.Data.Models.NarrativeEdge", b =>
@@ -580,17 +548,6 @@ namespace ChatRPG.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Graph");
-                });
-
-            modelBuilder.Entity("ChatRPG.Data.Models.Verdict", b =>
-                {
-                    b.HasOne("ChatRPG.Data.Models.Campaign", "Campaign")
-                        .WithMany()
-                        .HasForeignKey("CampaignId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Campaign");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

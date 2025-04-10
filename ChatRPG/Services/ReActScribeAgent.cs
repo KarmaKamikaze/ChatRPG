@@ -12,7 +12,7 @@ namespace ChatRPG.Services;
 
 public class ReActScribeAgent
 {
-    private readonly OpenAiProvider _provider;
+    private readonly Gpt4OmniModel _llm;
     private readonly string _reActPrompt;
     private readonly bool _scribeDebugMode;
     private const int BatchSize = 5;
@@ -23,7 +23,11 @@ public class ReActScribeAgent
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts")
             .GetValue<string>("ScribeReActPrompt"));
         _reActPrompt = configuration.GetSection("SystemPrompts").GetValue<string>("ScribeReActPrompt")!;
-        _provider = new OpenAiProvider(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
+        var provider = new OpenAiProvider(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
+        _llm = new Gpt4OmniModel(provider)
+        {
+            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.4 }
+        };
         _scribeDebugMode = configuration.GetValue<bool>("ScribeChainDebug");
     }
 
@@ -35,18 +39,15 @@ public class ReActScribeAgent
         var pdfPig = new PdfPigPdfLoader();
         var documents = await pdfPig.LoadAsync(DataSource.FromBytes(uploadedFile));
 
-        var llm = new Gpt4OmniModel(_provider)
-        {
-            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.4 }
-        };
 
         var previousGraphExtensionSummary =
             $"The starting node \"{graph.GetStartNode()!.Name}\" has been added as the beginning of the story.";
 
         for (var i = 0; i < documents.Count; i += BatchSize)
         {
-            var agent = new ReActAgentChain(_scribeDebugMode ? llm.UseConsoleForDebug() : llm, graph,
-                previousGraphExtensionSummary, reActPrompt: _reActPrompt, maxActions: 50);
+            var agent = new ReActAgentChain(model: _scribeDebugMode ? _llm.UseConsoleForDebug() : _llm,
+                reActPrompt: _reActPrompt, graph: graph, graphExtensionSummary: previousGraphExtensionSummary,
+                maxActions: 50);
 
             var tools = CreateTools(graph);
             foreach (var tool in tools)
@@ -104,7 +105,7 @@ public class ReActScribeAgent
             ### **Usage Format**
             - **Do not use markdown!**  
             - The tool requires **valid JSON input**, structured as follows:
-            {{
+            {
                 "name": "a unique name of the node based on the location or plot point within the scenario document",
                 "storycontent": "the story content of the relevant details such as a description of the plot point/location, key NPCs, obstacles, or possible discoveries, etc.",
                 "edges": [
@@ -117,7 +118,7 @@ public class ReActScribeAgent
                         "targetnodename": "the name of the target node that should be connected using this edge. This node can already exist in the graph or it can be this node, if this node is the target"
                     }
                 ]
-            }}
+            }
 
             Each edge must include a **list of conditions** and connect either from or to an existing node to maintain coherence in the narrative structure.  
             These conditions must be formulated as **short easy-to-answer questions**.
@@ -132,7 +133,7 @@ public class ReActScribeAgent
             - Removed a large boulder blocking the path.
 
             #### **Tool Call Example:**
-            {{
+            {
                 "name": "The Abandoned Ruins",
                 "storycontent": "A crumbling stone structure overgrown with vines, hiding an ancient shrine with faded inscriptions. The air is thick with mystery, and a sense of forgotten history lingers. Possible discoveries include ancient artifacts and hidden passages.",
                 "edges": [
@@ -145,7 +146,7 @@ public class ReActScribeAgent
                         "targetnodename": "The Abandoned Ruins"
                     }
                 ]
-            }}
+            }
 
             #### **Expected Outcome:**
             - The tool returns an updated string representation of the graph, now including "**The Abandoned Ruins**" as a new node, connected to "**The Village of Eldermere**" via an edge with the conditions:
@@ -160,7 +161,7 @@ public class ReActScribeAgent
             A new node is added when the player discovers the **Forbidden Archives**, an ancient library containing lost knowledge.
 
             #### **Tool Call Example:**
-            {{
+            {
                 "name": "Forbidden Archives",
                 "storycontent": "A vast underground library filled with crumbling tomes, forbidden knowledge, and the echoes of long-forgotten scholars. Strange symbols glow faintly on the walls, hinting at secrets waiting to be uncovered.",
                 "edges": [
@@ -170,7 +171,7 @@ public class ReActScribeAgent
                         "targetnodename": "Forbidden Archives"
                     }
                 ]
-            }}
+            }
 
             #### **Outcome:**
             - The **Forbidden Archives** is introduced as a new story node.
@@ -212,11 +213,11 @@ public class ReActScribeAgent
             ### **Usage Format**
             - **Do not use markdown!**  
             - The tool requires **valid JSON input**, structured as follows:
-            {{ 
+            {
                 "conditions": [ "condition 1 for traversing the edge", "condition 2 for traversing the edge" ], 
                 "sourcenodename": "the name of the source node which already exists in the graph", 
                 "targetnodename": "the name of the target node which already exists in the graph" 
-            }}
+            }
 
             ---
 
@@ -226,11 +227,11 @@ public class ReActScribeAgent
             In this scenario, the player must obtain the Rusted Key before they can enter the Ancient Crypt.
 
             #### **Tool Input:**
-            {{ 
+            {
                 "sourcenodename": "Old Graveyard", 
                 "targetnodename": "Ancient Crypt", 
                 "conditions": [ "Has the player obtained the Rusted Key?" ] 
-            }}
+            }
 
             #### **Outcome:**
             - The **Old Graveyard** is now connected to the **Ancient Crypt**.
@@ -246,7 +247,7 @@ public class ReActScribeAgent
             3. Dispelled the magical barrier on the Royal Chamber doors.
 
             #### **Tool Input:**
-            {{ 
+            {
                 "sourcenodename": "Castle Courtyard", 
                 "targetnodename": "Royal Chamber", 
                 "conditions": [ 
@@ -254,7 +255,7 @@ public class ReActScribeAgent
                     "Has the player defeated the Elite Guards?", 
                     "Has the player dispelled the magical barrier?" 
                     ] 
-            }}
+            }
 
             #### **Outcome:**
             - The **Castle Courtyard** is now connected to the **Royal Chamber**.
@@ -284,10 +285,10 @@ public class ReActScribeAgent
             ### **Usage Format**
             - **Do not use markdown!**  
             - The tool requires **valid JSON input**, structured as follows:
-            {{
+            {
                 "sourcenodename": "the name of the source node which already exists in the graph", 
                 "conditions": [ "condition that defines if the ending is reached based on the player’s choices" ]
-            }}
+            }
 
             ---
 
@@ -297,10 +298,10 @@ public class ReActScribeAgent
             If the player successfully defeats the Dark Lord and restores peace, the ending is triggered.
 
             #### **Tool Input:**
-            {{ 
+            {
                 "sourcenodename": "Victory Over the Dark Lord", 
                 "conditions": [ "Has the player defeated the Dark Lord?" ] 
-            }}
+            }
 
             #### **Outcome:**
             - This ending is reached **only if the player defeats the Dark Lord**.
@@ -312,10 +313,10 @@ public class ReActScribeAgent
             If the player fails to escape a collapsing dungeon, the story ends.
 
             #### **Tool Input:**
-            {{ 
+            {
                 "sourcenodename": "Buried Beneath the Ruins", 
                 "conditions": [ "Has the player failed to escape the ruins before time ran out?" ] 
-            }}
+            }
 
             #### **Outcome:**
             - The story **ends when the player fails to escape** the ruins.
@@ -327,14 +328,14 @@ public class ReActScribeAgent
             If the player successfully claims the throne by fulfilling multiple prerequisites, the ending is triggered.
 
             #### **Tool Input:**
-            {{
+            {
                 "sourcenodename": "Ascension to the Throne",
                 "conditions": [
                     "Has the player retrieved the Royal Crown?",
                     "Has the player gained the support of the High Council?",
                     "Has the player defeated the False Heir in battle?"
                 ]
-            }}
+            }
 
             #### **Outcome:**
             - This ending is only reached if the player has:

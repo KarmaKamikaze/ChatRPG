@@ -9,16 +9,19 @@ public class GameInputHandler
 {
     private readonly ILogger<GameInputHandler> _logger;
     private readonly IReActLlmClient _llmClient;
+    private readonly ReActExaminerAgent _reActExaminerAgent;
     private readonly ReActArchivistAgent _reActArchivistAgent;
     private readonly bool _streamChatCompletions;
     private readonly Dictionary<SystemPromptType, string> _systemPrompts = new();
+    private readonly Dictionary<SystemPromptType, string> _systemPromptsWithVerdict = new();
     private readonly AutoResetEvent _autoResetEvent = new(true);
 
     public GameInputHandler(ILogger<GameInputHandler> logger, IReActLlmClient llmClient,
-        ReActArchivistAgent reActArchivistAgent, IConfiguration configuration)
+        ReActExaminerAgent reActExaminerAgent, ReActArchivistAgent reActArchivistAgent, IConfiguration configuration)
     {
         _logger = logger;
         _llmClient = llmClient;
+        _reActExaminerAgent = reActExaminerAgent;
         _reActArchivistAgent = reActArchivistAgent;
         _streamChatCompletions = configuration.GetValue("StreamChatCompletions", true);
         if (configuration.GetValue("UseMocks", false))
@@ -30,6 +33,8 @@ public class GameInputHandler
         _systemPrompts.Add(SystemPromptType.Initial, sysPromptSec.GetValue("Initial", ""));
         _systemPrompts.Add(SystemPromptType.DoAction, sysPromptSec.GetValue("DoAction", ""));
         _systemPrompts.Add(SystemPromptType.SayAction, sysPromptSec.GetValue("SayAction", ""));
+        _systemPromptsWithVerdict.Add(SystemPromptType.DoAction, sysPromptSec.GetValue("DoActionWithVerdict", ""));
+        _systemPromptsWithVerdict.Add(SystemPromptType.SayAction, sysPromptSec.GetValue("SayActionWithVerdict", ""));
     }
 
     public event EventHandler<ChatCompletionReceivedEventArgs>? ChatCompletionReceived;
@@ -56,13 +61,24 @@ public class GameInputHandler
 
     public async Task HandleUserPrompt(Campaign campaign, UserPromptType promptType, string userInput)
     {
+        // Check if the campaign is in a state that allows performing adherence checks
+        string? userInputAdherenceVerdict = null;
+        var relevantSystemPrompts = _systemPrompts;
+        if (!campaign.IsOpenWorld)
+        {
+            relevantSystemPrompts = _systemPromptsWithVerdict;
+            userInputAdherenceVerdict = await _reActExaminerAgent.ExaminePlayerInput(campaign, userInput);
+        }
+
         switch (promptType)
         {
             case UserPromptType.Do:
-                await GetResponseAndUpdateState(campaign, _systemPrompts[SystemPromptType.DoAction], userInput);
+                await GetResponseAndUpdateState(campaign, relevantSystemPrompts[SystemPromptType.DoAction],
+                    userInput, userInputAdherenceVerdict);
                 break;
             case UserPromptType.Say:
-                await GetResponseAndUpdateState(campaign, _systemPrompts[SystemPromptType.SayAction], userInput);
+                await GetResponseAndUpdateState(campaign, relevantSystemPrompts[SystemPromptType.SayAction],
+                    userInput, userInputAdherenceVerdict);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -77,16 +93,29 @@ public class GameInputHandler
         _logger.LogInformation("Finished processing prompt");
     }
 
-    private async Task GetResponseAndUpdateState(Campaign campaign, string actionPrompt, string input)
+    private async Task GetResponseAndUpdateState(Campaign campaign, string actionPrompt, string playerInput,
+        string? verdict = null)
     {
         _autoResetEvent.WaitOne();
+
+        var input = playerInput;
+        if (!campaign.IsOpenWorld)
+        {
+            input = $"""
+                     Player input: 
+                     {playerInput}
+                     Adherence verdict: 
+                     {verdict}
+                     """;
+        }
 
         if (_streamChatCompletions)
         {
             OpenAiGptMessage message = new(MessageRole.Assistant, "");
             OnChatCompletionReceived(message);
 
-            await foreach (var chunk in _llmClient.GetStreamedChatCompletionAsync(campaign, actionPrompt, input))
+            await foreach (var chunk in
+                           _llmClient.GetStreamedChatCompletionAsync(campaign, actionPrompt, input))
             {
                 OnChatCompletionChunkReceived(isStreamingDone: false, chunk);
             }
@@ -95,7 +124,7 @@ public class GameInputHandler
 
             _ = Task.Run(async () =>
             {
-                await SaveInteraction(campaign, input, message.Content);
+                await SaveInteraction(campaign, playerInput, message.Content, verdict);
                 _autoResetEvent.Set();
             });
         }
@@ -107,17 +136,17 @@ public class GameInputHandler
 
             _ = Task.Run(async () =>
             {
-                await SaveInteraction(campaign, input, message.Content);
+                await SaveInteraction(campaign, playerInput, message.Content, verdict);
                 _autoResetEvent.Set();
             });
         }
     }
 
-    private async Task SaveInteraction(Campaign campaign, string input, string response)
+    private async Task SaveInteraction(Campaign campaign, string input, string response, string? verdict = null)
     {
         await _reActArchivistAgent.UpdateCampaignFromNarrative(campaign, input, response);
         OnCampaignUpdated();
-        await _reActArchivistAgent.StoreMessagesInCampaign(campaign, input, response);
+        await _reActArchivistAgent.StoreMessagesInCampaign(campaign, input, response, verdict);
         await _reActArchivistAgent.SaveCurrentState(campaign);
     }
 }

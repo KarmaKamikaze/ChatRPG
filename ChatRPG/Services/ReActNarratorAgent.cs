@@ -100,10 +100,10 @@ public class ReActNarratorAgent : IReActLlmClient
 
             ### Input Format:
             Input to this tool must be provided in **RAW JSON format** (do not use markdown):
-            {{
+            {
                 "input": "<The player's input>",
                 "severity": "<Describes how devastating the injury is based on the action>"
-            }}
+            }
 
             ### Accepted Values:
             - **`severity` values:** `{low, medium, high, extraordinary}`
@@ -134,10 +134,10 @@ public class ReActNarratorAgent : IReActLlmClient
 
             ### Input Format:
             Input to this tool must be in the following **RAW JSON format** (do not use markdown):
-            {{
+            {
                 "input": "<The player's input>",
                 "magnitude": "<Describes how much health the character will regain based on the action>"
-            }}
+            }
 
             ### Accepted Values:
             - **`magnitude` values:** `{low, medium, high, extraordinary}`
@@ -186,20 +186,20 @@ public class ReActNarratorAgent : IReActLlmClient
 
             ### Input Format:
             Input to this tool must be in the following **RAW JSON format** (do not use markdown):
-            {{
-                "participant1": {{
+            {
+                "participant1": {
                     "name": "<name of participant one>",
                     "description": "<description of participant one>"
-                }},
-                "participant2": {{
+                },
+                "participant2": {
                     "name": "<name of participant two>",
                     "description": "<description of participant two>"
-                }},
+                },
                 "participant1HitChance": "<hit chance specifier for participant one>",
                 "participant2HitChance": "<hit chance specifier for participant two>",
                 "participant1DamageSeverity": "<damage severity for participant one>",
                 "participant2DamageSeverity": "<damage severity for participant two>"
-            }} 
+            }
 
             ### Accepted Values:
             - **`participant#HitChance` specifiers:** `{high, medium, low, impossible}`
@@ -210,7 +210,7 @@ public class ReActNarratorAgent : IReActLlmClient
             """);
         tools.Add(battleTool);
 
-        if (campaign.NarrativeGraph != null)
+        if (!campaign.IsOpenWorld)
         {
             var searchScenarioTool = await SearchScenarioTool.CreateAsync(
                 _configuration,
@@ -244,10 +244,10 @@ public class ReActNarratorAgent : IReActLlmClient
                 about a location that the player has already visited. If you inquire about a node that the player has yet 
                 to discover, be very careful to avoid revealing any details that the player has not yet encountered.
                 The input to this tool must be in the following RAW JSON format, where the "nodename" property is optional:
-                {{
+                {
                     "query": "<The search query string>",
                     "nodename": "<The name of the node in the graph>",
-                }}
+                }
 
                 ### Example Uses:
 
@@ -255,10 +255,10 @@ public class ReActNarratorAgent : IReActLlmClient
                 **Player Input:** 'I want to talk to the ghost of the former king.'
 
                 You are unsure if a ghost exists in the castle hall. You call the tool with the input  
-                {{
+                {
                     "query": "Is there a ghost of the former king in the castle hall?",
                     "nodename": "Castle Hall",
-                }}
+                }
 
                 You retrieve details, learning that there is a suit of armor containing red eyes that greets the player as Ulemar, 
                 the Knight of the King.
@@ -267,10 +267,10 @@ public class ReActNarratorAgent : IReActLlmClient
                 **Player Input:** 'I enter a random house in the village. What do I see?'
 
                 You are unsure about the houses and call the tool with the input  
-                {{
+                {
                     "query": "Tell me about the houses in the village.",
                     "nodename": "Village Square",
-                }}
+                }
 
                 If the adventure module contains details about the house, the tool retrieves them.  
                 If the house is not mentioned, you may improvise a minor detail (e.g.,  
@@ -281,9 +281,9 @@ public class ReActNarratorAgent : IReActLlmClient
 
                 You are unsure what the player can find in the forest. Since you are searching for general information 
                 about an area that does not correlate with a specific node, you call the tool with the input  
-                {{
+                {
                     "query": "Tell me about the forest. Are there any objectives there? Does anything happen when the player leaves the dungeon?",
-                }}
+                }
 
                 If the adventure module has no information about the forest, you may allow limited exploration but  
                 eventually use the tool to reference details from the current chapter, nudging the player back toward  
@@ -312,23 +312,24 @@ public class ReActNarratorAgent : IReActLlmClient
     {
         // Create the ReActAgentChain with the campaign's NarrativeGraph if it exists, meaning the game is running in
         // pre-defined scenarios. Otherwise, create the agent without the NarrativeGraph for open-world.
-        if (campaign.NarrativeGraph != null)
+        if (!campaign.IsOpenWorld)
         {
             ArgumentException.ThrowIfNullOrEmpty(_configuration.GetSection("SystemPrompts")
                 .GetValue<string>("NarratorWithGraphReActPrompt"));
             var reActPrompt = _configuration.GetSection("SystemPrompts")
                 .GetValue<string>("NarratorWithGraphReActPrompt")!;
-            return new ReActAgentChain(_narratorDebugMode ? llm.UseConsoleForDebug() : llm, campaign.NarrativeGraph,
-                actionPrompt: actionPrompt, ToolUtilities.ConstructSummary(campaign, _shouldIncludePreviousMessages),
-                reActPrompt);
+            return new ReActAgentChain(_narratorDebugMode ? llm.UseConsoleForDebug() : llm, reActPrompt: reActPrompt,
+                gameSummary: ToolUtilities.ConstructSummary(campaign, _shouldIncludePreviousMessages),
+                graph: campaign.NarrativeGraph, actionPrompt: actionPrompt);
         }
         else
         {
             ArgumentException.ThrowIfNullOrEmpty(_configuration.GetSection("SystemPrompts")
                 .GetValue<string>("NarratorReActPrompt"));
             var reActPrompt = _configuration.GetSection("SystemPrompts").GetValue<string>("NarratorReActPrompt")!;
-            return new ReActAgentChain(_narratorDebugMode ? llm.UseConsoleForDebug() : llm, actionPrompt: actionPrompt,
-                ToolUtilities.ConstructSummary(campaign, _shouldIncludePreviousMessages), reActPrompt);
+            return new ReActAgentChain(_narratorDebugMode ? llm.UseConsoleForDebug() : llm, reActPrompt: reActPrompt,
+                gameSummary: ToolUtilities.ConstructSummary(campaign, _shouldIncludePreviousMessages),
+                actionPrompt: actionPrompt);
         }
     }
 }

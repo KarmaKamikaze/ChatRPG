@@ -13,9 +13,10 @@ public class Campaign
         StartedOn = DateTime.UtcNow;
     }
 
-    public Campaign(User user, string title, string startScenario) : this(user, title)
+    public Campaign(User user, string title, string startScenario, bool isOpenWorld) : this(user, title)
     {
         StartScenario = startScenario;
+        IsOpenWorld = isOpenWorld;
     }
 
     public int Id { get; private set; }
@@ -28,5 +29,6 @@ public class Campaign
     public ICollection<Character> Characters { get; } = new List<Character>();
     public ICollection<Environment> Environments { get; } = new List<Environment>();
     public Character Player => Characters.First(c => c.IsPlayer);
+    public bool IsOpenWorld { get; set; }
     public NarrativeGraph? NarrativeGraph { get; set; }
 }

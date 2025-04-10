@@ -17,81 +17,100 @@ public sealed class ReActAgentChain : BaseStackableChain
 {
     private const string ReActAnswer = "answer";
     private readonly ConversationBufferMemory _conversationBufferMemory;
-    private readonly int _maxActions;
     private readonly IChatModel _model;
+    private readonly int _maxActions;
     private readonly string _reActPrompt;
-    private readonly string _actionPrompt = string.Empty;
-    private StackChain? _chain;
     private readonly Dictionary<string, AgentTool> _tools = new();
+    private StackChain? _chain;
+
     private bool _useCache;
     private string _userInput = string.Empty;
+
+    private readonly string _actionPrompt;
     private readonly string? _gameSummary;
-    private readonly string _playerCharacter = string.Empty;
-    private readonly string _characters = string.Empty;
-    private readonly string _environments = string.Empty;
-    private readonly string _narrativeGraph = string.Empty;
-    private readonly string _graphExtensionSummary = string.Empty;
+    private readonly string _playerCharacter;
+    private readonly string _characters;
+    private readonly string _environments;
+    private readonly string _narrativeGraph;
+    private readonly string _graphExtensionSummary;
 
-    public string DefaultPrompt = @"Assistant is a large language model trained by OpenAI.
+    public string DefaultPrompt = """
+                                  Assistant is a large language model trained by OpenAI.
 
-Assistant is designed to be able to assist with a wide range of tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of topics. As a language model, Assistant is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
+                                  Assistant is designed to be able to assist with a wide range of tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of topics. As a language model, Assistant is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
 
-Assistant is constantly learning and improving, and its capabilities are constantly evolving. It is able to process and understand large amounts of text, and can use this knowledge to provide accurate and informative responses to a wide range of questions. Additionally, Assistant is able to generate its own text based on the input it receives, allowing it to engage in discussions and provide explanations and descriptions on a wide range of topics.
+                                  Assistant is constantly learning and improving, and its capabilities are constantly evolving. It is able to process and understand large amounts of text, and can use this knowledge to provide accurate and informative responses to a wide range of questions. Additionally, Assistant is able to generate its own text based on the input it receives, allowing it to engage in discussions and provide explanations and descriptions on a wide range of topics.
 
-Overall, Assistant is a powerful tool that can help with a wide range of tasks and provide valuable insights and information on a wide range of topics. Whether you need help with a specific question or just want to have a conversation about a particular topic, Assistant is here to assist.
+                                  Overall, Assistant is a powerful tool that can help with a wide range of tasks and provide valuable insights and information on a wide range of topics. Whether you need help with a specific question or just want to have a conversation about a particular topic, Assistant is here to assist.
 
-TOOLS:
-------
+                                  TOOLS:
+                                  ------
 
-Assistant has access to the following tools:
+                                  Assistant has access to the following tools:
 
-{tools}
+                                  {tools}
 
-To use a tool, please use the following format:
+                                  To use a tool, please use the following format:
 
-```
-Thought: Do I need to use a tool? Yes
-Action: the action to take, should be one of [{tool_names}]
-Action Input: the input to the action
-Observation: the result of the action
-```
+                                  ```
+                                  Thought: Do I need to use a tool? Yes
+                                  Action: the action to take, should be one of [{tool_names}]
+                                  Action Input: the input to the action
+                                  Observation: the result of the action
+                                  ```
 
-When you have a response to say to the Human, or if you do not need to use a tool, you MUST use the format:
+                                  When you have a response to say to the Human, or if you do not need to use a tool, you MUST use the format:
 
-```
-Thought: Do I need to use a tool? No
-Final Answer: [your response here]
-```
+                                  ```
+                                  Thought: Do I need to use a tool? No
+                                  Final Answer: [your response here]
+                                  ```
 
-Always add [END] after final answer
+                                  Always add [END] after final answer
 
-Special action:
-{action}
+                                  Special action:
+                                  {action}
 
-Begin!
+                                  Begin!
 
-Game summary:
-{summary}
+                                  Game summary:
+                                  {summary}
 
-Previous conversation history:
-{history}
+                                  Previous conversation history:
+                                  {history}
 
-New input: {input}";
+                                  New input: {input}
+                                  """;
 
     public ReActAgentChain(
         IChatModel model,
         string? reActPrompt = null,
+        string? gameSummary = null,
+        NarrativeGraph? graph = null,
+        string? graphExtensionSummary = null,
+        string? actionPrompt = null,
+        string? characters = null,
+        string? playerCharacter = null,
+        string? environments = null,
         string inputKey = "input",
         string outputKey = "text",
         int maxActions = 20)
     {
-        _model = model;
+        _model = model ?? throw new ArgumentNullException(nameof(model));
         _model.Settings!.StopSequences = ["Observation", "[END]"];
         _reActPrompt = reActPrompt ?? DefaultPrompt;
         _maxActions = maxActions;
 
         InputKeys = [inputKey];
         OutputKeys = [outputKey];
+
+        _gameSummary = gameSummary;
+        _narrativeGraph = graph?.Serialize() ?? string.Empty;
+        _graphExtensionSummary = graphExtensionSummary ?? string.Empty;
+        _actionPrompt = actionPrompt ?? string.Empty;
+        _characters = characters ?? string.Empty;
+        _playerCharacter = playerCharacter ?? string.Empty;
+        _environments = environments ?? string.Empty;
 
         var messageFormatter = new MessageFormatter
         {
@@ -110,91 +129,6 @@ New input: {input}";
         {
             Formatter = messageFormatter
         };
-    }
-
-    public ReActAgentChain(
-        IChatModel model,
-        string gameSummary,
-        string? reActPrompt = null,
-        string inputKey = "input",
-        string outputKey = "text",
-        int maxActions = 20) : this(model, reActPrompt, inputKey, outputKey, maxActions)
-    {
-        _gameSummary = gameSummary;
-    }
-
-    public ReActAgentChain(
-        IChatModel model,
-        string actionPrompt,
-        string gameSummary,
-        string? reActPrompt = null,
-        string inputKey = "input",
-        string outputKey = "text",
-        int maxActions = 20) : this(model, gameSummary, reActPrompt, inputKey, outputKey, maxActions)
-    {
-        _actionPrompt = actionPrompt;
-    }
-
-    public ReActAgentChain(
-        IChatModel model,
-        NarrativeGraph graph,
-        string actionPrompt,
-        string gameSummary,
-        string? reActPrompt = null,
-        string inputKey = "input",
-        string outputKey = "text",
-        int maxActions = 20) : this(model, gameSummary, reActPrompt, inputKey, outputKey, maxActions)
-    {
-        _actionPrompt = actionPrompt;
-        _narrativeGraph = graph.Serialize();
-    }
-
-    public ReActAgentChain(
-        IChatModel model,
-        string characters,
-        string playerCharacter,
-        string environments,
-        string gameSummary,
-        string? reActPrompt = null,
-        string inputKey = "input",
-        string outputKey = "text",
-        int maxActions = 20) : this(model, gameSummary, reActPrompt, inputKey, outputKey, maxActions)
-    {
-        _characters = characters;
-        _playerCharacter = playerCharacter;
-        _environments = environments;
-    }
-
-    public ReActAgentChain(
-        IChatModel model,
-        NarrativeGraph graph,
-        string characters,
-        string playerCharacter,
-        string environments,
-        string gameSummary,
-        string? reActPrompt = null,
-        string inputKey = "input",
-        string outputKey = "text",
-        int maxActions = 20) : this(model, gameSummary, reActPrompt, inputKey, outputKey, maxActions)
-    {
-        _characters = characters;
-        _playerCharacter = playerCharacter;
-        _environments = environments;
-        _narrativeGraph = graph.Serialize();
-    }
-
-
-    public ReActAgentChain(
-        IChatModel model,
-        NarrativeGraph graph,
-        string graphExtensionSummary,
-        string? reActPrompt = null,
-        string inputKey = "input",
-        string outputKey = "text",
-        int maxActions = 20) : this(model, reActPrompt, inputKey, outputKey, maxActions)
-    {
-        _narrativeGraph = graph.Serialize();
-        _graphExtensionSummary = graphExtensionSummary;
     }
 
     private void InitializeChain()
