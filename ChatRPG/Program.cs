@@ -32,6 +32,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuth
     .AddTransient<IEmailSender, EmailSender>()
     .AddTransient<GameInputHandler>()
     .AddTransient<ReActExaminerAgent>()
+    .AddTransient<ReActNavigatorAgent>()
     .AddTransient<ReActArchivistAgent>()
     .AddTransient<ReActScribeAgent>()
     .AddSingleton<ICampaignMediatorService, CampaignMediatorService>()
