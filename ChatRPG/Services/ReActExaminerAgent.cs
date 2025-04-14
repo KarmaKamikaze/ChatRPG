@@ -42,7 +42,7 @@ public class ReActExaminerAgent
             gameSummary: ToolUtilities.ConstructSummary(campaign, _shouldIncludePreviousMessages),
             graph: campaign.NarrativeGraph);
 
-        var tools = await CreateTools(campaign, playerInput);
+        var tools = await CreateTools(campaign);
         foreach (var tool in tools)
         {
             agent.UseTool(tool);
@@ -53,7 +53,7 @@ public class ReActExaminerAgent
         return (await chain.RunAsync("text"))!;
     }
 
-    private async Task<List<AgentTool>> CreateTools(Campaign campaign, string playerInput)
+    private async Task<List<AgentTool>> CreateTools(Campaign campaign)
     {
         var tools = new List<AgentTool>();
 
