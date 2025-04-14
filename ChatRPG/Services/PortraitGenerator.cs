@@ -16,7 +16,7 @@ public class PortraitGenerator
         _imageGenerationOptions = new ImageGenerationOptions()
         {
             Quality = GeneratedImageQuality.Standard,
-            Size = GeneratedImageSize.W1024xH1792,
+            Size = GeneratedImageSize.W1024xH1024,
             Style = GeneratedImageStyle.Vivid,
             ResponseFormat = GeneratedImageFormat.Bytes
         };
@@ -26,12 +26,12 @@ public class PortraitGenerator
     public async Task GeneratePortraitAsync(Character character, string startingScenario)
     {
         var prompt = $"""
-                      A portrait of {character.Name.Trim()}, described as {character.Description.Trim()}.
+                      Create a portrait of {character.Name.Trim()}, described as {character.Description.Trim()}.
 
                       The background reflects the atmosphere and setting of this fantasy scenario:
                       {startingScenario.Trim()}
 
-                      Style: highly detailed, cinematic lighting, fantasy digital painting, intricate textures, professional concept art quality.
+                      Style: highly detailed, cinematic lighting, fantasy digital painting, intricate textures, professional concept art quality, no text or text-boxes.
                       """;
 
         var image = await _llm.GenerateImageAsync(prompt, _imageGenerationOptions);

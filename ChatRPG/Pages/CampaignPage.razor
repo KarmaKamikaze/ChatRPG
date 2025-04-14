@@ -138,6 +138,15 @@
                     <HealthBar MaxHealth="_mainCharacter?.MaxHealth"
                                CurrentHealth="_mainCharacter?.CurrentHealth"></HealthBar>
                 </div>
+                @if (_mainCharacter?.Portrait != null)
+                {
+                    <div class="mx-4 mt-3">
+                        <h4 class="text-center mb-4">Portrait</h4>
+                        <img src="data:image/png;base64,@Convert.ToBase64String(_mainCharacter.Portrait)"
+                             class="img-fluid rounded"
+                             alt="Portrait of @_mainCharacter.Name" />
+                    </div>
+                }
             </div>
             <!-- RadzenStack fixed to the bottom of the outer div -->
             <div style="position: absolute; bottom: 1rem; left: 0; right: 0; text-align: center;">
