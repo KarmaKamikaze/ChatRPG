@@ -5,14 +5,14 @@ namespace ChatRPG.Services;
 
 public class PortraitGenerator
 {
-    private readonly ImageClient _llm;
+    private readonly ImageClient _imageLlmClient;
     private readonly ImageGenerationOptions _imageGenerationOptions;
     private readonly IPersistenceService _persistenceService;
 
     public PortraitGenerator(IConfiguration configuration, IPersistenceService persistenceService)
     {
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI"));
-        _llm = new ImageClient("dall-e-3", configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
+        _imageLlmClient = new ImageClient("dall-e-3", configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
         _imageGenerationOptions = new ImageGenerationOptions()
         {
             Quality = GeneratedImageQuality.Standard,
@@ -34,7 +34,7 @@ public class PortraitGenerator
                       Style: highly detailed, cinematic lighting, fantasy digital painting, intricate textures, professional concept art quality, no text or text-boxes.
                       """;
 
-        var image = await _llm.GenerateImageAsync(prompt, _imageGenerationOptions);
+        var image = await _imageLlmClient.GenerateImageAsync(prompt, _imageGenerationOptions);
         character.Portrait = image.Value.ImageBytes.ToArray();
 
         await _persistenceService.SaveAsync(character.Campaign);
