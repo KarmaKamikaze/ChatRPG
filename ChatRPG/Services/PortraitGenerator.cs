@@ -28,10 +28,10 @@ public class PortraitGenerator
         var prompt = $"""
                       Create a portrait of {character.Name.Trim()}, described as {character.Description.Trim()}.
 
-                      The background reflects the atmosphere and setting of this fantasy scenario:
+                      Let the following affect the background atmosphere and setting of this fantasy scenario:
                       {startingScenario.Trim()}
 
-                      Style: highly detailed, cinematic lighting, fantasy digital painting, intricate textures, professional concept art quality, no text or text-boxes.
+                      Style: highly detailed, cinematic lighting, fantasy digital painting, intricate textures, no text or text-boxes.
                       """;
 
         var image = await _imageLlmClient.GenerateImageAsync(prompt, _imageGenerationOptions);
