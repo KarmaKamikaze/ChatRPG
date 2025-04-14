@@ -36,6 +36,7 @@ public class Character
     public bool IsPlayer { get; private set; }
     public string Name { get; private set; } = null!;
     public string Description { get; set; } = null!;
+    public byte[]? Portrait { get; set; }
     public int MaxHealth { get; private set; }
     public int CurrentHealth { get; private set; }
 

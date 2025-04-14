@@ -36,6 +36,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuth
     .AddTransient<ReActScribeAgent>()
     .AddSingleton<ICampaignMediatorService, CampaignMediatorService>()
     .AddScoped<JsInteropService>()
+    .AddScoped<PortraitGenerator>()
     .AddScoped<ScenarioDocumentService>()
     .AddScoped<VisualizationService>();
 
