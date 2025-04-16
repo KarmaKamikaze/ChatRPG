@@ -55,6 +55,9 @@ public partial class UserCampaignOverview : ComponentBase
     private VisualizationService? VisualizationService { get; set; }
 
     [Inject]
+    private PortraitGenerator? PortraitGenerator { get; set; }
+
+    [Inject]
     private ICampaignMediatorService? CampaignMediatorService { get; set; }
 
     [Inject]
@@ -128,6 +131,7 @@ public partial class UserCampaignOverview : ComponentBase
             VisualizationService!.VisualizeNarrativeGraphIfEnabled(campaign.NarrativeGraph);
         }
 
+        await PortraitGenerator!.GeneratePortraitAsync(player, campaign.StartScenario!);
         LaunchCampaign(campaign.Id);
     }
 
