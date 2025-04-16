@@ -3,6 +3,9 @@ using OpenAI.Images;
 
 namespace ChatRPG.Services;
 
+/// <summary>
+/// Service for generating character portraits using the DALL-E 3 model.
+/// </summary>
 public class PortraitGenerator
 {
     private readonly ImageClient _imageLlmClient;
@@ -23,13 +26,18 @@ public class PortraitGenerator
         _persistenceService = persistenceService;
     }
 
-    public async Task GeneratePortraitAsync(Character character, string startingScenario)
+    /// <summary>
+    /// Generates a portrait of the given character using the DALL-E 3 model.
+    /// </summary>
+    /// <param name="character">The character that will have their portrait generated.</param>
+    /// <param name="atmosphereDescription">The background atmosphere description.</param>
+    public async Task GeneratePortraitAsync(Character character, string atmosphereDescription)
     {
         var prompt = $"""
                       Create a portrait of {character.Name.Trim()}, described as {character.Description.Trim()}.
 
                       Let the following affect the background atmosphere and setting of this fantasy scenario:
-                      {startingScenario.Trim()}
+                      {atmosphereDescription.Trim()}
 
                       Style: highly detailed, cinematic lighting, fantasy digital painting, intricate textures, no text or text-boxes.
                       """;
