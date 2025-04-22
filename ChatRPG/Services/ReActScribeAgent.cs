@@ -60,7 +60,7 @@ public class ReActScribeAgent
             if (i + BatchSize >= documents.Count)
             {
                 pages += "\n\nThis is the last page of the document. " +
-                         "Make sure that the graph contains an end node providing the final answer.";
+                         "Make sure that the graph contains an end node before providing the final answer.";
             }
 
             var chain = Set(pages, "input") | agent;
