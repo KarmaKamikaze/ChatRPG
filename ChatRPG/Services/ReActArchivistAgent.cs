@@ -208,7 +208,8 @@ public class ReActArchivistAgent
         Campaign campaign,
         string playerInput,
         string narratorOutput,
-        string? examinerVerdict = null)
+        string? examinerVerdict = null,
+        string? gameEndMessage = null)
     {
         if (_summarizeMessages)
         {
@@ -250,5 +251,13 @@ public class ReActArchivistAgent
         campaign.Messages.Add(new Message(campaign,
             MessageRole.Assistant,
             narratorOutput.Trim()));
+
+        if (gameEndMessage != null)
+        {
+            campaign.Messages.Add(new Message(
+                campaign,
+                MessageRole.Assistant,
+                gameEndMessage.Trim()));
+        }
     }
 }

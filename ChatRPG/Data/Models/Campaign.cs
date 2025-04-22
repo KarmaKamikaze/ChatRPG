@@ -31,4 +31,5 @@ public class Campaign
     public Character Player => Characters.First(c => c.IsPlayer);
     public bool IsOpenWorld { get; set; }
     public NarrativeGraph? NarrativeGraph { get; set; }
+    public bool GameOver { get; set; } = false;
 }

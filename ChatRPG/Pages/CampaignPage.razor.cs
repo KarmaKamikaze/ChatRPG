@@ -32,6 +32,7 @@ public partial class CampaignPage : IAsyncDisposable
     private UserPromptType _activeUserPromptType = UserPromptType.Do;
     private string _userInputPlaceholder = InputPlaceholder[UserPromptType.Do];
     private bool _pageInitialized;
+    private bool _initializingCampaignFirstMessage;
 
     private static readonly Dictionary<UserPromptType, string> InputPlaceholder = new()
     {
@@ -110,8 +111,9 @@ public partial class CampaignPage : IAsyncDisposable
             await ScrollToElement(BottomId); // scroll down to latest message
         }
 
-        if (_pageInitialized && _conversation.Count == 0)
+        if (_pageInitialized && _conversation.Count == 0 && !_initializingCampaignFirstMessage)
         {
+            _initializingCampaignFirstMessage = true;
             await InitializeCampaign();
         }
     }

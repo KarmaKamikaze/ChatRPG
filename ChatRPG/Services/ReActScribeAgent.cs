@@ -57,6 +57,12 @@ public class ReActScribeAgent
 
             var pages = string.Join("\n", documents.Skip(i).Take(BatchSize));
 
+            if (i + BatchSize >= documents.Count)
+            {
+                pages += "\n\nThis is the last page of the document. " +
+                         "Make sure that the graph contains an end node providing the final answer.";
+            }
+
             var chain = Set(pages, "input") | agent;
 
             previousGraphExtensionSummary = await chain.RunAsync("text") ??

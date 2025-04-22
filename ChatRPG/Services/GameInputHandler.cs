@@ -40,6 +40,7 @@ public class GameInputHandler
         _systemPrompts.Add(SystemPromptType.Initial, sysPromptSec.GetValue("Initial", ""));
         _systemPrompts.Add(SystemPromptType.DoAction, sysPromptSec.GetValue("DoAction", ""));
         _systemPrompts.Add(SystemPromptType.SayAction, sysPromptSec.GetValue("SayAction", ""));
+        _systemPrompts.Add(SystemPromptType.GameOver, sysPromptSec.GetValue("GameOver", ""));
         _systemPromptsWithVerdict.Add(SystemPromptType.DoAction, sysPromptSec.GetValue("DoActionWithVerdict", ""));
         _systemPromptsWithVerdict.Add(SystemPromptType.SayAction, sysPromptSec.GetValue("SayActionWithVerdict", ""));
     }
@@ -155,9 +156,15 @@ public class GameInputHandler
 
             OnChatCompletionChunkReceived(isStreamingDone: true);
 
+            string? gameOverMessage = null;
+            if (IsGameOver(campaign))
+            {
+                gameOverMessage = await EndGame(campaign, playerInput, message.Content);
+            }
+
             _ = Task.Run(async () =>
             {
-                await SaveInteraction(campaign, playerInput, message.Content, verdict);
+                await SaveInteraction(campaign, playerInput, message.Content, verdict, gameOverMessage);
                 _autoResetEvent.Set();
             });
         }
@@ -167,19 +174,69 @@ public class GameInputHandler
             OpenAiGptMessage message = new(MessageRole.Assistant, response);
             OnChatCompletionReceived(message);
 
+            string? gameOverMessage = null;
+            if (IsGameOver(campaign))
+            {
+                gameOverMessage = await EndGame(campaign, playerInput, message.Content);
+            }
+
             _ = Task.Run(async () =>
             {
-                await SaveInteraction(campaign, playerInput, message.Content, verdict);
+                await SaveInteraction(campaign, playerInput, message.Content, verdict, gameOverMessage);
                 _autoResetEvent.Set();
             });
         }
     }
 
-    private async Task SaveInteraction(Campaign campaign, string input, string response, string? verdict = null)
+    private async Task SaveInteraction(Campaign campaign, string input, string response, string? verdict = null,
+        string? gameEndMessage = null)
     {
         await _reActArchivistAgent.UpdateCampaignFromNarrative(campaign, input, response);
-        await _reActArchivistAgent.StoreMessagesInCampaign(campaign, input, response, verdict);
+        await _reActArchivistAgent.StoreMessagesInCampaign(campaign, input, response, verdict, gameEndMessage);
         await _reActArchivistAgent.SaveCurrentState(campaign);
         OnCampaignUpdated();
+    }
+
+    private static bool IsGameOver(Campaign campaign)
+    {
+        if (campaign.IsOpenWorld)
+        {
+            return campaign.Player.CurrentHealth <= 0;
+        }
+
+        return campaign.Player.CurrentHealth <= 0 ||
+               campaign.NarrativeGraph!.GetEndNode()?.NodeStatus is not NarrativeNode.Status.Undiscovered;
+    }
+
+    private async Task<string> EndGame(Campaign campaign, string playerInput, string narrativeResponse)
+    {
+        campaign.GameOver = true;
+
+        if (_streamChatCompletions)
+        {
+            OpenAiGptMessage message = new(MessageRole.Assistant, "");
+            OnChatCompletionReceived(message);
+
+            await foreach (var chunk in
+                           _llmClient.GetStreamedChatCompletionAsync(campaign,
+                               _systemPrompts[SystemPromptType.GameOver],
+                               $"Player: {playerInput}\nGM: {narrativeResponse}"))
+            {
+                OnChatCompletionChunkReceived(isStreamingDone: false, chunk);
+            }
+
+            OnChatCompletionChunkReceived(isStreamingDone: true);
+
+            return message.Content;
+        }
+        else
+        {
+            var response = await _llmClient.GetChatCompletionAsync(campaign, _systemPrompts[SystemPromptType.GameOver],
+                $"Player: {playerInput}\n GM: {narrativeResponse}");
+            OpenAiGptMessage message = new(MessageRole.Assistant, response);
+            OnChatCompletionReceived(message);
+
+            return message.Content;
+        }
     }
 }

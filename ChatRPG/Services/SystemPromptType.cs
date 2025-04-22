@@ -4,5 +4,6 @@ public enum SystemPromptType
 {
     Initial,
     DoAction,
-    SayAction
+    SayAction,
+    GameOver
 }
