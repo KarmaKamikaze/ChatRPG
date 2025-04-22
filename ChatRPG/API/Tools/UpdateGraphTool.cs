@@ -14,6 +14,7 @@ public class UpdateGraphTool(
     IConfiguration configuration,
     Campaign campaign,
     string playerInput,
+    string examinerVerdict,
     string name,
     string? description = null) : AgentTool(name, description)
 {
@@ -194,7 +195,7 @@ public class UpdateGraphTool(
             query.Append(configuration.GetSection("SystemPrompts").GetValue<string>("CheckGraphUpdateConditions")!
                 .Replace("{graph}", campaign.NarrativeGraph!.Serialize())
                 .Replace("{summary}", ToolUtilities.ConstructSummary(campaign, _shouldIncludePreviousMessages)
-                                      + $"\nPlayer input: {playerInput}")
+                                      + $"\nPlayer input: {playerInput}\nAdherence verdict: {examinerVerdict}")
                 .Replace("{edge}", edge.Serialize())
                 .Replace("{history}", previousAttemptHistory));
 

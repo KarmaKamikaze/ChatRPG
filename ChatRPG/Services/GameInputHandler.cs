@@ -10,18 +10,25 @@ public class GameInputHandler
     private readonly ILogger<GameInputHandler> _logger;
     private readonly IReActLlmClient _llmClient;
     private readonly ReActExaminerAgent _reActExaminerAgent;
+    private readonly ReActNavigatorAgent _reActNavigatorAgent;
     private readonly ReActArchivistAgent _reActArchivistAgent;
     private readonly bool _streamChatCompletions;
     private readonly Dictionary<SystemPromptType, string> _systemPrompts = new();
     private readonly Dictionary<SystemPromptType, string> _systemPromptsWithVerdict = new();
     private readonly AutoResetEvent _autoResetEvent = new(true);
 
-    public GameInputHandler(ILogger<GameInputHandler> logger, IReActLlmClient llmClient,
-        ReActExaminerAgent reActExaminerAgent, ReActArchivistAgent reActArchivistAgent, IConfiguration configuration)
+    public GameInputHandler(
+        ILogger<GameInputHandler> logger,
+        IReActLlmClient llmClient,
+        ReActExaminerAgent reActExaminerAgent,
+        ReActNavigatorAgent reActNavigatorAgent,
+        ReActArchivistAgent reActArchivistAgent,
+        IConfiguration configuration)
     {
         _logger = logger;
         _llmClient = llmClient;
         _reActExaminerAgent = reActExaminerAgent;
+        _reActNavigatorAgent = reActNavigatorAgent;
         _reActArchivistAgent = reActArchivistAgent;
         _streamChatCompletions = configuration.GetValue("StreamChatCompletions", true);
         if (configuration.GetValue("UseMocks", false))
@@ -33,6 +40,7 @@ public class GameInputHandler
         _systemPrompts.Add(SystemPromptType.Initial, sysPromptSec.GetValue("Initial", ""));
         _systemPrompts.Add(SystemPromptType.DoAction, sysPromptSec.GetValue("DoAction", ""));
         _systemPrompts.Add(SystemPromptType.SayAction, sysPromptSec.GetValue("SayAction", ""));
+        _systemPrompts.Add(SystemPromptType.GameOver, sysPromptSec.GetValue("GameOver", ""));
         _systemPromptsWithVerdict.Add(SystemPromptType.DoAction, sysPromptSec.GetValue("DoActionWithVerdict", ""));
         _systemPromptsWithVerdict.Add(SystemPromptType.SayAction, sysPromptSec.GetValue("SayActionWithVerdict", ""));
     }
@@ -61,24 +69,34 @@ public class GameInputHandler
 
     public async Task HandleUserPrompt(Campaign campaign, UserPromptType promptType, string userInput)
     {
+        // Wait for the previous archivist task to finish before processing next prompt
+        _autoResetEvent.WaitOne();
+
         // Check if the campaign is in a state that allows performing adherence checks
         string? userInputAdherenceVerdict = null;
+        string? graphUpdateSummary = null;
         var relevantSystemPrompts = _systemPrompts;
         if (!campaign.IsOpenWorld)
         {
             relevantSystemPrompts = _systemPromptsWithVerdict;
             userInputAdherenceVerdict = await _reActExaminerAgent.ExaminePlayerInput(campaign, userInput);
+            // Check if the verdict is disallowed and if so, skip the graph update since no changes are needed
+            if (!userInputAdherenceVerdict.Contains("DISALLOWED", StringComparison.Ordinal))
+            {
+                graphUpdateSummary =
+                    await _reActNavigatorAgent.ReviewGraph(campaign, userInput, userInputAdherenceVerdict);
+            }
         }
 
         switch (promptType)
         {
             case UserPromptType.Do:
                 await GetResponseAndUpdateState(campaign, relevantSystemPrompts[SystemPromptType.DoAction],
-                    userInput, userInputAdherenceVerdict);
+                    userInput, userInputAdherenceVerdict, graphUpdateSummary);
                 break;
             case UserPromptType.Say:
                 await GetResponseAndUpdateState(campaign, relevantSystemPrompts[SystemPromptType.SayAction],
-                    userInput, userInputAdherenceVerdict);
+                    userInput, userInputAdherenceVerdict, graphUpdateSummary);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -89,23 +107,39 @@ public class GameInputHandler
 
     public async Task HandleInitialPrompt(Campaign campaign, string initialInput)
     {
-        await GetResponseAndUpdateState(campaign, _systemPrompts[SystemPromptType.Initial], initialInput);
+        string? graphUpdateSummary = null;
+        if (!campaign.IsOpenWorld)
+        {
+            graphUpdateSummary = await _reActNavigatorAgent.ReviewGraph(
+                campaign,
+                initialInput,
+                "Verdict: ALLOWED\nThe scenario is created directly from the scenario document.");
+        }
+
+        await GetResponseAndUpdateState(campaign, _systemPrompts[SystemPromptType.Initial], initialInput,
+            graphUpdateSummary: graphUpdateSummary);
         _logger.LogInformation("Finished processing prompt");
     }
 
     private async Task GetResponseAndUpdateState(Campaign campaign, string actionPrompt, string playerInput,
-        string? verdict = null)
+        string? verdict = null, string? graphUpdateSummary = null)
     {
-        _autoResetEvent.WaitOne();
-
         var input = playerInput;
         if (!campaign.IsOpenWorld)
         {
             input = $"""
                      Player input: 
                      {playerInput}
-                     Adherence verdict: 
-                     {verdict}
+                     {(verdict is null ? "" :
+                         $"""
+                          Adherence verdict: 
+                          {verdict}
+                          """)}
+                     {(graphUpdateSummary is null ? "" :
+                         $"""
+                          Graph update summary:
+                          {graphUpdateSummary}
+                          """)}
                      """;
         }
 
@@ -122,9 +156,15 @@ public class GameInputHandler
 
             OnChatCompletionChunkReceived(isStreamingDone: true);
 
+            string? gameOverMessage = null;
+            if (IsGameOver(campaign))
+            {
+                gameOverMessage = await EndGame(campaign, playerInput, message.Content);
+            }
+
             _ = Task.Run(async () =>
             {
-                await SaveInteraction(campaign, playerInput, message.Content, verdict);
+                await SaveInteraction(campaign, playerInput, message.Content, verdict, gameOverMessage);
                 _autoResetEvent.Set();
             });
         }
@@ -134,19 +174,69 @@ public class GameInputHandler
             OpenAiGptMessage message = new(MessageRole.Assistant, response);
             OnChatCompletionReceived(message);
 
+            string? gameOverMessage = null;
+            if (IsGameOver(campaign))
+            {
+                gameOverMessage = await EndGame(campaign, playerInput, message.Content);
+            }
+
             _ = Task.Run(async () =>
             {
-                await SaveInteraction(campaign, playerInput, message.Content, verdict);
+                await SaveInteraction(campaign, playerInput, message.Content, verdict, gameOverMessage);
                 _autoResetEvent.Set();
             });
         }
     }
 
-    private async Task SaveInteraction(Campaign campaign, string input, string response, string? verdict = null)
+    private async Task SaveInteraction(Campaign campaign, string input, string response, string? verdict = null,
+        string? gameEndMessage = null)
     {
         await _reActArchivistAgent.UpdateCampaignFromNarrative(campaign, input, response);
-        OnCampaignUpdated();
-        await _reActArchivistAgent.StoreMessagesInCampaign(campaign, input, response, verdict);
+        await _reActArchivistAgent.StoreMessagesInCampaign(campaign, input, response, verdict, gameEndMessage);
         await _reActArchivistAgent.SaveCurrentState(campaign);
+        OnCampaignUpdated();
+    }
+
+    private static bool IsGameOver(Campaign campaign)
+    {
+        if (campaign.IsOpenWorld)
+        {
+            return campaign.Player.CurrentHealth <= 0;
+        }
+
+        return campaign.Player.CurrentHealth <= 0 ||
+               campaign.NarrativeGraph!.GetEndNode()?.NodeStatus is not NarrativeNode.Status.Undiscovered;
+    }
+
+    private async Task<string> EndGame(Campaign campaign, string playerInput, string narrativeResponse)
+    {
+        campaign.GameOver = true;
+
+        if (_streamChatCompletions)
+        {
+            OpenAiGptMessage message = new(MessageRole.Assistant, "");
+            OnChatCompletionReceived(message);
+
+            await foreach (var chunk in
+                           _llmClient.GetStreamedChatCompletionAsync(campaign,
+                               _systemPrompts[SystemPromptType.GameOver],
+                               $"Player: {playerInput}\nGM: {narrativeResponse}"))
+            {
+                OnChatCompletionChunkReceived(isStreamingDone: false, chunk);
+            }
+
+            OnChatCompletionChunkReceived(isStreamingDone: true);
+
+            return message.Content;
+        }
+        else
+        {
+            var response = await _llmClient.GetChatCompletionAsync(campaign, _systemPrompts[SystemPromptType.GameOver],
+                $"Player: {playerInput}\n GM: {narrativeResponse}");
+            OpenAiGptMessage message = new(MessageRole.Assistant, response);
+            OnChatCompletionReceived(message);
+
+            return message.Content;
+        }
     }
 }

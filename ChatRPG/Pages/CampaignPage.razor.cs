@@ -32,6 +32,7 @@ public partial class CampaignPage : IAsyncDisposable
     private UserPromptType _activeUserPromptType = UserPromptType.Do;
     private string _userInputPlaceholder = InputPlaceholder[UserPromptType.Do];
     private bool _pageInitialized;
+    private bool _initializingCampaignFirstMessage;
 
     private static readonly Dictionary<UserPromptType, string> InputPlaceholder = new()
     {
@@ -106,12 +107,13 @@ public partial class CampaignPage : IAsyncDisposable
             _autoResizeJsScript ??= await JsService!.GetAutoResizeModuleAsync();
             _dotNetRef = DotNetObjectReference.Create(this);
             var textAreaHandlerJsScript = await JsService!.GetTextAreaHandlerModuleAsync();
-            await textAreaHandlerJsScript!.InvokeVoidAsync("setupTextareaKeyHandler", _textAreaRef, _dotNetRef);
+            await textAreaHandlerJsScript.InvokeVoidAsync("setupTextareaKeyHandler", _textAreaRef, _dotNetRef);
             await ScrollToElement(BottomId); // scroll down to latest message
         }
 
-        if (_pageInitialized && _conversation.Count == 0)
+        if (_pageInitialized && _conversation.Count == 0 && !_initializingCampaignFirstMessage)
         {
+            _initializingCampaignFirstMessage = true;
             await InitializeCampaign();
         }
     }

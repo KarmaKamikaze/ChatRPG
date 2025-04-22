@@ -31,6 +31,11 @@ public class NarrativeGraph
         return Nodes.Where(n => n.Edges.Any(edge => edge.TargetNode == targetNode)).ToList();
     }
 
+    public NarrativeNode? GetEndNode()
+    {
+        return Nodes.FirstOrDefault(node => node.Name == "End");
+    }
+
     public NarrativeNode? GetStartNode()
     {
         return Nodes.FirstOrDefault(node => GetIncomingNodes(node).Count == 0);

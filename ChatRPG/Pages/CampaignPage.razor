@@ -104,14 +104,15 @@
                     <textarea
                         @ref="_textAreaRef"
                         @bind="_userInput"
-                        @oninput="ResizeTextArea"
+                        @bind:event="oninput"
+                        @bind:after="ResizeTextArea"
                         placeholder="@_userInputPlaceholder"
                         class="form-control user-prompt custom-text-field auto-resize-textarea"
-                        disabled="@(_isWaitingForResponse || _campaign?.Player.CurrentHealth <= 0)">
+                        disabled="@(_isWaitingForResponse || _campaign is { GameOver: true })">
                     </textarea>
                     <div class="input-group-append m-2">
                         <button class="btn btn-primary ml-2" id="input-sent-button" type="button" @onclick="SendPrompt"
-                                disabled="@(_isWaitingForResponse || _campaign?.Player.CurrentHealth <= 0)">
+                                disabled="@(_isWaitingForResponse || _campaign is { GameOver: true })">
                             Send
                         </button>
                     </div>
