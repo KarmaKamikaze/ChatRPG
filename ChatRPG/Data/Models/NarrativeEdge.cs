@@ -22,7 +22,7 @@ public class NarrativeEdge
     [JsonIgnore]
     public int Id { get; private set; }
 
-    public ICollection<string> Conditions { get; private set; } = null!;
+    public ICollection<string> Conditions { get; private set; } = new List<string>();
 
     [JsonIgnore]
     public int SourceNodeId { get; private set; }
