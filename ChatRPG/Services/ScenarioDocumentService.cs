@@ -13,11 +13,12 @@ namespace ChatRPG.Services;
 
 public class ScenarioDocumentService
 {
+    private readonly ILogger<ScenarioDocumentService> _logger;
     private readonly string _connectionString;
     private readonly string _openAiKey;
     private readonly string _startingScenarioPrompt;
 
-    public ScenarioDocumentService(IConfiguration configuration)
+    public ScenarioDocumentService(IConfiguration configuration, ILogger<ScenarioDocumentService> logger)
     {
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("ConnectionStrings")
             .GetValue<string>("DefaultConnection"));
@@ -28,6 +29,7 @@ public class ScenarioDocumentService
             .GetValue<string>("DefaultConnection")!;
         _openAiKey = configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!;
         _startingScenarioPrompt = configuration.GetSection("SystemPrompts").GetValue<string>("StartingScenario")!;
+        _logger = logger;
     }
 
     public async Task StoreScenarioEmbedding(int campaignId, byte[] scenarioDocument)
@@ -96,7 +98,7 @@ public class ScenarioDocumentService
         var exists = await existsCmd.ExecuteScalarAsync();
         if (exists != null && !(bool)exists)
         {
-            Console.WriteLine($"Source table '{sourceTable}' does not exist.");
+            _logger.LogWarning("Source table '{SourceTable}' does not exist", sourceTable);
             return;
         }
 
@@ -107,7 +109,7 @@ public class ScenarioDocumentService
              """, conn);
 
         await copyCmd.ExecuteNonQueryAsync();
-        Console.WriteLine($"Copied '{sourceTable}' to '{targetTable}'");
+        _logger.LogInformation("Created table '{TargetTable}' as a copy of '{SourceTable}'", targetTable, sourceTable);
     }
 
     private static string CreateRagQueryForStartingScenario(Campaign campaign)
