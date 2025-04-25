@@ -8,7 +8,10 @@ namespace ChatRPG.Services;
 /// <summary>
 /// Service for persisting and loading changes from the data model using Entity Framework.
 /// </summary>
-public class EfPersistenceService(ILogger<EfPersistenceService> logger, ApplicationDbContext dbContext)
+public class EfPersistenceService(
+    ILogger<EfPersistenceService> logger,
+    ApplicationDbContext dbContext,
+    ScenarioDocumentService scenarioDocumentService)
     : IPersistenceService
 {
     /// <inheritdoc />
@@ -102,9 +105,10 @@ public class EfPersistenceService(ILogger<EfPersistenceService> logger, Applicat
     }
 
     /// <inheritdoc />
-    public async Task SaveSnapshotAsync(Campaign campaign)
+    public async Task SaveSnapshotAsync(Campaign campaign, User user)
     {
-        var snapshot = campaign.DeepCopy();
+        var snapshot = campaign.DeepCopy(user, $"Snapshot of {campaign.Title}");
         await SaveAsync(snapshot);
+        await scenarioDocumentService.CopyScenarioEmbeddingForSnapshot(campaign.Id, snapshot.Id);
     }
 }

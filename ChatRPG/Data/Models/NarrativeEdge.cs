@@ -22,7 +22,7 @@ public class NarrativeEdge
     [JsonIgnore]
     public int Id { get; private set; }
 
-    public ICollection<string> Conditions { get; private set; }
+    public ICollection<string> Conditions { get; private set; } = null!;
 
     [JsonIgnore]
     public int SourceNodeId { get; private set; }
@@ -30,7 +30,7 @@ public class NarrativeEdge
     public string SourceNodeName => SourceNode.Name;
 
     [JsonIgnore]
-    public NarrativeNode SourceNode { get; private set; }
+    public NarrativeNode SourceNode { get; private set; } = null!;
 
     [JsonIgnore]
     public int TargetNodeId { get; private set; }
@@ -38,7 +38,7 @@ public class NarrativeEdge
     public string TargetNodeName => TargetNode.Name;
 
     [JsonIgnore]
-    public NarrativeNode TargetNode { get; private set; }
+    public NarrativeNode TargetNode { get; private set; } = null!;
 
     [JsonIgnore]
     public Status EdgeStatus { get; set; } = Status.Unvisited;

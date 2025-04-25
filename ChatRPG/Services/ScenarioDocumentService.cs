@@ -6,6 +6,7 @@ using LangChain.Providers.OpenAI.Predefined;
 using LangChain.DocumentLoaders;
 using LangChain.Extensions;
 using LangChain.Splitters.Text;
+using Npgsql;
 using static LangChain.Chains.Chain;
 
 namespace ChatRPG.Services;
@@ -72,6 +73,41 @@ public class ScenarioDocumentService
         var response = await chain.RunAsync("text");
 
         return response ?? "System: I'm sorry, I couldn't find any relevant scenarios.";
+    }
+
+    public async Task CopyScenarioEmbeddingForSnapshot(int oldCampaignId, int newCampaignId)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        var sourceTable = $"~collection-{oldCampaignId}";
+        var targetTable = $"~collection-{newCampaignId}";
+
+        // Check if the source table exists
+        var existsCmd = new NpgsqlCommand(
+            """
+                        SELECT EXISTS (
+                            SELECT FROM pg_tables 
+                            WHERE schemaname = 'public' AND tablename = @table
+                        );
+            """, conn);
+        existsCmd.Parameters.AddWithValue("table", sourceTable);
+
+        var exists = await existsCmd.ExecuteScalarAsync();
+        if (exists != null && !(bool)exists)
+        {
+            Console.WriteLine($"Source table '{sourceTable}' does not exist.");
+            return;
+        }
+
+        // Create the new table as a copy
+        var copyCmd = new NpgsqlCommand(
+            $"""
+                         CREATE TABLE "{targetTable}" AS TABLE "{sourceTable}";
+             """, conn);
+
+        await copyCmd.ExecuteNonQueryAsync();
+        Console.WriteLine($"Copied '{sourceTable}' to '{targetTable}'");
     }
 
     private static string CreateRagQueryForStartingScenario(Campaign campaign)

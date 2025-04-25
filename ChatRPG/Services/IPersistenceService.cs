@@ -46,5 +46,6 @@ public interface IPersistenceService
     /// This is useful for creating a backup or saving the current state of the campaign.
     /// </summary>
     /// <param name="campaign">The campaign to save a snapshot of.</param>
-    Task SaveSnapshotAsync(Campaign campaign);
+    /// <param name="user">The user who owns the campaign.</param>
+    Task SaveSnapshotAsync(Campaign campaign, User user);
 }
