@@ -119,7 +119,7 @@ public class NarrativeGraph
             var newSourceNode = nodeMap[oldNode];
             foreach (var edge in oldNode.Edges)
             {
-                var newEdge = new NarrativeEdge([..edge.Conditions], newSourceNode, nodeMap[edge.TargetNode])
+                var newEdge = new NarrativeEdge([.. edge.Conditions], newSourceNode, nodeMap[edge.TargetNode])
                 {
                     EdgeStatus = edge.EdgeStatus
                 };
