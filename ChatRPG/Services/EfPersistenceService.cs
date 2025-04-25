@@ -100,4 +100,11 @@ public class EfPersistenceService(ILogger<EfPersistenceService> logger, Applicat
     {
         return await dbContext.StartScenarios.ToListAsync();
     }
+
+    /// <inheritdoc />
+    public async Task SaveSnapshotAsync(Campaign campaign)
+    {
+        var snapshot = campaign.DeepCopy();
+        await SaveAsync(snapshot);
+    }
 }

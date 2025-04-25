@@ -21,4 +21,17 @@ public class Message
     public string Content { get; private set; } = null!;
     public DateTime Timestamp { get; private set; }
     public Verdict? Verdict { get; private set; }
+
+    /// <summary>
+    /// Creates a deep copy of the message.
+    /// </summary>
+    /// <param name="campaign">The new campaign snapshot.</param>
+    /// <returns>A copy of the message.</returns>
+    public Message DeepCopy(Campaign campaign)
+    {
+        return new Message(campaign, Role, Content, Verdict?.DeepCopy(campaign))
+        {
+            Timestamp = Timestamp
+        };
+    }
 }

@@ -15,4 +15,10 @@ public class Verdict
     public int Id { get; private set; }
     public Campaign Campaign { get; private set; } = null!;
     public string Content { get; private set; } = null!;
+
+    public Verdict DeepCopy(Campaign campaign)
+    {
+        return new Verdict(campaign, Content);
+    }
+
 }

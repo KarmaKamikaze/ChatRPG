@@ -40,4 +40,11 @@ public interface IPersistenceService
     /// </summary>
     /// <returns>A list of all start scenarios.</returns>
     Task<List<StartScenario>> GetStartScenarios();
+
+    /// <summary>
+    /// Saves a snapshot of the given <paramref name="campaign"/>.
+    /// This is useful for creating a backup or saving the current state of the campaign.
+    /// </summary>
+    /// <param name="campaign">The campaign to save a snapshot of.</param>
+    Task SaveSnapshotAsync(Campaign campaign);
 }
