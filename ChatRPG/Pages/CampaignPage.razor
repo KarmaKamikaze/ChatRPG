@@ -122,7 +122,7 @@
 
         <div class="col player-info floating-stats rounded text-white" style="position: relative;">
             <div class="sticky">
-                @if (Configuration != null && (Configuration.GetValue<bool>("EnableSnapshots")) && _campaign is { IsSnapshot: false })
+                @if (Configuration != null && Configuration.GetValue<bool>("EnableSnapshots") && _campaign is { IsSnapshot: false })
                 {
                     <div class="mx-4 mt-4 text-center">
                         <button class="btn btn-warning" @onclick="SaveSnapshotAsync">
