@@ -32,4 +32,44 @@ public class Campaign
     public bool IsOpenWorld { get; set; }
     public NarrativeGraph? NarrativeGraph { get; set; }
     public bool GameOver { get; set; } = false;
+    public bool IsSnapshot { get; set; } = false;
+
+    /// <summary>
+    /// Creates a deep copy of the campaign.
+    /// </summary>
+    /// <returns>The copy of the campaign.</returns>
+    public Campaign DeepCopy(User user, string newTitle)
+    {
+        var copy = new Campaign(
+            user,
+            newTitle,
+            StartScenario ?? string.Empty,
+            IsOpenWorld
+        )
+        {
+            GameSummary = GameSummary,
+            GameOver = GameOver,
+            IsSnapshot = true,
+        };
+        copy.NarrativeGraph = NarrativeGraph?.DeepCopy(copy);
+
+        foreach (var message in Messages)
+        {
+            copy.Messages.Add(message.DeepCopy(copy));
+        }
+
+        foreach (var environment in Environments)
+        {
+            copy.Environments.Add(new Environment(copy, environment.Name, environment.Description));
+        }
+
+        foreach (var character in Characters)
+        {
+            copy.Characters.Add(character.DeepCopy(copy,
+                copy.Environments.First(e =>
+                    e.Name == character.Environment.Name && e.Description == character.Environment.Description)));
+        }
+
+        return copy;
+    }
 }

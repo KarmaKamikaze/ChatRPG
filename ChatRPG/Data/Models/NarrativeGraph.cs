@@ -89,4 +89,44 @@ public class NarrativeGraph
             }
         }
     }
+
+    /// <summary>
+    /// Creates a deep copy of the narrative graph.
+    /// </summary>
+    /// <param name="campaign">The new campaign snapshot that the graph is associated with.</param>
+    /// <returns>The copy of the narrative graph.</returns>
+    public NarrativeGraph DeepCopy(Campaign campaign)
+    {
+        var copy = new NarrativeGraph
+        {
+            Campaigns = new List<Campaign>() { campaign }
+        };
+
+        var nodeMap = new Dictionary<NarrativeNode, NarrativeNode>();
+
+        foreach (var node in Nodes)
+        {
+            var newNode = new NarrativeNode(node.Name, node.StoryContent, copy)
+            {
+                NodeStatus = node.NodeStatus
+            };
+            nodeMap[node] = newNode;
+            copy.Nodes.Add(newNode);
+        }
+
+        foreach (var oldNode in Nodes)
+        {
+            var newSourceNode = nodeMap[oldNode];
+            foreach (var edge in oldNode.Edges)
+            {
+                var newEdge = new NarrativeEdge([.. edge.Conditions], newSourceNode, nodeMap[edge.TargetNode])
+                {
+                    EdgeStatus = edge.EdgeStatus
+                };
+                newSourceNode.Edges.Add(newEdge);
+            }
+        }
+
+        return copy;
+    }
 }

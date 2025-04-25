@@ -6,17 +6,19 @@ using LangChain.Providers.OpenAI.Predefined;
 using LangChain.DocumentLoaders;
 using LangChain.Extensions;
 using LangChain.Splitters.Text;
+using Npgsql;
 using static LangChain.Chains.Chain;
 
 namespace ChatRPG.Services;
 
 public class ScenarioDocumentService
 {
+    private readonly ILogger<ScenarioDocumentService> _logger;
     private readonly string _connectionString;
     private readonly string _openAiKey;
     private readonly string _startingScenarioPrompt;
 
-    public ScenarioDocumentService(IConfiguration configuration)
+    public ScenarioDocumentService(IConfiguration configuration, ILogger<ScenarioDocumentService> logger)
     {
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("ConnectionStrings")
             .GetValue<string>("DefaultConnection"));
@@ -27,6 +29,7 @@ public class ScenarioDocumentService
             .GetValue<string>("DefaultConnection")!;
         _openAiKey = configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!;
         _startingScenarioPrompt = configuration.GetSection("SystemPrompts").GetValue<string>("StartingScenario")!;
+        _logger = logger;
     }
 
     public async Task StoreScenarioEmbedding(int campaignId, byte[] scenarioDocument)
@@ -72,6 +75,41 @@ public class ScenarioDocumentService
         var response = await chain.RunAsync("text");
 
         return response ?? "System: I'm sorry, I couldn't find any relevant scenarios.";
+    }
+
+    public async Task CopyScenarioEmbeddingForSnapshot(int oldCampaignId, int newCampaignId)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        var sourceTable = $"~collection-{oldCampaignId}";
+        var targetTable = $"~collection-{newCampaignId}";
+
+        // Check if the source table exists
+        var existsCmd = new NpgsqlCommand(
+            """
+                        SELECT EXISTS (
+                            SELECT FROM pg_tables 
+                            WHERE schemaname = 'public' AND tablename = @table
+                        );
+            """, conn);
+        existsCmd.Parameters.AddWithValue("table", sourceTable);
+
+        var exists = await existsCmd.ExecuteScalarAsync();
+        if (exists != null && !(bool)exists)
+        {
+            _logger.LogWarning("Source table '{SourceTable}' does not exist", sourceTable);
+            return;
+        }
+
+        // Create the new table as a copy
+        var copyCmd = new NpgsqlCommand(
+            $"""
+                         CREATE TABLE "{targetTable}" AS TABLE "{sourceTable}";
+             """, conn);
+
+        await copyCmd.ExecuteNonQueryAsync();
+        _logger.LogInformation("Created table '{TargetTable}' as a copy of '{SourceTable}'", targetTable, sourceTable);
     }
 
     private static string CreateRagQueryForStartingScenario(Campaign campaign)

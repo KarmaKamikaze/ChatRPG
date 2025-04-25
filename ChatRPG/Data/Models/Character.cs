@@ -49,4 +49,26 @@ public class Character
         CurrentHealth = Math.Min(MaxHealth, Math.Max(0, CurrentHealth + value));
         return CurrentHealth <= 0;
     }
+
+    /// <summary>
+    /// Deep copy of the character.
+    /// </summary>
+    /// <param name="campaign">The new campaign snapshot.</param>
+    /// <param name="environment">The new environment copy.</param>
+    /// <returns>A copy of the character.</returns>
+    public Character DeepCopy(Campaign campaign, Environment environment)
+    {
+        return new Character(
+            campaign,
+            environment,
+            Type,
+            Name,
+            Description,
+            IsPlayer
+        )
+        {
+            Portrait = Portrait != null ? (byte[])Portrait.Clone() : null,
+            CurrentHealth = CurrentHealth
+        };
+    }
 }

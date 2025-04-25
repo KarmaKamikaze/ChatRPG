@@ -122,6 +122,14 @@
 
         <div class="col player-info floating-stats rounded text-white" style="position: relative;">
             <div class="sticky">
+                @if (Configuration != null && (Configuration.GetValue<bool>("EnableSnapshots")) && _campaign is { IsSnapshot: false })
+                {
+                    <div class="mx-4 mt-4 text-center">
+                        <button class="btn btn-warning" @onclick="SaveSnapshotAsync">
+                            Save Campaign Snapshot
+                        </button>
+                    </div>
+                }
                 <div class="mx-4 mt-3">
                     <h3 class="text-center mb-4">@_mainCharacter?.Name</h3>
                     <div class="card card-dim mb-2 text-black text-center scrollbar"
@@ -145,7 +153,7 @@
                         <h4 class="text-center mb-4">Portrait</h4>
                         <img src="data:image/png;base64,@Convert.ToBase64String(_mainCharacter.Portrait)"
                              class="img-fluid rounded"
-                             alt="Portrait of @_mainCharacter.Name" />
+                             alt="Portrait of @_mainCharacter.Name"/>
                     </div>
                 }
             </div>
