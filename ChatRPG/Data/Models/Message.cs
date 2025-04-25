@@ -29,7 +29,7 @@ public class Message
     /// <returns>A copy of the message.</returns>
     public Message DeepCopy(Campaign campaign)
     {
-        return new Message(campaign, Role, Content, Verdict?.DeepCopy(campaign))
+        return new Message(campaign, Role, Content, (Verdict != null ? new Verdict(campaign, Verdict.Content) : null))
         {
             Timestamp = Timestamp
         };
