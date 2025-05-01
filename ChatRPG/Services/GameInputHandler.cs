@@ -17,6 +17,14 @@ public class GameInputHandler
     private readonly Dictionary<SystemPromptType, string> _systemPromptsWithVerdict = new();
     private readonly AutoResetEvent _autoResetEvent = new(true);
 
+    private readonly Dictionary<string, string> _redirectionStrategies = new()
+    {
+        { "Hard Deny", "No" },
+        { "More Information", "Acktually" },
+        { "NPC Influence", "Sarmi says" },
+        { "Consequences", "Kill" }
+    };
+
     public GameInputHandler(
         ILogger<GameInputHandler> logger,
         IReActLlmClient llmClient,
@@ -43,6 +51,22 @@ public class GameInputHandler
         _systemPrompts.Add(SystemPromptType.GameOver, sysPromptSec.GetValue("GameOver", ""));
         _systemPromptsWithVerdict.Add(SystemPromptType.DoAction, sysPromptSec.GetValue("DoActionWithVerdict", ""));
         _systemPromptsWithVerdict.Add(SystemPromptType.SayAction, sysPromptSec.GetValue("SayActionWithVerdict", ""));
+        _systemPromptsWithVerdict.Add(SystemPromptType.DoActionHardDeny,
+            sysPromptSec.GetValue("DoActionHardDenyRedirect", ""));
+        _systemPromptsWithVerdict.Add(SystemPromptType.DoActionMoreInfo,
+            sysPromptSec.GetValue("DoActionMoreInformationRedirect", ""));
+        _systemPromptsWithVerdict.Add(SystemPromptType.DoActionNpcInfluence,
+            sysPromptSec.GetValue("DoActionNPCInfluenceRedirect", ""));
+        _systemPromptsWithVerdict.Add(SystemPromptType.DoActionConsequences,
+            sysPromptSec.GetValue("DoActionConsequencesRedirect", ""));
+        _systemPromptsWithVerdict.Add(SystemPromptType.SayActionHardDeny,
+            sysPromptSec.GetValue("SayActionHardDenyRedirect", ""));
+        _systemPromptsWithVerdict.Add(SystemPromptType.SayActionMoreInfo,
+            sysPromptSec.GetValue("SayActionMoreInformationRedirect", ""));
+        _systemPromptsWithVerdict.Add(SystemPromptType.SayActionNpcInfluence,
+            sysPromptSec.GetValue("SayActionNPCInfluenceRedirect", ""));
+        _systemPromptsWithVerdict.Add(SystemPromptType.SayActionConsequences,
+            sysPromptSec.GetValue("SayActionConsequencesRedirect", ""));
     }
 
     public event EventHandler<ChatCompletionReceivedEventArgs>? ChatCompletionReceived;
@@ -88,18 +112,55 @@ public class GameInputHandler
             }
         }
 
-        switch (promptType)
+        if (campaign.IsSnapshot && userInputAdherenceVerdict != null &&
+            userInputAdherenceVerdict.Contains("DISALLOWED", StringComparison.Ordinal))
         {
-            case UserPromptType.Do:
-                await GetResponseAndUpdateState(campaign, relevantSystemPrompts[SystemPromptType.DoAction],
-                    userInput, userInputAdherenceVerdict, graphUpdateSummary);
-                break;
-            case UserPromptType.Say:
-                await GetResponseAndUpdateState(campaign, relevantSystemPrompts[SystemPromptType.SayAction],
-                    userInput, userInputAdherenceVerdict, graphUpdateSummary);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
+            switch (promptType)
+            {
+                case UserPromptType.Do:
+                    await GetResponseAndUpdateState(campaign, relevantSystemPrompts[SystemPromptType.DoActionHardDeny],
+                        userInput, userInputAdherenceVerdict, graphUpdateSummary, "A.\n\n");
+                    await GetResponseAndUpdateState(campaign, relevantSystemPrompts[SystemPromptType.DoActionMoreInfo],
+                        userInput, userInputAdherenceVerdict, graphUpdateSummary, "B.\n\n");
+                    await GetResponseAndUpdateState(campaign,
+                        relevantSystemPrompts[SystemPromptType.DoActionNpcInfluence],
+                        userInput, userInputAdherenceVerdict, graphUpdateSummary, "C.\n\n");
+                    await GetResponseAndUpdateState(campaign,
+                        relevantSystemPrompts[SystemPromptType.DoActionConsequences],
+                        userInput, userInputAdherenceVerdict, graphUpdateSummary, "D.\n\n");
+                    ;
+                    break;
+                case UserPromptType.Say:
+                    await GetResponseAndUpdateState(campaign, relevantSystemPrompts[SystemPromptType.SayActionHardDeny],
+                        userInput, userInputAdherenceVerdict, graphUpdateSummary, "A.\n\n");
+                    await GetResponseAndUpdateState(campaign, relevantSystemPrompts[SystemPromptType.SayActionMoreInfo],
+                        userInput, userInputAdherenceVerdict, graphUpdateSummary, "B.\n\n");
+                    await GetResponseAndUpdateState(campaign,
+                        relevantSystemPrompts[SystemPromptType.SayActionNpcInfluence],
+                        userInput, userInputAdherenceVerdict, graphUpdateSummary, "C.\n\n");
+                    await GetResponseAndUpdateState(campaign,
+                        relevantSystemPrompts[SystemPromptType.SayActionConsequences],
+                        userInput, userInputAdherenceVerdict, graphUpdateSummary, "D.\n\n");
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+        else
+        {
+            switch (promptType)
+            {
+                case UserPromptType.Do:
+                    await GetResponseAndUpdateState(campaign, relevantSystemPrompts[SystemPromptType.DoAction],
+                        userInput, userInputAdherenceVerdict, graphUpdateSummary);
+                    break;
+                case UserPromptType.Say:
+                    await GetResponseAndUpdateState(campaign, relevantSystemPrompts[SystemPromptType.SayAction],
+                        userInput, userInputAdherenceVerdict, graphUpdateSummary);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         _logger.LogInformation("Finished processing prompt");
@@ -122,7 +183,7 @@ public class GameInputHandler
     }
 
     private async Task GetResponseAndUpdateState(Campaign campaign, string actionPrompt, string playerInput,
-        string? verdict = null, string? graphUpdateSummary = null)
+        string? verdict = null, string? graphUpdateSummary = null, string? redirectionPrefix = null)
     {
         var input = playerInput;
         if (!campaign.IsOpenWorld)
@@ -145,7 +206,7 @@ public class GameInputHandler
 
         if (_streamChatCompletions)
         {
-            OpenAiGptMessage message = new(MessageRole.Assistant, "");
+            OpenAiGptMessage message = new(MessageRole.Assistant, redirectionPrefix ?? "");
             OnChatCompletionReceived(message);
 
             await foreach (var chunk in
@@ -164,14 +225,20 @@ public class GameInputHandler
 
             _ = Task.Run(async () =>
             {
-                await SaveInteraction(campaign, playerInput, message.Content, verdict, gameOverMessage);
+                if (!campaign.IsSnapshot || campaign.IsSnapshot &&
+                    (verdict != null && !verdict.Contains("DISALLOWED", StringComparison.Ordinal)))
+                {
+                    await SaveInteraction(campaign, playerInput, message.Content, verdict, gameOverMessage);
+                }
+
                 _autoResetEvent.Set();
+                OnCampaignUpdated();
             });
         }
         else
         {
             var response = await _llmClient.GetChatCompletionAsync(campaign, actionPrompt, input);
-            OpenAiGptMessage message = new(MessageRole.Assistant, response);
+            OpenAiGptMessage message = new(MessageRole.Assistant, redirectionPrefix ?? "" + response);
             OnChatCompletionReceived(message);
 
             string? gameOverMessage = null;
@@ -182,8 +249,14 @@ public class GameInputHandler
 
             _ = Task.Run(async () =>
             {
-                await SaveInteraction(campaign, playerInput, message.Content, verdict, gameOverMessage);
+                if (!campaign.IsSnapshot || campaign.IsSnapshot &&
+                    (verdict != null && !verdict.Contains("DISALLOWED", StringComparison.Ordinal)))
+                {
+                    await SaveInteraction(campaign, playerInput, message.Content, verdict, gameOverMessage);
+                }
+
                 _autoResetEvent.Set();
+                OnCampaignUpdated();
             });
         }
     }
