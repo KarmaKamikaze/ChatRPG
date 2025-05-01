@@ -4,7 +4,6 @@ using ChatRPG.Data.Models;
 using ChatRPG.Services.Events;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.JSInterop;
 using Environment = ChatRPG.Data.Models.Environment;
 using OpenAiGptMessage = ChatRPG.API.OpenAiGptMessage;
@@ -49,13 +48,7 @@ public partial class CampaignPage : IAsyncDisposable
     private JsInteropService? JsService { get; set; }
 
     [Inject]
-    private IConfiguration? Configuration { get; set; }
-
-    [Inject]
     private AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
-
-    [Inject]
-    private UserManager<User>? UserManager { get; set; }
 
     [Inject]
     private IPersistenceService? PersistenceService { get; set; }
@@ -158,13 +151,6 @@ public partial class CampaignPage : IAsyncDisposable
     {
         _userInput = currentInput;
         await SendPrompt();
-    }
-
-    public async Task SaveSnapshotAsync()
-    {
-        var user = await UserManager!.GetUserAsync((await AuthenticationStateProvider!.GetAuthenticationStateAsync())
-            .User);
-        await PersistenceService!.SaveSnapshotAsync(_campaign!, user!);
     }
 
     /// <summary>

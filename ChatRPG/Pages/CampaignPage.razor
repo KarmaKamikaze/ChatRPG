@@ -122,14 +122,6 @@
 
         <div class="col player-info floating-stats rounded text-white" style="position: relative;">
             <div class="sticky">
-                @if (Configuration != null && (Configuration.GetValue<bool>("EnableSnapshots")) && _campaign is { IsSnapshot: false })
-                {
-                    <div class="mx-4 mt-4 text-center">
-                        <button class="btn btn-warning" @onclick="SaveSnapshotAsync">
-                            Save Campaign Snapshot
-                        </button>
-                    </div>
-                }
                 <div class="mx-4 mt-3">
                     <h3 class="text-center mb-4">@_mainCharacter?.Name</h3>
                     <div class="card card-dim mb-2 text-black text-center scrollbar"

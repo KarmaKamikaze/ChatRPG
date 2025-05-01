@@ -10,8 +10,7 @@ namespace ChatRPG.Services;
 /// </summary>
 public class EfPersistenceService(
     ILogger<EfPersistenceService> logger,
-    ApplicationDbContext dbContext,
-    ScenarioDocumentService scenarioDocumentService)
+    ApplicationDbContext dbContext)
     : IPersistenceService
 {
     /// <inheritdoc />
@@ -102,13 +101,5 @@ public class EfPersistenceService(
     public async Task<List<StartScenario>> GetStartScenarios()
     {
         return await dbContext.StartScenarios.ToListAsync();
-    }
-
-    /// <inheritdoc />
-    public async Task SaveSnapshotAsync(Campaign campaign, User user)
-    {
-        var snapshot = campaign.DeepCopy(user, $"Snapshot of {campaign.Title}");
-        await SaveAsync(snapshot);
-        await scenarioDocumentService.CopyScenarioEmbeddingForSnapshot(campaign.Id, snapshot.Id);
     }
 }
