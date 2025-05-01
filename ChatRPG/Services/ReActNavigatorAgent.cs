@@ -117,7 +117,7 @@ public class ReActNavigatorAgent
 
             #### **If traversal is NOT allowed:**
             Returns a string showing each edge condition and whether it was met.
-            
+
               **Example:**
               `"condition_1: true condition_2: false"`
 

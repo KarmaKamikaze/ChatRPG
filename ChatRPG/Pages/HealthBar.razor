@@ -10,9 +10,13 @@
 
 @code {
 
-    [Parameter] [EditorRequired] public int? MaxHealth { get; set; }
+    [Parameter]
+    [EditorRequired]
+    public int? MaxHealth { get; set; }
 
-    [Parameter] [EditorRequired] public int? CurrentHealth { get; set; }
+    [Parameter]
+    [EditorRequired]
+    public int? CurrentHealth { get; set; }
 
     private int? Percentage => (int?)((double?)CurrentHealth / MaxHealth * 100);
 }

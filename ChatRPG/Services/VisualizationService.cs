@@ -5,7 +5,7 @@ namespace ChatRPG.Services;
 
 public class VisualizationService(IConfiguration configuration)
 {
-    private bool _shouldVisualizeNarrativeGraph = configuration.GetValue<bool>("ShouldVisualizeNarrativeGraph");
+    private readonly bool _shouldVisualizeNarrativeGraph = configuration.GetValue<bool>("ShouldVisualizeNarrativeGraph");
 
     public void VisualizeNarrativeGraphIfEnabled(NarrativeGraph graph)
     {

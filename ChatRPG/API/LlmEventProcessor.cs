@@ -7,7 +7,7 @@ namespace ChatRPG.API;
 
 public class LlmEventProcessor
 {
-    private readonly object _lock = new object();
+    private readonly Lock _lock = new Lock();
     private readonly StringBuilder _buffer = new StringBuilder();
     private bool _foundFinalAnswer = false;
     private readonly Channel<string> _channel = Channel.CreateUnbounded<string>();

@@ -9,7 +9,9 @@
 </div>
 
 @code {
-    [Parameter] public required OpenAiGptMessage Message { get; set; }
+
+    [Parameter]
+    public required OpenAiGptMessage Message { get; set; }
 
     private string MessagePrefix => Message.Role switch
     {
