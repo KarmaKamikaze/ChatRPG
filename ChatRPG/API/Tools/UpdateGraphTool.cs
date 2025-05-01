@@ -58,7 +58,7 @@ public class UpdateGraphTool(
 
             var response = await CheckConditions(edge);
 
-            // If all retry attempt are spent, response and edge conditions are null. Therefore, instruct Archivist to try again.
+            // If all retry attempts are spent, response and edge conditions are null. Therefore, instruct agent to try again.
             if (response?.EdgeConditions is null)
             {
                 return "Failed to check conditions for updating the graph. Please try again.";
