@@ -1,0 +1,36 @@
+﻿namespace ChatRPG.API.Tools.InputModels;
+
+public class AddEdgeInput
+{
+    public List<string>? Conditions { get; set; }
+    public string? SourceNodeName { get; set; }
+    public string? TargetNodeName { get; set; }
+
+    public bool IsValid(out List<string> validationErrors)
+    {
+        validationErrors = [];
+
+        if (string.IsNullOrWhiteSpace(SourceNodeName))
+            validationErrors.Add("SourceNodeName is required.");
+
+        if (string.IsNullOrWhiteSpace(TargetNodeName))
+            validationErrors.Add("TargetNodeName is required.");
+
+        if (Conditions is null || Conditions.Count == 0)
+        {
+            validationErrors.Add("Conditions list is required.");
+        }
+        else
+        {
+            foreach (var condition in Conditions)
+            {
+                if (string.IsNullOrWhiteSpace(condition))
+                {
+                    validationErrors.Add("Condition is required.");
+                }
+            }
+        }
+
+        return validationErrors.Count == 0;
+    }
+}

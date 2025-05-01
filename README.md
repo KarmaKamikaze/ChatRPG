@@ -89,7 +89,7 @@ dotnet build --configuration Release
 
 4. Navigate to the build folder and run the program
 
-**Important**: Please read the *Setting up Entity Framework* section before running the game.
+**Important**: Please read the _Setting up Entity Framework_ section before running the game.
 
 ```shell
 cd bin/Release/net8.0/
@@ -127,6 +127,12 @@ dotnet ef database update
 
 The database used in the connection string should now be up-to-date and ready for use.
 
+#### Installing pgvector Extension
+
+To use our vector-based search features, you must install the `pgvector` extension in your PostgreSQL database.
+
+Follow the instructions on the official [pgvector GitHub page](https://github.com/pgvector/pgvector) to install the extension.
+
 #### Making changes to the data model
 
 Internally, EF uses the migration scripts in `/ChatRPG/Data/Migrations/` to create the data model (tables, constraints,
@@ -140,12 +146,12 @@ To make changes to the data model, follow these steps:
 2. Make the required changes, e.g. by changing the database context (`/ChatRPG/Data/ApplicationDbContext.cs`), or by
    adding/altering models in `/ChatRPG/Data/Models/`.
 3. Run the following command, which will generate a migration named `[DATE_AND_TIME]_[NAME_OF_MIGRATION].cs`:
-    ```shell
-    dotnet ef migrations add [NAME_OF_MIGRATION]
-    ```
+   ```shell
+   dotnet ef migrations add [NAME_OF_MIGRATION]
+   ```
 4. To apply this migration, run the command:
-    ```shell
-    dotnet ef database update
+   ```shell
+   dotnet ef database update
    ```
 
 The local data model should then be up-to-date.
@@ -158,20 +164,20 @@ and the captivating world that awaits. Dive in, make choices, and let the magic 
 #### Landing Page
 
 ![Landing Page](.github/images/landing-page.png)
-*Welcome to ChatRPG! The journey begins at our inviting landing page,
-setting the stage for the immersive adventures that await.*
+_Welcome to ChatRPG! The journey begins at our inviting landing page,
+setting the stage for the immersive adventures that await._
 
 #### Dashboard
 
 ![Dashboard](.github/images/dashboard.png)
-*Your control center for epic storytelling! The Dashboard lets users configure new campaigns,
-track progress, and seamlessly continue previous adventures.*
+_Your control center for epic storytelling! The Dashboard lets users configure new campaigns,
+track progress, and seamlessly continue previous adventures._
 
 #### Campaign Gameplay
 
 ![Campaign Gameplay](.github/images/campaign.png)
-*Step into the heart of the action! The Campaign Gameplay screen is where fantasy comes to life,
-with dynamic storytelling and AI-powered encounters.*
+_Step into the heart of the action! The Campaign Gameplay screen is where fantasy comes to life,
+with dynamic storytelling and AI-powered encounters._
 
 ## Contribute
 

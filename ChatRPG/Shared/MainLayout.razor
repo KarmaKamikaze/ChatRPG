@@ -1,4 +1,7 @@
 ﻿@inherits LayoutComponentBase
+@inject DialogService DialogService
+
+<RadzenDialog @ref="dialog"/>
 
 <PageTitle>ChatRPG</PageTitle>
 
@@ -20,3 +23,7 @@
         </div>
     </Authorized>
 </AuthorizeView>
+
+@code {
+    private RadzenDialog? dialog;
+}

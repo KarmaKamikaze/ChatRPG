@@ -6,10 +6,12 @@ using ChatRPG.Data.Models;
 using ChatRPG.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Environment = ChatRPG.Data.Models.Environment;
+using Radzen;
 using CampaignModel = ChatRPG.Data.Models.Campaign;
+using Environment = ChatRPG.Data.Models.Environment;
 
 namespace ChatRPG.Pages;
 
@@ -20,19 +22,58 @@ public partial class UserCampaignOverview : ComponentBase
     private List<StartScenario> StartScenarios { get; set; } = [];
     private bool TestFields { get; set; }
     private int TextAreaRows { get; set; } = 6;
+    private bool IsOpenWorld { get; set; } = true;
+    private bool IsProcessingPdfFile { get; set; } = false;
+    private byte[]? UploadedFile { get; set; }
+    private string FileUploadError { get; set; } = string.Empty;
+    private double ProgressValue { get; set; } = 0;
 
-    [Required][BindProperty] private string CampaignTitle { get; set; } = "";
-    [Required][BindProperty] private string CharacterName { get; set; } = "";
-    [BindProperty] private string CharacterDescription { get; set; } = "";
-    [BindProperty] private string StartScenario { get; set; } = null!;
+    [Required]
+    [BindProperty]
+    private string CampaignTitle { get; set; } = "";
 
-    [Inject] private AuthenticationStateProvider? AuthProvider { get; set; }
-    [Inject] private UserManager<User>? UserManager { get; set; }
-    [Inject] private IPersistenceService? PersistenceService { get; set; }
-    [Inject] private ICampaignMediatorService? CampaignMediatorService { get; set; }
-    [Inject] private NavigationManager? NavMan { get; set; }
+    [Required]
+    [BindProperty]
+    private string CharacterName { get; set; } = "";
 
-    [CascadingParameter] public IModalService? ConfirmDeleteModal { get; set; }
+    [BindProperty]
+    private string CharacterDescription { get; set; } = "";
+
+    [BindProperty]
+    private string StartScenario { get; set; } = null!;
+
+    [Inject]
+    private AuthenticationStateProvider? AuthProvider { get; set; }
+
+    [Inject]
+    private UserManager<User>? UserManager { get; set; }
+
+    [Inject]
+    private IPersistenceService? PersistenceService { get; set; }
+
+    [Inject]
+    private VisualizationService? VisualizationService { get; set; }
+
+    [Inject]
+    private PortraitGenerator? PortraitGenerator { get; set; }
+
+    [Inject]
+    private ICampaignMediatorService? CampaignMediatorService { get; set; }
+
+    [Inject]
+    private NavigationManager? NavMan { get; set; }
+
+    [Inject]
+    private ScenarioDocumentService? ScenarioDocumentService { get; set; }
+
+    [Inject]
+    private ReActScribeAgent? ReActScribeAgent { get; set; }
+
+    [Inject]
+    private DialogService? DialogService { get; set; }
+
+    [CascadingParameter]
+    public IModalService? ConfirmDeleteModal { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -58,13 +99,39 @@ public partial class UserCampaignOverview : ComponentBase
             return;
         }
 
-        CampaignModel campaign = new(User, CampaignTitle, StartScenario);
+        CampaignModel campaign = new(User, CampaignTitle, StartScenario, IsOpenWorld);
         Environment environment = new(campaign, "Start location", "The place where it all began");
         Character player = new(campaign, environment, CharacterType.Humanoid, CharacterName, CharacterDescription,
             true);
         campaign.Environments.Add(environment);
         campaign.Characters.Add(player);
-        await PersistenceService!.SaveAsync(campaign);
+        await PersistenceService!.SaveAsync(campaign); // Save the campaign ID to the database
+
+        if (!IsOpenWorld)
+        {
+            // Upload campaign documents to vector database
+            // UploadedFile should not be able to be null since the button is disabled if it is
+            await ScenarioDocumentService!.StoreScenarioEmbedding(campaign.Id, UploadedFile!);
+
+            var dialogTask = OpenScribeDialog();
+            var progress = new Progress<int>(value =>
+            {
+                ProgressValue = value;
+                DialogService!.Refresh();
+                if (value == 100)
+                {
+                    DialogService.Close();
+                }
+            });
+            campaign.NarrativeGraph = await ReActScribeAgent!.ScribeNarrativeGraph(UploadedFile!, progress);
+            await dialogTask;
+
+            campaign.StartScenario = await ScenarioDocumentService.GenerateStartingScenario(campaign);
+            await PersistenceService!.SaveAsync(campaign);
+            VisualizationService!.VisualizeNarrativeGraphIfEnabled(campaign.NarrativeGraph);
+        }
+
+        await PortraitGenerator!.GeneratePortraitAsync(player, campaign.StartScenario!);
         LaunchCampaign(campaign.Id);
     }
 
@@ -148,5 +215,51 @@ public partial class UserCampaignOverview : ComponentBase
         }
 
         StateHasChanged();
+    }
+
+    private void OnCampaignTypeChange(bool value)
+    {
+        IsOpenWorld = value;
+        IsProcessingPdfFile = false;
+        FileUploadError = string.Empty;
+        UploadedFile = null;
+    }
+
+    private async Task HandleScenarioFileUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (!file.ContentType.Equals("application/pdf", StringComparison.OrdinalIgnoreCase))
+        {
+            FileUploadError = "Only PDF files are allowed.";
+            UploadedFile = null;
+        }
+        else
+        {
+            IsProcessingPdfFile = true;
+            FileUploadError = string.Empty;
+
+            try
+            {
+                using var memoryStream = new MemoryStream();
+                await file.OpenReadStream(maxAllowedSize: long.MaxValue).CopyToAsync(memoryStream);
+                UploadedFile = memoryStream.ToArray();
+            }
+            finally
+            {
+                IsProcessingPdfFile = false;
+            }
+        }
+    }
+
+    private Task<dynamic> OpenScribeDialog()
+    {
+        return DialogService!.OpenAsync("Processing...", rf => ScribeDialogFragment(),
+            new DialogOptions
+            {
+                Width = "600px",
+                CloseDialogOnOverlayClick = false,
+                CloseDialogOnEsc = false,
+                ShowClose = false
+            });
     }
 }

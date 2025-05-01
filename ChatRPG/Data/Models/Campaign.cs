@@ -13,19 +13,24 @@ public class Campaign
         StartedOn = DateTime.UtcNow;
     }
 
-    public Campaign(User user, string title, string startScenario) : this(user, title)
+    public Campaign(User user, string title, string startScenario, bool isOpenWorld) : this(user, title)
     {
         StartScenario = startScenario;
+        IsOpenWorld = isOpenWorld;
     }
 
     public int Id { get; private set; }
-    public string? StartScenario { get; private set; }
+    public string? StartScenario { get; set; }
     public User User { get; private set; } = null!;
     public string Title { get; private set; } = null!;
     public DateTime StartedOn { get; private set; }
     public ICollection<Message> Messages { get; } = new List<Message>();
-    public string? GameSummary { get; set; }
+    public string GameSummary { get; set; } = string.Empty;
     public ICollection<Character> Characters { get; } = new List<Character>();
     public ICollection<Environment> Environments { get; } = new List<Environment>();
     public Character Player => Characters.First(c => c.IsPlayer);
+    public bool IsOpenWorld { get; set; }
+    public NarrativeGraph? NarrativeGraph { get; set; }
+    public bool GameOver { get; set; } = false;
+    public bool IsSnapshot { get; set; } = false;
 }

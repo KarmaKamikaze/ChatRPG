@@ -8,7 +8,9 @@ namespace ChatRPG.Services;
 /// <summary>
 /// Service for persisting and loading changes from the data model using Entity Framework.
 /// </summary>
-public class EfPersistenceService(ILogger<EfPersistenceService> logger, ApplicationDbContext dbContext)
+public class EfPersistenceService(
+    ILogger<EfPersistenceService> logger,
+    ApplicationDbContext dbContext)
     : IPersistenceService
 {
     /// <inheritdoc />
@@ -63,13 +65,26 @@ public class EfPersistenceService(ILogger<EfPersistenceService> logger, Applicat
     /// <inheritdoc />
     public async Task<Campaign> LoadFromCampaignIdAsync(int campaignId)
     {
-        return await dbContext.Campaigns
+        var campaign = await dbContext.Campaigns
             .Where(campaign => campaign.Id == campaignId)
             .Include(campaign => campaign.Messages)
+            .ThenInclude(message => message.Verdict)
             .Include(campaign => campaign.Environments)
             .Include(campaign => campaign.Characters)
+            .Include(campaign => campaign.NarrativeGraph)
             .AsSplitQuery()
-            .FirstAsync();
+            .FirstOrDefaultAsync();
+
+        if (campaign?.NarrativeGraph != null)
+        {
+            await dbContext.Entry(campaign.NarrativeGraph)
+                .Collection(graph => graph.Nodes)
+                .Query()
+                .Include(node => node.Edges)
+                .LoadAsync();
+        }
+
+        return campaign!;
     }
 
     /// <inheritdoc />

@@ -1,10 +1,12 @@
 using System.Text;
 using System.Text.Json;
 using ChatRPG.API.Response;
+using ChatRPG.API.Tools.InputModels;
 using ChatRPG.Data.Models;
 using LangChain.Providers;
 using LangChain.Providers.OpenAI;
 using LangChain.Providers.OpenAI.Predefined;
+using MessageRole = ChatRPG.Data.Models.MessageRole;
 
 namespace ChatRPG.API.Tools;
 
@@ -31,18 +33,7 @@ public class ToolUtilities(IConfiguration configuration)
         query.Append(configuration.GetSection("SystemPrompts").GetValue<string>("FindCharacter")!
             .Replace("{instruction}", instruction));
 
-        query.Append($"\n\nThe story up until now: {campaign.GameSummary}");
-
-        if (_shouldIncludePreviousMessages)
-        {
-            var content = campaign.Messages.TakeLast(IncludedPreviousMessages).Select(m => m.Content);
-            query.Append(
-                "\n\nUse these previous messages as context. They only serve to give a hint of the current scenario:");
-            foreach (var message in content)
-            {
-                query.Append($"\n {message}");
-            }
-        }
+        query.Append(ConstructSummary(campaign, _shouldIncludePreviousMessages));
 
         query.Append("\n\nHere is the list of all characters present in the story:\n\n{\"characters\": [");
 
@@ -101,5 +92,63 @@ public class ToolUtilities(IConfiguration configuration)
         }
 
         return text;
+    }
+
+    public static string ConstructSummary(Campaign campaign, bool shouldIncludePreviousMessages)
+    {
+        var result = $"\n\nThe story up until now: {campaign.GameSummary}";
+
+        if (shouldIncludePreviousMessages)
+        {
+            var messages = campaign.Messages.TakeLast(IncludedPreviousMessages);
+            result +=
+                "\n\nUse these previous messages as context. They only serve to give a hint of the current scenario:";
+            foreach (var message in messages)
+            {
+                if (message.Role == MessageRole.User)
+                {
+                    result += $"\nPlayer: {message.Content}";
+                    if (message.Verdict is not null)
+                    {
+                        result += $"\nAdherence verdict: {message.Verdict.Content}";
+                    }
+                }
+                else
+                {
+                    result += $"\nGM: {message.Content}\n";
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public static bool NodesValidForNewEdge(NarrativeNode? sourceNode, NarrativeNode? targetNode, AddEdgeInput newEdge,
+        out List<string> errorMessages)
+    {
+        errorMessages = [];
+        if (targetNode is null)
+        {
+            errorMessages.Add($"Target node with name {newEdge.TargetNodeName} not found.");
+        }
+
+        if (sourceNode is null)
+        {
+            errorMessages.Add($"Source node with name {newEdge.SourceNodeName} not found.");
+        }
+        else if (sourceNode.Name == "End")
+        {
+            errorMessages.Add($"Node {sourceNode.Name} cannot have an edge to another node.");
+        }
+        else if (sourceNode == targetNode)
+        {
+            errorMessages.Add($"Node {sourceNode.Name} cannot have an edge to itself.");
+        }
+        else if (targetNode is not null && sourceNode.Edges.Any(e => e.TargetNode == targetNode))
+        {
+            errorMessages.Add($"An edge already exists between {newEdge.SourceNodeName} and {newEdge.TargetNodeName}.");
+        }
+
+        return errorMessages.Count == 0;
     }
 }

@@ -38,7 +38,8 @@
 @code {
     private bool _isHidden;
 
-    [Parameter, EditorRequired] public string Username { get; set; } = null!;
+    [Parameter, EditorRequired]
+    public string Username { get; set; } = null!;
 
     protected override void OnInitialized()
     {

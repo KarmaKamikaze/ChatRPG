@@ -1,11 +1,12 @@
 using System.Text.Json;
+using ChatRPG.API.Tools.InputModels;
 using ChatRPG.Data.Models;
 using LangChain.Chains.StackableChains.Agents.Tools;
 
 namespace ChatRPG.API.Tools;
 
 public class HealCharacterTool(
-    IConfiguration configuration,
+    string instruction,
     Campaign campaign,
     ToolUtilities utilities,
     string name,
@@ -31,7 +32,6 @@ public class HealCharacterTool(
             var healInput = JsonSerializer.Deserialize<HealInput>(ToolUtilities.RemoveMarkdown(input), JsonOptions) ??
                             throw new JsonException("Failed to deserialize");
 
-            var instruction = configuration.GetSection("SystemPrompts").GetValue<string>("HealCharacterInstruction")!;
             var character = await utilities.FindCharacter(campaign, healInput.Input!, instruction);
 
             if (character is null)

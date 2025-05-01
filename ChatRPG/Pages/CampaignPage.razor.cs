@@ -4,7 +4,6 @@ using ChatRPG.Data.Models;
 using ChatRPG.Services.Events;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using Environment = ChatRPG.Data.Models.Environment;
 using OpenAiGptMessage = ChatRPG.API.OpenAiGptMessage;
@@ -12,14 +11,17 @@ using OpenAiGptMessage = ChatRPG.API.OpenAiGptMessage;
 namespace ChatRPG.Pages;
 
 [SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
-public partial class CampaignPage
+public partial class CampaignPage : IAsyncDisposable
 {
     private string? _loggedInUsername;
     private IJSObjectReference? _scrollJsScript;
     private IJSObjectReference? _detectScrollBarJsScript;
+    private IJSObjectReference? _autoResizeJsScript;
+    private DotNetObjectReference<CampaignPage>? _dotNetRef;
+    private ElementReference _textAreaRef;
+    private string _userInput = "";
     private bool _hasScrollBar;
     private List<OpenAiGptMessage> _conversation = [];
-    private string _userInput = "";
     private bool _isWaitingForResponse;
     private bool _isArchiving;
     private const string BottomId = "bottom-id";
@@ -30,6 +32,7 @@ public partial class CampaignPage
     private UserPromptType _activeUserPromptType = UserPromptType.Do;
     private string _userInputPlaceholder = InputPlaceholder[UserPromptType.Do];
     private bool _pageInitialized;
+    private bool _initializingCampaignFirstMessage;
 
     private static readonly Dictionary<UserPromptType, string> InputPlaceholder = new()
     {
@@ -41,12 +44,23 @@ public partial class CampaignPage
         ? "margin-top: -25px; margin-bottom: -60px;"
         : "margin-top: 20px; margin-bottom: 60px;";
 
-    [Inject] private JsInteropService? JsService { get; set; }
-    [Inject] private AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
-    [Inject] private IPersistenceService? PersistenceService { get; set; }
-    [Inject] private ICampaignMediatorService? CampaignMediatorService { get; set; }
-    [Inject] private GameInputHandler? GameInputHandler { get; set; }
-    [Inject] private NavigationManager? NavMan { get; set; }
+    [Inject]
+    private JsInteropService? JsService { get; set; }
+
+    [Inject]
+    private AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
+
+    [Inject]
+    private IPersistenceService? PersistenceService { get; set; }
+
+    [Inject]
+    private ICampaignMediatorService? CampaignMediatorService { get; set; }
+
+    [Inject]
+    private GameInputHandler? GameInputHandler { get; set; }
+
+    [Inject]
+    private NavigationManager? NavMan { get; set; }
 
     /// <summary>
     /// Initializes the Campaign page component by setting up configuration parameters.
@@ -90,11 +104,16 @@ public partial class CampaignPage
         {
             _scrollJsScript ??= await JsService!.GetScrollModuleAsync();
             _detectScrollBarJsScript ??= await JsService!.GetDetectScrollBarModuleAsync();
+            _autoResizeJsScript ??= await JsService!.GetAutoResizeModuleAsync();
+            _dotNetRef = DotNetObjectReference.Create(this);
+            var textAreaHandlerJsScript = await JsService!.GetTextAreaHandlerModuleAsync();
+            await textAreaHandlerJsScript.InvokeVoidAsync("setupTextareaKeyHandler", _textAreaRef, _dotNetRef);
             await ScrollToElement(BottomId); // scroll down to latest message
         }
 
-        if (_pageInitialized && _conversation.Count == 0)
+        if (_pageInitialized && _conversation.Count == 0 && !_initializingCampaignFirstMessage)
         {
+            _initializingCampaignFirstMessage = true;
             await InitializeCampaign();
         }
     }
@@ -126,13 +145,12 @@ public partial class CampaignPage
     /// <summary>
     /// Handles the Enter key press event and sends the user input as a prompt to the LLM API.
     /// </summary>
-    /// <param name="e">A KeyboardEventArgs representing the keyboard event.</param>
-    private async Task EnterKeyHandler(KeyboardEventArgs e)
+    /// <param name="currentInput">The current text contained within the textarea.</param>
+    [JSInvokable("OnEnterPressed")]
+    public async Task OnEnterPressed(string currentInput)
     {
-        if (e.Code is "Enter" or "NumpadEnter")
-        {
-            await SendPrompt();
-        }
+        _userInput = currentInput;
+        await SendPrompt();
     }
 
     /// <summary>
@@ -257,5 +275,17 @@ public partial class CampaignPage
         _currentLocation = _campaign!.Player.Environment;
         _mainCharacter = _campaign!.Player;
         StateHasChanged();
+    }
+
+    private async Task ResizeTextArea()
+    {
+        await _autoResizeJsScript!.InvokeVoidAsync("autoResize", _textAreaRef);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await Task.Yield();
+        _dotNetRef?.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

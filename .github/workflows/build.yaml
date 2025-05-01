@@ -5,16 +5,18 @@ on:
   pull_request:
     branches: [master, dev]
 
+permissions: {}
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-      - name: Setup .NET 7.0
-        uses: actions/setup-dotnet@v3
+      - name: Setup .NET 9.0
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 7.0
+          dotnet-version: 9.0.x
       - name: Install dependencies
         run: dotnet restore
         working-directory: ChatRPG/
