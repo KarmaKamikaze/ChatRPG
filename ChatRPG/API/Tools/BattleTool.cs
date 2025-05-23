@@ -21,14 +21,14 @@ public class BattleTool(
     private static readonly Dictionary<string, double> HitChance = new()
     {
         { "high", 0.9 },
-        { "medium", 0.5 },
-        { "low", 0.3 },
-        { "impossible", 0.01 }
+        { "medium", 0.75 },
+        { "low", 0.5 },
+        { "impossible", 0.1 }
     };
 
     private static readonly Dictionary<string, (int, int)> DamageRanges = new()
     {
-        { "harmless", (0, 1) },
+        { "harmless", (1, 5) },
         { "low", (5, 10) },
         { "medium", (10, 20) },
         { "high", (15, 25) },

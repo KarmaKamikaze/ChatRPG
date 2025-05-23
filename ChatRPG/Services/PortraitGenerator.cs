@@ -34,15 +34,15 @@ public class PortraitGenerator
     public async Task GeneratePortraitAsync(Character character, string atmosphereDescription)
     {
         var prompt = $"""
+                      Style: highly detailed, cinematic lighting, fantasy digital painting, intricate textures, no text or text-boxes.
                       Create a portrait of {character.Name.Trim()}, described as {character.Description.Trim()}.
 
                       Let the following affect the background atmosphere and setting of this fantasy scenario:
                       {atmosphereDescription.Trim()}
-
-                      Style: highly detailed, cinematic lighting, fantasy digital painting, intricate textures, no text or text-boxes.
                       """;
 
-        var image = await _imageLlmClient.GenerateImageAsync(prompt, _imageGenerationOptions);
+        var image = await _imageLlmClient.GenerateImageAsync(prompt.Length > 4000 ? prompt[..4000] : prompt,
+            _imageGenerationOptions);
         character.Portrait = image.Value.ImageBytes.ToArray();
 
         await _persistenceService.SaveAsync(character.Campaign);

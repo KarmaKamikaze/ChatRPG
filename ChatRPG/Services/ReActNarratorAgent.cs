@@ -205,8 +205,6 @@ public class ReActNarratorAgent : IReActLlmClient
             - **`participant#HitChance` specifiers:** `{high, medium, low, impossible}`
             - **`participant#DamageSeverity` values:** `{harmless, low, medium, high, extraordinary}`
 
-            The narrative battle **ends** when each character has had the chance to attack another 
-            character **at most once**.
             """);
         tools.Add(battleTool);
 

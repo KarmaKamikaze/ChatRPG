@@ -5,5 +5,13 @@ public enum SystemPromptType
     Initial,
     DoAction,
     SayAction,
-    GameOver
+    GameOver,
+    DoActionHardDeny,
+    DoActionMoreInfo,
+    DoActionNpcInfluence,
+    DoActionConsequences,
+    SayActionHardDeny,
+    SayActionMoreInfo,
+    SayActionNpcInfluence,
+    SayActionConsequences,
 }
