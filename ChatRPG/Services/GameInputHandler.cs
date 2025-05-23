@@ -230,7 +230,7 @@ public class GameInputHandler
         else
         {
             var response = await _llmClient.GetChatCompletionAsync(campaign, actionPrompt, input);
-            OpenAiGptMessage message = new(MessageRole.Assistant, redirectionPrefix ?? "" + response);
+            OpenAiGptMessage message = new(MessageRole.Assistant, (redirectionPrefix ?? "") + response);
             OnChatCompletionReceived(message);
 
             string? gameOverMessage = null;
