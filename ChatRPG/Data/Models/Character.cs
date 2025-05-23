@@ -17,15 +17,18 @@ public class Character
         IsPlayer = isPlayer;
         MaxHealth = type switch
         {
-            CharacterType.Humanoid => 40,
-            CharacterType.SmallMonster => 15,
+            CharacterType.Humanoid => 50,
+            CharacterType.SmallMonster => 20,
             CharacterType.MediumMonster => 35,
-            CharacterType.LargeMonster => 55,
+            CharacterType.LargeMonster => 65,
             CharacterType.BossMonster => 90,
             _ => 50
         };
         if (isPlayer)
+        {
             MaxHealth = 100;
+        }
+
         CurrentHealth = MaxHealth;
     }
 

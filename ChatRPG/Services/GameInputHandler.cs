@@ -17,14 +17,6 @@ public class GameInputHandler
     private readonly Dictionary<SystemPromptType, string> _systemPromptsWithVerdict = new();
     private readonly AutoResetEvent _autoResetEvent = new(true);
 
-    private readonly Dictionary<string, string> _redirectionStrategies = new()
-    {
-        { "Hard Deny", "No" },
-        { "More Information", "Acktually" },
-        { "NPC Influence", "Sarmi says" },
-        { "Consequences", "Kill" }
-    };
-
     public GameInputHandler(
         ILogger<GameInputHandler> logger,
         IReActLlmClient llmClient,
