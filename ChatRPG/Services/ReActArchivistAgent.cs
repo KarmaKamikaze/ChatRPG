@@ -4,8 +4,6 @@ using ChatRPG.API.Tools;
 using ChatRPG.Data.Models;
 using LangChain.Chains.StackableChains.Agents.Tools;
 using LangChain.Providers;
-using LangChain.Providers.OpenAI;
-using LangChain.Providers.OpenAI.Predefined;
 using static LangChain.Chains.Chain;
 using Message = ChatRPG.Data.Models.Message;
 using MessageRole = ChatRPG.Data.Models.MessageRole;
@@ -14,22 +12,22 @@ namespace ChatRPG.Services;
 
 public class ReActArchivistAgent
 {
-    private readonly OpenAiProvider _provider;
+    private readonly LlmProviderFactory _llmProviderFactory;
     private readonly IPersistenceService _persistenceService;
     private readonly bool _archivistDebugMode;
     private readonly bool _summarizeMessages;
     private readonly string _reActPrompt;
 
-    public ReActArchivistAgent(IConfiguration configuration, IPersistenceService persistenceService)
+    public ReActArchivistAgent(IConfiguration configuration, LlmProviderFactory llmProviderFactory,
+        IPersistenceService persistenceService)
     {
-        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI"));
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts")
             .GetValue<string>("ArchivistReActPrompt"));
-        _provider = new OpenAiProvider(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
+        _llmProviderFactory = llmProviderFactory;
+        _persistenceService = persistenceService;
         _archivistDebugMode = configuration.GetValue<bool>("ArchivistChainDebug");
         _summarizeMessages = configuration.GetValue<bool>("ShouldSummarize");
         _reActPrompt = configuration.GetSection("SystemPrompts").GetValue<string>("ArchivistReActPrompt")!;
-        _persistenceService = persistenceService;
     }
 
     public async Task SaveCurrentState(Campaign campaign)
@@ -63,10 +61,7 @@ public class ReActArchivistAgent
         environments.Length--; // Remove last comma
         environments.Append("\n]}");
 
-        var llm = new Gpt4OmniModel(_provider)
-        {
-            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.7 }
-        };
+        var llm = _llmProviderFactory.CreateChatModel(temperature: 0.7);
 
         var agent = new ReActAgentChain(_archivistDebugMode ? llm.UseConsoleForDebug() : llm, reActPrompt: _reActPrompt,
             gameSummary: campaign.GameSummary, characters: characters.ToString(), playerCharacter: campaign.Player.Name,
@@ -213,10 +208,7 @@ public class ReActArchivistAgent
     {
         if (_summarizeMessages)
         {
-            var summaryLlm = new Gpt4OmniModel(_provider)
-            {
-                Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.4 }
-            };
+            var summaryLlm = _llmProviderFactory.CreateChatModel(temperature: 0.4);
 
             var newMessages = new List<LangChain.Providers.Message>
             {

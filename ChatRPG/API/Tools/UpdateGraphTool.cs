@@ -3,15 +3,15 @@ using System.Text.Json;
 using ChatRPG.API.Response;
 using ChatRPG.API.Tools.InputModels;
 using ChatRPG.Data.Models;
+using ChatRPG.Services;
+using ChatRPG.API;
 using LangChain.Chains.StackableChains.Agents.Tools;
-using LangChain.Providers;
-using LangChain.Providers.OpenAI;
-using LangChain.Providers.OpenAI.Predefined;
 
 namespace ChatRPG.API.Tools;
 
 public class UpdateGraphTool(
     IConfiguration configuration,
+    LlmProviderFactory llmProviderFactory,
     Campaign campaign,
     string playerInput,
     string examinerVerdict,
@@ -181,11 +181,7 @@ public class UpdateGraphTool(
 
     private async Task<LlmResponseEdgeConditions?> CheckConditions(NarrativeEdge edge)
     {
-        var provider = new OpenAiProvider(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
-        var llm = new Gpt4OmniModel(provider)
-        {
-            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.1 },
-        };
+        var llm = llmProviderFactory.CreateChatModel(temperature: 0.1);
 
         var previousAttemptHistory = string.Empty;
 
@@ -199,7 +195,7 @@ public class UpdateGraphTool(
                 .Replace("{edge}", edge.Serialize())
                 .Replace("{history}", previousAttemptHistory));
 
-            var responseJson = await llm.GenerateAsync(query.ToString());
+            var responseJson = await llm.GenerateAsTextAsync(query.ToString());
 
             var response = JsonSerializer.Deserialize<LlmResponseEdgeConditions>(
                 ToolUtilities.RemoveMarkdown(responseJson.ToString()),
