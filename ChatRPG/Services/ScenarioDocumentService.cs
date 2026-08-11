@@ -22,7 +22,7 @@ public class ScenarioDocumentService
             .GetValue<string>("DefaultConnection"));
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts")
             .GetValue<string>("StartingScenario"));
-        
+
         _connectionString = configuration.GetSection("ConnectionStrings")
             .GetValue<string>("DefaultConnection")!;
         _startingScenarioPrompt = configuration.GetSection("SystemPrompts").GetValue<string>("StartingScenario")!;
