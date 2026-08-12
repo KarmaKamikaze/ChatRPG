@@ -3,8 +3,6 @@ using ChatRPG.API.Tools;
 using ChatRPG.Data.Models;
 using LangChain.Chains.StackableChains.Agents.Tools;
 using LangChain.Providers;
-using LangChain.Providers.OpenAI;
-using LangChain.Providers.OpenAI.Predefined;
 using static LangChain.Chains.Chain;
 
 namespace ChatRPG.Services;
@@ -12,23 +10,21 @@ namespace ChatRPG.Services;
 public class ReActExaminerAgent
 {
     private readonly IConfiguration _configuration;
-    private readonly Gpt4OmniModel _llm;
+    private readonly LlmProviderFactory _llmProviderFactory;
+    private readonly ChatModel _llm;
     private readonly bool _examinerDebugMode;
     private readonly bool _shouldIncludePreviousMessages;
     private readonly string _reactPrompt;
 
 
-    public ReActExaminerAgent(IConfiguration configuration)
+    public ReActExaminerAgent(IConfiguration configuration, LlmProviderFactory llmProviderFactory)
     {
-        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI"));
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts")
             .GetValue<string>("ExaminerReActPrompt"));
         _configuration = configuration;
-        var provider = new OpenAiProvider(_configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
-        _llm = new Gpt4OmniModel(provider)
-        {
-            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.4 }
-        };
+        _llmProviderFactory = llmProviderFactory;
+        _llm = _llmProviderFactory.CreateChatModel(temperature: 0.4);
+
         _reactPrompt = _configuration.GetSection("SystemPrompts").GetValue<string>("ExaminerReActPrompt")!;
         _examinerDebugMode = _configuration.GetValue<bool>("ExaminerChainDebug");
         _shouldIncludePreviousMessages = _configuration.GetValue<bool>("ShouldSummarize");
@@ -59,6 +55,7 @@ public class ReActExaminerAgent
 
         var searchScenarioTool = await SearchScenarioTool.CreateAsync(
             _configuration,
+            _llmProviderFactory,
             campaign,
             "searchscenariotool",
             """

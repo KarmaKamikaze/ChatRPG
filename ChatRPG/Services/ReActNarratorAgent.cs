@@ -3,8 +3,6 @@ using ChatRPG.API.Tools;
 using ChatRPG.Data.Models;
 using LangChain.Chains.StackableChains.Agents.Tools;
 using LangChain.Providers;
-using LangChain.Providers.OpenAI;
-using LangChain.Providers.OpenAI.Predefined;
 using static LangChain.Chains.Chain;
 
 namespace ChatRPG.Services;
@@ -12,25 +10,23 @@ namespace ChatRPG.Services;
 public class ReActNarratorAgent : IReActLlmClient
 {
     private readonly IConfiguration _configuration;
-    private readonly OpenAiProvider _provider;
+    private readonly LlmProviderFactory _llmProviderFactory;
     private readonly bool _narratorDebugMode;
     private readonly bool _shouldIncludePreviousMessages;
 
-    public ReActNarratorAgent(IConfiguration configuration)
+    public ReActNarratorAgent(IConfiguration configuration, LlmProviderFactory llmProviderFactory)
     {
-        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI"));
+        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts")
+            .GetValue<string>("NarratorReActPrompt"));
         _configuration = configuration;
-        _provider = new OpenAiProvider(_configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
+        _llmProviderFactory = llmProviderFactory;
         _narratorDebugMode = _configuration.GetValue<bool>("NarrativeChainDebug");
         _shouldIncludePreviousMessages = _configuration.GetValue<bool>("ShouldSummarize");
     }
 
     public async Task<string> GetChatCompletionAsync(Campaign campaign, string actionPrompt, string input)
     {
-        var llm = new Gpt4OmniModel(_provider)
-        {
-            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.7 }
-        };
+        var llm = _llmProviderFactory.CreateChatModel(temperature: 0.7);
 
         var agent = SelectAgent(campaign, llm, actionPrompt);
 
@@ -47,10 +43,7 @@ public class ReActNarratorAgent : IReActLlmClient
     public async IAsyncEnumerable<string> GetStreamedChatCompletionAsync(Campaign campaign, string actionPrompt,
         string input)
     {
-        var llm = new Gpt4OmniModel(_provider)
-        {
-            Settings = new OpenAiChatSettings() { UseStreaming = true, Temperature = 0.7 }
-        };
+        var llm = _llmProviderFactory.CreateChatModel(temperature: 0.7, useStreaming: true);
 
         var eventProcessor = new LlmEventProcessor(llm);
         var agent = SelectAgent(campaign, llm, actionPrompt);
@@ -75,7 +68,7 @@ public class ReActNarratorAgent : IReActLlmClient
     private async Task<List<AgentTool>> CreateTools(Campaign campaign)
     {
         var tools = new List<AgentTool>();
-        var utils = new ToolUtilities(_configuration);
+        var utils = new ToolUtilities(_configuration, _llmProviderFactory);
 
         var woundCharacterTool = new WoundCharacterTool(
             _configuration.GetSection("SystemPrompts").GetValue<string>("WoundCharacterInstruction")!,
@@ -214,6 +207,7 @@ public class ReActNarratorAgent : IReActLlmClient
         {
             var searchScenarioTool = await SearchScenarioTool.CreateAsync(
                 _configuration,
+                _llmProviderFactory,
                 campaign,
                 "searchscenariotool",
                 """
@@ -305,10 +299,10 @@ public class ReActNarratorAgent : IReActLlmClient
     /// Selects the appropriate ReActAgentChain based on if the campaign utilizes a NarrativeGraph.
     /// </summary>
     /// <param name="campaign">The campaign being played.</param>
-    /// <param name="llm">The OpenAI LLM model.</param>
+    /// <param name="llm">The LLM model.</param>
     /// <param name="actionPrompt">A specific prompt based on the action mode selected by the player.</param>
     /// <returns>An agent that utilizes a NarrativeGraph if necessary.</returns>
-    private ReActAgentChain SelectAgent(Campaign campaign, Gpt4OmniModel llm, string actionPrompt)
+    private ReActAgentChain SelectAgent(Campaign campaign, ChatModel llm, string actionPrompt)
     {
         // Create the ReActAgentChain with the campaign's NarrativeGraph if it exists, meaning the game is running in
         // pre-defined scenarios. Otherwise, create the agent without the NarrativeGraph for open-world.

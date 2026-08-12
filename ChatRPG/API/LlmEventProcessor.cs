@@ -1,7 +1,6 @@
 using System.Text;
 using System.Threading.Channels;
 using LangChain.Providers;
-using LangChain.Providers.OpenAI;
 
 namespace ChatRPG.API;
 
@@ -12,7 +11,7 @@ public class LlmEventProcessor
     private bool _foundFinalAnswer = false;
     private readonly Channel<string> _channel = Channel.CreateUnbounded<string>();
 
-    public LlmEventProcessor(OpenAiChatModel model)
+    public LlmEventProcessor(ChatModel model)
     {
         model.DeltaReceived += OnDeltaReceived;
         model.ResponseReceived += OnResponseReceived;

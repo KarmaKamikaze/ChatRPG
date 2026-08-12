@@ -3,14 +3,13 @@ using System.Text.Json;
 using ChatRPG.API.Response;
 using ChatRPG.API.Tools.InputModels;
 using ChatRPG.Data.Models;
-using LangChain.Providers;
-using LangChain.Providers.OpenAI;
-using LangChain.Providers.OpenAI.Predefined;
+using ChatRPG.Services;
+using ChatRPG.API;
 using MessageRole = ChatRPG.Data.Models.MessageRole;
 
 namespace ChatRPG.API.Tools;
 
-public class ToolUtilities(IConfiguration configuration)
+public class ToolUtilities(IConfiguration configuration, LlmProviderFactory llmProviderFactory)
 {
     private const int IncludedPreviousMessages = 4;
     private readonly bool _shouldIncludePreviousMessages = configuration.GetValue<bool>("ShouldSummarize");
@@ -22,11 +21,7 @@ public class ToolUtilities(IConfiguration configuration)
 
     public async Task<Character?> FindCharacter(Campaign campaign, string input, string instruction)
     {
-        var provider = new OpenAiProvider(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
-        var llm = new Gpt4OmniModel(provider)
-        {
-            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.1 }
-        };
+        var llm = llmProviderFactory.CreateChatModel(temperature: 0.1);
 
         // Add system prompt and construct LLM query
         var query = new StringBuilder();
@@ -51,7 +46,7 @@ public class ToolUtilities(IConfiguration configuration)
 
         query.Append($"\n\nFind the character using the following content: {input}.");
 
-        var response = await llm.GenerateAsync(query.ToString());
+        var response = await llm.GenerateAsTextAsync(query.ToString());
 
         try
         {

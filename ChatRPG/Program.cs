@@ -27,6 +27,7 @@ builder.Services.AddBlazoredModal();
 
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<User>>()
     .AddScoped<Radzen.DialogService>()
+    .AddSingleton<LlmProviderFactory>()
     .AddTransient<IReActLlmClient, ReActNarratorAgent>()
     .AddScoped<IPersistenceService, EfPersistenceService>()
     .AddTransient<IEmailSender, EmailSender>()

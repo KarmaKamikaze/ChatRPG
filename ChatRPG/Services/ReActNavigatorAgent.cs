@@ -3,8 +3,6 @@ using ChatRPG.API.Tools;
 using ChatRPG.Data.Models;
 using LangChain.Chains.StackableChains.Agents.Tools;
 using LangChain.Providers;
-using LangChain.Providers.OpenAI;
-using LangChain.Providers.OpenAI.Predefined;
 using static LangChain.Chains.Chain;
 
 namespace ChatRPG.Services;
@@ -12,22 +10,20 @@ namespace ChatRPG.Services;
 public class ReActNavigatorAgent
 {
     private readonly IConfiguration _configuration;
-    private readonly Gpt4OmniModel _llm;
+    private readonly LlmProviderFactory _llmProviderFactory;
+    private readonly ChatModel _llm;
     private readonly bool _navigatorDebugMode;
     private readonly bool _shouldIncludePreviousMessages;
     private readonly string _reactPrompt;
 
-    public ReActNavigatorAgent(IConfiguration configuration)
+    public ReActNavigatorAgent(IConfiguration configuration, LlmProviderFactory llmProviderFactory)
     {
-        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI"));
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts")
             .GetValue<string>("NavigatorReActPrompt"));
         _configuration = configuration;
-        var provider = new OpenAiProvider(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
-        _llm = new Gpt4OmniModel(provider)
-        {
-            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.4 }
-        };
+        _llmProviderFactory = llmProviderFactory;
+        _llm = _llmProviderFactory.CreateChatModel(temperature: 0.4);
+
         _reactPrompt = configuration.GetSection("SystemPrompts").GetValue<string>("NavigatorReActPrompt")!;
         _navigatorDebugMode = configuration.GetValue<bool>("NavigatorChainDebug");
         _shouldIncludePreviousMessages = configuration.GetValue<bool>("ShouldSummarize");
@@ -64,6 +60,7 @@ public class ReActNavigatorAgent
 
         var updateGraphTool = new UpdateGraphTool(
             _configuration,
+            _llmProviderFactory,
             campaign,
             playerInput,
             examinerVerdict,

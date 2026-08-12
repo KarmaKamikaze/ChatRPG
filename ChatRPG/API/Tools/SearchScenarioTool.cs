@@ -2,12 +2,12 @@ using System.Text;
 using System.Text.Json;
 using ChatRPG.API.Tools.InputModels;
 using ChatRPG.Data.Models;
+using ChatRPG.Services;
 using LangChain.Chains.StackableChains.Agents.Tools;
 using LangChain.Databases;
 using LangChain.Databases.Postgres;
 using LangChain.Extensions;
-using LangChain.Providers.OpenAI;
-using LangChain.Providers.OpenAI.Predefined;
+using LangChain.Providers;
 using static LangChain.Chains.Chain;
 
 namespace ChatRPG.API.Tools;
@@ -17,8 +17,8 @@ public class SearchScenarioTool : AgentTool
     private readonly IConfiguration _configuration;
     private readonly Campaign _campaign;
     private readonly bool _shouldIncludePreviousMessages;
-    private readonly TextEmbeddingV3SmallModel _embeddingModel;
-    private readonly Gpt4OmniModel _llm;
+    private readonly IEmbeddingModel _embeddingModel;
+    private readonly ChatModel _llm;
     private IVectorCollection _vectorCollection = null!; // Initialized in CreateAsync
 
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -28,11 +28,12 @@ public class SearchScenarioTool : AgentTool
 
     public static async Task<SearchScenarioTool> CreateAsync(
         IConfiguration configuration,
+        LlmProviderFactory llmProviderFactory,
         Campaign campaign,
         string name,
         string? description = null)
     {
-        var searchScenarioTool = new SearchScenarioTool(configuration, campaign, name, description);
+        var searchScenarioTool = new SearchScenarioTool(configuration, llmProviderFactory, campaign, name, description);
 
         var vectorDatabase =
             new PostgresVectorDatabase(configuration.GetSection("ConnectionStrings")
@@ -44,6 +45,7 @@ public class SearchScenarioTool : AgentTool
 
     private SearchScenarioTool(
         IConfiguration configuration,
+        LlmProviderFactory llmProviderFactory,
         Campaign campaign,
         string name,
         string? description = null) : base(name, description)
@@ -51,12 +53,8 @@ public class SearchScenarioTool : AgentTool
         _configuration = configuration;
         _campaign = campaign;
         _shouldIncludePreviousMessages = configuration.GetValue<bool>("ShouldSummarize");
-        var provider = new OpenAiProvider(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
-        _embeddingModel = new TextEmbeddingV3SmallModel(provider);
-        _llm = new Gpt4OmniModel(provider)
-        {
-            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.1 }
-        };
+        _embeddingModel = llmProviderFactory.CreateEmbeddingModel(out _);
+        _llm = llmProviderFactory.CreateChatModel(temperature: 0.1);
     }
 
     public override async Task<string> ToolTask(string input, CancellationToken token = new CancellationToken())

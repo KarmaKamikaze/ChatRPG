@@ -4,30 +4,24 @@ using ChatRPG.Data.Models;
 using LangChain.Chains.StackableChains.Agents.Tools;
 using LangChain.DocumentLoaders;
 using LangChain.Providers;
-using LangChain.Providers.OpenAI;
-using LangChain.Providers.OpenAI.Predefined;
 using static LangChain.Chains.Chain;
 
 namespace ChatRPG.Services;
 
 public class ReActScribeAgent
 {
-    private readonly Gpt4OmniModel _llm;
+    private readonly ChatModel _llm;
     private readonly string _reActPrompt;
     private readonly bool _scribeDebugMode;
     private const int BatchSize = 5;
 
-    public ReActScribeAgent(IConfiguration configuration)
+    public ReActScribeAgent(IConfiguration configuration, LlmProviderFactory llmProviderFactory)
     {
-        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI"));
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts")
             .GetValue<string>("ScribeReActPrompt"));
+
         _reActPrompt = configuration.GetSection("SystemPrompts").GetValue<string>("ScribeReActPrompt")!;
-        var provider = new OpenAiProvider(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!);
-        _llm = new Gpt4OmniModel(provider)
-        {
-            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 0.4 }
-        };
+        _llm = llmProviderFactory.CreateChatModel(temperature: 0.4);
         _scribeDebugMode = configuration.GetValue<bool>("ScribeChainDebug");
     }
 

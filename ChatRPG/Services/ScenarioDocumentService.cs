@@ -1,44 +1,43 @@
 using System.Text;
 using ChatRPG.Data.Models;
 using LangChain.Databases.Postgres;
-using LangChain.Providers.OpenAI;
-using LangChain.Providers.OpenAI.Predefined;
 using LangChain.DocumentLoaders;
 using LangChain.Extensions;
 using LangChain.Splitters.Text;
 using static LangChain.Chains.Chain;
+using LangChain.Providers;
 
 namespace ChatRPG.Services;
 
 public class ScenarioDocumentService
 {
     private readonly string _connectionString;
-    private readonly string _openAiKey;
     private readonly string _startingScenarioPrompt;
+    private readonly LlmProviderFactory _llmProviderFactory;
 
-    public ScenarioDocumentService(IConfiguration configuration)
+
+    public ScenarioDocumentService(IConfiguration configuration, LlmProviderFactory llmProviderFactory)
     {
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("ConnectionStrings")
             .GetValue<string>("DefaultConnection"));
-        ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("ApiKeys").GetValue<string>("OpenAI"));
         ArgumentException.ThrowIfNullOrEmpty(configuration.GetSection("SystemPrompts")
             .GetValue<string>("StartingScenario"));
+
         _connectionString = configuration.GetSection("ConnectionStrings")
             .GetValue<string>("DefaultConnection")!;
-        _openAiKey = configuration.GetSection("ApiKeys").GetValue<string>("OpenAI")!;
         _startingScenarioPrompt = configuration.GetSection("SystemPrompts").GetValue<string>("StartingScenario")!;
+        _llmProviderFactory = llmProviderFactory;
     }
 
     public async Task StoreScenarioEmbedding(int campaignId, byte[] scenarioDocument)
     {
-        var provider = new OpenAiProvider(_openAiKey);
-        var embeddingModel = new TextEmbeddingV3SmallModel(provider);
+        var embeddingModel = _llmProviderFactory.CreateEmbeddingModel(out int dimensions);
 
         var vectorDatabase = new PostgresVectorDatabase(_connectionString);
 
         _ = await vectorDatabase.AddDocumentsFromAsync<PdfPigPdfLoader>(
             embeddingModel,
-            dimensions: 1536,
+            dimensions: dimensions,
             dataSource: DataSource.FromBytes(scenarioDocument),
             collectionName: "~collection-" + campaignId,
             // Configure how to extract chunks from the bigger document.
@@ -49,12 +48,8 @@ public class ScenarioDocumentService
 
     public async Task<string> GenerateStartingScenario(Campaign campaign)
     {
-        var provider = new OpenAiProvider(_openAiKey);
-        var embeddingModel = new TextEmbeddingV3SmallModel(provider);
-        var llm = new Gpt4OmniModel(provider)
-        {
-            Settings = new OpenAiChatSettings() { UseStreaming = false, Temperature = 1 }
-        };
+        var embeddingModel = _llmProviderFactory.CreateEmbeddingModel(out int dimensions);
+        var llm = _llmProviderFactory.CreateChatModel(1, false);
 
         var vectorDatabase =
             new PostgresVectorDatabase(_connectionString);
